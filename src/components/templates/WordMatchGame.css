@@ -1,0 +1,68 @@
+/* WordMatchGame.css */
+.word-match-game {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+  
+  .column {
+    flex: 1;
+  }
+  
+  .column h3 {
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  
+  .word {
+    padding: 10px;
+    margin: 5px 0;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+  
+  .word:hover {
+    background-color: #eaeaea;
+  }
+  
+  .word.selected {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #0056b3;
+  }
+  
+  .matched-pairs {
+    flex: 1;
+  }
+  
+  .matched-pairs h3 {
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  
+  .pair {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin: 5px 0;
+  }
+  
+  .pair .spanish {
+    flex: 1;
+    text-align: left;
+  }
+  
+  .pair .english {
+    flex: 1;
+    text-align: right;
+  }
+  
