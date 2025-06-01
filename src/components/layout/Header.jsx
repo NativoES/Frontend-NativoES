@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
 import { Menu, Bell, Globe, LogOut, ChevronDown, User } from 'lucide-react';
+import { useAppContext } from '@/contexts/Context';
 
 const Header = ({ toggleSidebar }) => {
+  const {language, setLanguage} = useAppContext();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [language, setLanguage] = useState('ES');
+  // const [language, setLanguage] = useState('ES');
 
   const toggleDropdown = () => {
     setDropdownOpen(prev => !prev);
   };
 
   const toggleLanguage = () => {
-    setLanguage(prev => prev === 'ES' ? 'EN' : 'ES');
-  };
+  setLanguage(prev => {
+    if (prev === 'ES') return 'EN';
+    if (prev === 'EN') return 'FR';
+    return 'ES';
+  });
+};
 
   return (
     <header className="bg-white border-b border-gray-200 z-10">

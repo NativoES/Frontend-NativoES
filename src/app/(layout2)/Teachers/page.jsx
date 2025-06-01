@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import React, { useState } from 'react';
- import { useAppContext} from '@/contexts/Context';
+import React, { useState, useEffect } from 'react';
+import { useAppContext } from '@/contexts/Context';
 
 import Card, { CardContent, CardHeader } from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
@@ -9,80 +9,168 @@ import Textarea from '@/components/ui/Textarea';
 import Button from '@/components/ui/Button';
 import { Plus, Trash, Move } from 'lucide-react';
 
-const TeachersEditor= () => {
-  const { siteData, updateSection } = useAppContext();
-  const [formData, setFormData] = useState({
-    title: siteData.teachers.title,
-    subtitle: siteData.teachers.subtitle,
-    profiles: [...siteData.teachers.profiles]
-  });
+const TeachersEditor = () => {
+  const { siteData, updateSection, language } = useAppContext();
+  const [formData, setFormData] = useState({});
+  const [teachers, setTeachers] = useState([]);
+  const idioma = language.toLowerCase();
+
+  const fetchTeachers = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/teacher?locale=${idioma}`);
+      const data = await res.json();
+      setTeachers(data);
+    } catch (error) {
+      console.error('Error al cargar profesores:', error);
+    }
+  };
+  useEffect(() => {
+
+    fetchTeachers();
+  }, [idioma]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleTeacherChange = (index, field, value) => {
-    const updatedProfiles = [...formData.profiles];
-    updatedProfiles[index] = {
-      ...updatedProfiles[index],
-      [field]: value
+    const updated = [...teachers];
+    updated[index] = {
+      ...updated[index],
+      [idioma]: {
+        ...updated[index][idioma],
+        [field]: value
+      }
     };
-    setFormData(prev => ({
-      ...prev,
-      profiles: updatedProfiles
-    }));
+    setTeachers(updated);
+  };
+
+  const handleArrayChange = (index, field, subIndex, value) => {
+    const updated = [...teachers];
+    const arr = [...(updated[index][idioma]?.[field] || [])];
+    arr[subIndex] = value;
+    updated[index] = {
+      ...updated[index],
+      [idioma]: {
+        ...updated[index][idioma],
+        [field]: arr
+      }
+    };
+    setTeachers(updated);
+  };
+
+  const addArrayItem = (index, field) => {
+    const updated = [...teachers];
+    const arr = [...(updated[index][idioma]?.[field] || [])];
+    arr.push('');
+    updated[index] = {
+      ...updated[index],
+      [idioma]: {
+        ...updated[index][idioma],
+        [field]: arr
+      }
+    };
+    setTeachers(updated);
+  };
+
+  const removeArrayItem = (index, field, subIndex) => {
+    const updated = [...teachers];
+    const arr = [...(updated[index][idioma]?.[field] || [])];
+    arr.splice(subIndex, 1);
+    updated[index] = {
+      ...updated[index],
+      [idioma]: {
+        ...updated[index][idioma],
+        [field]: arr
+      }
+    };
+    setTeachers(updated);
+  };
+
+  const handleImageChange = (index, file) => {
+    const updated = [...teachers];
+    const reader = new FileReader();
+    reader.onload = () => {
+      updated[index] = {
+        ...updated[index],
+        [idioma]: {
+          ...updated[index][idioma],
+          fotografia: reader.result
+        }
+      };
+      setTeachers(updated);
+    };
+    if (file) {
+      reader.readAsDataURL(file);
+    }
   };
 
   const addTeacher = () => {
     const newTeacher = {
-      id: Date.now().toString(),
-      name: 'Nuevo Profesor',
-      role: 'Profesor de Español',
-      bio: 'Información del profesor...',
-      image: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg'
+      [idioma]: {
+        nombre: '',
+        cargo: '',
+        fotografia: '',
+        resumenPrincipal: [],
+        resumenSecundario: [],
+        presentacion: []
+      }
     };
-    
-    setFormData(prev => ({
-      ...prev,
-      profiles: [...prev.profiles, newTeacher]
-    }));
+    setTeachers(prev => [...prev, newTeacher]);
   };
 
   const removeTeacher = (index) => {
-    const updatedProfiles = [...formData.profiles];
-    updatedProfiles.splice(index, 1);
-    setFormData(prev => ({
-      ...prev,
-      profiles: updatedProfiles
-    }));
+    const updated = [...teachers];
+    updated.splice(index, 1);
+    setTeachers(updated);
   };
 
   const moveTeacher = (index, direction) => {
-    if (
-      (direction === 'up' && index === 0) || 
-      (direction === 'down' && index === formData.profiles.length - 1)
-    ) {
-      return;
-    }
-    
     const newIndex = direction === 'up' ? index - 1 : index + 1;
-    const updatedProfiles = [...formData.profiles];
-    [updatedProfiles[index], updatedProfiles[newIndex]] = [updatedProfiles[newIndex], updatedProfiles[index]];
-    
-    setFormData(prev => ({
-      ...prev,
-      profiles: updatedProfiles
-    }));
+    if (newIndex < 0 || newIndex >= teachers.length) return;
+    const reordered = [...teachers];
+    [reordered[index], reordered[newIndex]] = [reordered[newIndex], reordered[index]];
+    setTeachers(reordered);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Esto sigue igual si no incluye archivos
     updateSection('teachers', formData);
+
+    for (const teacher of teachers) {
+      const formData = new FormData();
+
+      formData.append('locale', idioma);
+      formData.append('nombre', teacher[idioma]?.nombre || '');
+      formData.append('cargo', teacher[idioma]?.cargo || '');
+      formData.append('resumenPrincipal', JSON.stringify(teacher[idioma]?.resumenPrincipal || []));
+      formData.append('resumenSecundario', JSON.stringify(teacher[idioma]?.resumenSecundario || []));
+      formData.append('presentacion', JSON.stringify(teacher[idioma]?.presentacion || []));
+
+      // Adjuntar imagen si es un File
+      if (teacher.file instanceof File) {
+        formData.append('fotografia', teacher.file);
+      }
+
+      if (teacher._id) {
+        await fetch(`http://localhost:5000/api/teacher/${teacher._id}`, {
+          method: 'PATCH',
+          body: formData, // usamos FormData directamente
+        });
+      } else {
+        await fetch(`http://localhost:5000/api/teacher`, {
+          method: 'POST',
+          body: formData,
+        });
+      }
+    }
+
+    fetchTeachers();
   };
+
 
   return (
     <div className="space-y-6">
@@ -90,125 +178,107 @@ const TeachersEditor= () => {
         <h2 className="text-2xl font-bold">Editar Sección de Profesores</h2>
         <Button type="submit" form="teachers-form">Guardar cambios</Button>
       </div>
-      
+
       <form id="teachers-form" onSubmit={handleSubmit}>
-        <Card className="mb-6">
-          <CardHeader>
-            <h3 className="text-lg font-semibold">Encabezado de la sección</h3>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Input
-              label="Título de la sección"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              fullWidth
-            />
-            
-            <Textarea
-              label="Subtítulo de la sección"
-              name="subtitle"
-              value={formData.subtitle}
-              onChange={handleInputChange}
-              rows={2}
-              fullWidth
-            />
-          </CardContent>
-        </Card>
-        
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Perfiles de profesores</h3>
-          <Button 
-            type="button" 
-            variant="outline" 
-            size="sm"
-            leftIcon={<Plus size={16} />}
-            onClick={addTeacher}
-          >
+          <Button type="button" variant="outline" size="sm" leftIcon={<Plus size={16} />} onClick={addTeacher}>
             Añadir profesor
           </Button>
         </div>
-        
+
         <div className="space-y-4">
-          {formData.profiles.map((teacher, index) => (
-            <Card key={teacher.id} className="border border-gray-200 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between py-3">
-                <h4 className="text-md font-medium">{teacher.name}</h4>
-                <div className="flex items-center space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => moveTeacher(index, 'up')}
-                    disabled={index === 0}
-                    className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-30"
-                  >
-                    <Move size={16} className="rotate-90" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => moveTeacher(index, 'down')}
-                    disabled={index === formData.profiles.length - 1}
-                    className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-30"
-                  >
-                    <Move size={16} className="-rotate-90" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => removeTeacher(index)}
-                    className="p-1 text-red-500 hover:text-red-700"
-                  >
-                    <Trash size={16} />
-                  </button>
-                </div>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="md:col-span-1">
-                  <div className="aspect-square overflow-hidden rounded-lg mb-3">
-                    <img 
-                      src={teacher.image} 
-                      alt={teacher.name} 
-                      className="w-full h-full object-cover"
-                    />
+          {teachers.map((teacher, index) => {
+            const t = teacher[idioma] || {};
+            return (
+              <Card key={index}>
+                <CardHeader className="flex justify-between items-center">
+                  <h4 className="text-md font-medium">{t.nombre || 'Nuevo Profesor'}</h4>
+                  <div className="flex space-x-2">
+                    <button onClick={() => moveTeacher(index, 'up')} disabled={index === 0} className="p-1">
+                      <Move size={16} className="rotate-90" />
+                    </button>
+                    <button onClick={() => moveTeacher(index, 'down')} disabled={index === teachers.length - 1} className="p-1">
+                      <Move size={16} className="-rotate-90" />
+                    </button>
+                    <button onClick={() => removeTeacher(index)} className="p-1 text-red-500">
+                      <Trash size={16} />
+                    </button>
                   </div>
-                  <Input
-                    label="URL de imagen"
-                    value={teacher.image}
-                    onChange={(e) => handleTeacherChange(index, 'image', e.target.value)}
-                    fullWidth
-                  />
-                </div>
-                
-                <div className="md:col-span-2 space-y-4">
+                </CardHeader>
+
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="block font-medium mb-1">Fotografía</label>
+                    <div className="flex items-center space-x-4">
+                      <div className="w-24 h-24 bg-gray-100 rounded overflow-hidden">
+                        <img
+                          src={t.fotografia || '/no-image.png'}
+                          alt="preview"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <input type="file" accept="image/*" onChange={(e) => handleImageChange(index, e.target.files[0])} />
+                    </div>
+                  </div>
+
                   <Input
                     label="Nombre"
-                    value={teacher.name}
-                    onChange={(e) => handleTeacherChange(index, 'name', e.target.value)}
+                    value={t.nombre || ''}
+                    onChange={(e) => handleTeacherChange(index, 'nombre', e.target.value)}
                     fullWidth
                   />
-                  
                   <Input
                     label="Cargo"
-                    value={teacher.role}
-                    onChange={(e) => handleTeacherChange(index, 'role', e.target.value)}
+                    value={t.cargo || ''}
+                    onChange={(e) => handleTeacherChange(index, 'cargo', e.target.value)}
                     fullWidth
                   />
-                  
-                  <Textarea
-                    label="Biografía"
-                    value={teacher.bio}
-                    onChange={(e) => handleTeacherChange(index, 'bio', e.target.value)}
-                    rows={3}
-                    fullWidth
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-          
-          {formData.profiles.length === 0 && (
-            <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
-              <p className="text-gray-500 dark:text-gray-400">No hay profesores. Haga clic en "Añadir profesor" para comenzar.</p>
-            </div>
-          )}
+
+                  {['resumenPrincipal', 'resumenSecundario', 'presentacion'].map((field) => (
+                    <div key={field} className="mt-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h5 className="font-medium">{field}</h5>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          leftIcon={<Plus size={14} />}
+                          onClick={() => addArrayItem(index, field)}
+                        >
+                          Añadir
+                        </Button>
+                      </div>
+
+                      <div className="space-y-2">
+                        {(t[field] || []).map((item, i) => (
+                          <div key={i} className="flex items-center">
+                            <Input
+                              value={item}
+                              onChange={(e) => handleArrayChange(index, field, i, e.target.value)}
+                              className="flex-grow"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeArrayItem(index, field, i)}
+                              className="ml-2 p-1 text-red-500 hover:text-red-700"
+                            >
+                              <Trash size={14} />
+                            </button>
+                          </div>
+                        ))}
+                        {(t[field] || []).length === 0 && (
+                          <div className="text-center py-4 bg-gray-50 rounded border border-dashed">
+                            <p className="text-sm text-gray-500">No hay elementos. Haga clic en "Añadir" para comenzar.</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </form>
     </div>

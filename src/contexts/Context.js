@@ -21,6 +21,7 @@ export function AppProvider({ children }) {
   const [isOpenModal, setIsOpenModal] = useState(false)
   const [navItem, setNavItem] = useState('')
   const [success, setSuccess] = useState('')
+  const [language, setLanguage] = useState('ES');
 
   const setUserSuccess = (data) => {
     if (success === '') {
@@ -96,6 +97,9 @@ export function AppProvider({ children }) {
     success,
     setUserSuccess,
 
+    language,
+    setLanguage,
+
     // Sitio
     siteData,
     updateSiteData,
@@ -107,7 +111,7 @@ export function AppProvider({ children }) {
     toggleDarkMode
   }), [
     user, userDB, select, navItem, isOpenModal, loader, success,
-    siteData, hasUnsavedChanges, isDarkMode
+    siteData, hasUnsavedChanges, isDarkMode, language
   ])
 
   return (

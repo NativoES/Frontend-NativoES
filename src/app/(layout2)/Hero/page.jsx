@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAppContext } from '@/contexts/Context';
 
 import Card, { CardContent, CardHeader } from '@/components/ui/Card';
@@ -8,9 +8,44 @@ import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import Button from '@/components/ui/Button';
 
+const emptyHeroData = {
+    title: '',
+    title2: '',
+    subtitle: '',
+    btcPrimary: '',
+    btcSecondary: '',
+    studentsCount: '',
+    studentsText: '',
+    backgroundImageUrl: ''
+};
+
 const HeroEditor = () => {
-    const { siteData, updateSection } = useAppContext();
-    const [formData, setFormData] = useState({ ...siteData.hero });
+    const { siteData, updateSection, language } = useAppContext();
+    const [formData, setFormData] = useState(emptyHeroData);
+    const idioma = language.toLowerCase();
+
+    const loadHeroData = async (idioma) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/hero?locale=${idioma}`);
+            const data = await res.json();
+
+            if (data.length > 0) {
+                setFormData({
+                    ...data[0][idioma],
+                    _id: data[0]._id // opcional, si necesitas para PATCH
+                });
+            } else {
+                setFormData(emptyHeroData);
+            }
+        } catch (err) {
+            console.error('Error al cargar datos del hero:', err);
+            setFormData(emptyHeroData);
+        }
+    };
+
+    useEffect(() => {
+        loadHeroData(idioma);
+    }, [language]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -20,18 +55,43 @@ const HeroEditor = () => {
         }));
     };
 
-    const handleSubmit = (e) => {
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        fetch('http://localhost:4000/api/web/hero', {
-            method: 'PUT', // en lugar de POST
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-        });
-        console.log('hero', formData);
+        const formDataConLocale = {
+            ...formData,
+            locale: idioma
+        };
 
-        updateSection('hero', formData);
+
+        try {
+
+            if (formData._id) {
+                // PATCH
+                await fetch(`http://localhost:5000/api/hero/${formData._id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formDataConLocale)
+                });
+            } else {
+                // POST
+                await fetch('http://localhost:5000/api/hero', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formDataConLocale)
+                });
+            }
+
+
+            updateSection('hero', { ...siteData.hero, [idioma]: formDataConLocale });
+            console.log('hero actualizado/creado', formDataConLocale);
+
+        } catch (error) {
+            console.error('Error al enviar formulario:', error);
+        }
     };
+
 
     return (
         <div className="space-y-6">
@@ -50,14 +110,14 @@ const HeroEditor = () => {
                             <Input
                                 label="Título"
                                 name="title"
-                                value={formData.title}
+                                value={formData?.title || ''}
                                 onChange={handleInputChange}
                                 fullWidth
                             />
-                              <Input
+                            <Input
                                 label="Título 2"
                                 name="title2"
-                                value={formData.title2}
+                                value={formData?.title2 || ''}
                                 onChange={handleInputChange}
                                 fullWidth
                             />
@@ -65,7 +125,7 @@ const HeroEditor = () => {
                             <Textarea
                                 label="Subtítulo"
                                 name="subtitle"
-                                value={formData.subtitle}
+                                value={formData?.subtitle || ''}
                                 onChange={handleInputChange}
                                 rows={3}
                                 fullWidth
@@ -74,16 +134,16 @@ const HeroEditor = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <Input
                                     label="Texto CTA Principal"
-                                    name="ctaPrimary"
-                                    value={formData.ctaPrimary}
+                                    name="btcPrimary"
+                                    value={formData?.btcPrimary || ''}
                                     onChange={handleInputChange}
                                     fullWidth
                                 />
 
                                 <Input
                                     label="Texto CTA Secundario"
-                                    name="ctaSecondary"
-                                    value={formData.ctaSecondary}
+                                    name="btcSecondary"
+                                    value={formData?.btcSecondary || ''}
                                     onChange={handleInputChange}
                                     fullWidth
                                 />
@@ -93,7 +153,7 @@ const HeroEditor = () => {
                                 <Input
                                     label="Número de estudiantes"
                                     name="studentsCount"
-                                    value={formData.studentsCount}
+                                    value={formData?.studentsCount || ''}
                                     onChange={handleInputChange}
                                     fullWidth
                                 />
@@ -101,7 +161,7 @@ const HeroEditor = () => {
                                 <Input
                                     label="Texto de estudiantes"
                                     name="studentsText"
-                                    value={formData.studentsText}
+                                    value={formData?.studentsText || ''}
                                     onChange={handleInputChange}
                                     fullWidth
                                 />
@@ -110,7 +170,7 @@ const HeroEditor = () => {
                             <Input
                                 label="URL de imagen de fondo"
                                 name="backgroundImageUrl"
-                                value={formData.backgroundImage}
+                                value={formData?.backgroundImageUrl || ''}
                                 onChange={handleInputChange}
                                 fullWidth
                             />
