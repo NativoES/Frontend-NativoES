@@ -1,322 +1,287 @@
-'use client'
+'use client';
 
-import React, { useState } from 'react';
- import { useAppContext} from '@/contexts/Context';
-
+import React, { useEffect, useState } from 'react';
 import Card, { CardContent, CardHeader } from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import Button from '@/components/ui/Button';
-import { Plus, Trash, Move, Check } from 'lucide-react';
+import { Plus, Trash, Move } from 'lucide-react';
+import { useAppContext } from '@/contexts/Context';
 
-const PricingEditor= () => {
-  const { siteData, updateSection } = useAppContext();
-  const [formData, setFormData] = useState({
-    title: siteData.pricing.title,
-    subtitle: siteData.pricing.subtitle,
-    tiers: [...siteData.pricing.tiers]
-  });
+const API_URL = 'http://localhost:5000/api/plan';
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+export default function PricingEditor() {
+  const { language } = useAppContext();
+  const locale = language.toLowerCase();
+  const [tiers, setTiers] = useState([]);
+
+  const loadPlans = (lang) => {
+    fetch(`${API_URL}?locale=${lang}`)
+      .then(res => {
+        if (!res.ok) throw new Error(`Error: ${res.status} ${res.statusText}`);
+        return res.json();
+      })
+      .then(data => {
+        if (!Array.isArray(data)) throw new Error('La respuesta no es un arreglo');
+
+        const uiTiers = [];
+
+        data.forEach(plan => {
+          // El contenido para el idioma está dentro de plan[lang], ej plan['en']
+          const content = plan[lang];
+          if (!content) {
+            console.warn(`No hay contenido para locale ${lang} en plan ${plan._id}`);
+            return;
+          }
+          if (!Array.isArray(content.typePlan)) {
+            console.warn(`typePlan no es arreglo en plan ${plan._id}`);
+            return;
+          }
+
+          content.typePlan.forEach((tp, i) => {
+            uiTiers.push({
+              _id: plan._id,
+              planTitle: content.tituloDelPlan || '',
+              planDescription: content.descripcion || '',
+              planImageUrl: content.imageUrl || '',
+              tierId: i.toString(),
+              title: tp.type || '',
+              price: tp.precioRegular != null ? tp.precioRegular.toString() : '',
+              discountPrice: tp.precioConDescuento != null ? tp.precioConDescuento.toString() : '',
+              features: Array.isArray(tp.caracteristicas) ? tp.caracteristicas : [],
+            });
+          });
+        });
+
+        setTiers(uiTiers);
+      })
+      .catch(err => {
+        console.error('Error al cargar planes:', err);
+        alert('Error cargando planes, revisa consola.');
+      });
   };
 
-  const handleTierChange = (index, field, value) => {
-    const updatedTiers = [...formData.tiers];
-    updatedTiers[index] = {
-      ...updatedTiers[index],
-      [field]: value
-    };
-    setFormData(prev => ({
-      ...prev,
-      tiers: updatedTiers
-    }));
-  };
+  console.log('Tiers cargados:', tiers);
+  
 
-  const handleFeatureChange = (tierIndex, featureIndex, value) => {
-    const updatedTiers = [...formData.tiers];
-    const updatedFeatures = [...updatedTiers[tierIndex].features];
-    updatedFeatures[featureIndex] = value;
-    updatedTiers[tierIndex] = {
-      ...updatedTiers[tierIndex],
-      features: updatedFeatures
-    };
-    setFormData(prev => ({
-      ...prev,
-      tiers: updatedTiers
-    }));
-  };
 
-  const addFeature = (tierIndex) => {
-    const updatedTiers = [...formData.tiers];
-    updatedTiers[tierIndex] = {
-      ...updatedTiers[tierIndex],
-      features: [...updatedTiers[tierIndex].features, 'Nueva característica']
-    };
-    setFormData(prev => ({
-      ...prev,
-      tiers: updatedTiers
-    }));
-  };
+  useEffect(() => {
+    loadPlans(locale);
+  }, [language]);
 
-  const removeFeature = (tierIndex, featureIndex) => {
-    const updatedTiers = [...formData.tiers];
-    const updatedFeatures = [...updatedTiers[tierIndex].features];
-    updatedFeatures.splice(featureIndex, 1);
-    updatedTiers[tierIndex] = {
-      ...updatedTiers[tierIndex],
-      features: updatedFeatures
-    };
-    setFormData(prev => ({
-      ...prev,
-      tiers: updatedTiers
-    }));
-  };
+  function handleTierChange(index, field, value) {
+    const newTiers = [...tiers];
+    newTiers[index][field] = value;
+    setTiers(newTiers);
+  }
 
-  const addTier = () => {
-    const newTier = {
-      id: Date.now().toString(),
-      title: 'Nuevo Plan',
-      price: '1000',
-      discountPrice: null,
-      features: ['Característica 1', 'Característica 2', 'Característica 3'],
-      cta: 'Reserva tu clase'
-    };
-    
-    setFormData(prev => ({
-      ...prev,
-      tiers: [...prev.tiers, newTier]
-    }));
-  };
+  function handleFeatureChange(tierIndex, featureIndex, value) {
+    const newTiers = [...tiers];
+    newTiers[tierIndex].features[featureIndex] = value;
+    setTiers(newTiers);
+  }
 
-  const removeTier = (index) => {
-    const updatedTiers = [...formData.tiers];
-    updatedTiers.splice(index, 1);
-    setFormData(prev => ({
-      ...prev,
-      tiers: updatedTiers
-    }));
-  };
+  function addFeature(tierIndex) {
+    const newTiers = [...tiers];
+    newTiers[tierIndex].features.push('Nueva característica');
+    setTiers(newTiers);
+  }
 
-  const moveTier = (index, direction) => {
-    if (
-      (direction === 'up' && index === 0) || 
-      (direction === 'down' && index === formData.tiers.length - 1)
-    ) {
+  function removeFeature(tierIndex, featureIndex) {
+    const newTiers = [...tiers];
+    newTiers[tierIndex].features.splice(featureIndex, 1);
+    setTiers(newTiers);
+  }
+
+  function addTier() {
+    setTiers([
+      ...tiers,
+      {
+        _id: null,
+        planTitle: '',
+        planDescription: '',
+        planImageUrl: '',
+        tierId: Date.now().toString(),
+        title: 'Nuevo tipo',
+        price: '',
+        discountPrice: '',
+        features: ['Nueva característica'],
+      },
+    ]);
+  }
+
+  function removeTier(index) {
+    const newTiers = [...tiers];
+    newTiers.splice(index, 1);
+    setTiers(newTiers);
+  }
+
+  function moveTier(index, direction) {
+    if ((direction === 'up' && index === 0) || (direction === 'down' && index === tiers.length - 1))
       return;
-    }
-    
     const newIndex = direction === 'up' ? index - 1 : index + 1;
-    const updatedTiers = [...formData.tiers];
-    [updatedTiers[index], updatedTiers[newIndex]] = [updatedTiers[newIndex], updatedTiers[index]];
-    
-    setFormData(prev => ({
-      ...prev,
-      tiers: updatedTiers
-    }));
-  };
+    const newTiers = [...tiers];
+    [newTiers[index], newTiers[newIndex]] = [newTiers[newIndex], newTiers[index]];
+    setTiers(newTiers);
+  }
 
-  const togglePopular = (index) => {
-    const updatedTiers = [...formData.tiers];
-    
-    // First, remove popular from all tiers
-    updatedTiers.forEach(tier => {
-      tier.isPopular = false;
-    });
-    
-    // Then set the selected one as popular
-    updatedTiers[index] = {
-      ...updatedTiers[index],
-      isPopular: !updatedTiers[index].isPopular
-    };
-    
-    setFormData(prev => ({
-      ...prev,
-      tiers: updatedTiers
-    }));
-  };
-
-  const handleSubmit = (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-    updateSection('pricing', formData);
-  };
+
+    // Agrupar tiers por plan (_id) para enviar completos
+    const plansGrouped = {};
+    tiers.forEach(tier => {
+      const planId = tier._id || 'new-' + tier.tierId;
+      if (!plansGrouped[planId]) {
+        plansGrouped[planId] = {
+          _id: tier._id,
+          tituloDelPlan: tier.planTitle,
+          descripcion: tier.planDescription,
+          imageUrl: tier.planImageUrl,
+          typePlan: [],
+        };
+      }
+      plansGrouped[planId].typePlan.push({
+        type: tier.title,
+        precioRegular: Number(tier.price),
+        precioConDescuento: tier.discountPrice ? Number(tier.discountPrice) : null,
+        caracteristicas: tier.features,
+      });
+    });
+
+    try {
+      for (const key in plansGrouped) {
+        const plan = plansGrouped[key];
+        const body = {
+          locale: locale,
+          tituloDelPlan: plan.tituloDelPlan,
+          descripcion: plan.descripcion,
+          imageUrl: plan.imageUrl,
+          typePlan: plan.typePlan,
+        };
+
+        if (plan._id) {
+          await fetch(`${API_URL}/${plan._id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+        } else {
+          await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+        }
+      }
+      alert('Planes guardados correctamente');
+    } catch {
+      alert('Error al guardar los planes');
+    }
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Editar Sección de Precios</h2>
-        <Button type="submit" form="pricing-form">Guardar cambios</Button>
+        <Button onClick={handleSubmit}>Guardar cambios</Button>
       </div>
-      
-      <form id="pricing-form" onSubmit={handleSubmit}>
-        <Card className="mb-6">
-          <CardHeader>
-            <h3 className="text-lg font-semibold">Encabezado de la sección</h3>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Input
-              label="Título de la sección"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              fullWidth
-            />
-            
-            <Textarea
-              label="Subtítulo de la sección"
-              name="subtitle"
-              value={formData.subtitle}
-              onChange={handleInputChange}
-              rows={2}
-              fullWidth
-            />
-          </CardContent>
-        </Card>
-        
-        <div className="flex items-center justify-between mb-4">
+
+      <form onSubmit={handleSubmit}>
+        <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">Planes de precios</h3>
-          <Button 
-            type="button" 
-            variant="outline" 
-            size="sm"
-            leftIcon={<Plus size={16} />}
-            onClick={addTier}
-          >
-            Añadir plan
+          <Button type="button" variant="outline" size="sm" onClick={addTier} leftIcon={<Plus size={16} />}>
+            Agregar tipo de plan
           </Button>
         </div>
-        
-        <div className="space-y-6">
-          {formData.tiers.map((tier, tierIndex) => (
-            <Card key={tier.id} className={`border ${tier.isPopular ? 'border-blue-500 dark:border-blue-400 ring-2 ring-blue-200 dark:ring-blue-900' : 'border-gray-200 dark:border-gray-700'}`}>
-              <CardHeader className="flex flex-row items-center justify-between py-3">
-                <div className="flex items-center">
-                  <h4 className="text-md font-medium">{tier.title}</h4>
-                  {tier.isPopular && (
-                    <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Popular</span>
-                  )}
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => togglePopular(tierIndex)}
-                    className={`p-1 ${tier.isPopular ? 'text-blue-500 hover:text-blue-700' : 'text-gray-400 hover:text-gray-600'}`}
-                    title="Marcar como popular"
-                  >
-                    <Check size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => moveTier(tierIndex, 'up')}
-                    disabled={tierIndex === 0}
-                    className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-30"
-                  >
-                    <Move size={16} className="rotate-90" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => moveTier(tierIndex, 'down')}
-                    disabled={tierIndex === formData.tiers.length - 1}
-                    className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-30"
-                  >
-                    <Move size={16} className="-rotate-90" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => removeTier(tierIndex)}
-                    className="p-1 text-red-500 hover:text-red-700"
-                  >
-                    <Trash size={16} />
-                  </button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Input
-                  label="Título del plan"
-                  value={tier.title}
-                  onChange={(e) => handleTierChange(tierIndex, 'title', e.target.value)}
-                  fullWidth
-                />
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    label="Precio regular"
-                    value={tier.price}
-                    onChange={(e) => handleTierChange(tierIndex, 'price', e.target.value)}
-                    fullWidth
-                  />
-                  
-                  <Input
-                    label="Precio con descuento (dejar vacío si no hay)"
-                    value={tier.discountPrice || ''}
-                    onChange={(e) => handleTierChange(tierIndex, 'discountPrice', e.target.value || null)}
-                    fullWidth
-                  />
-                </div>
-                
-                <Input
-                  label="Texto del botón CTA"
-                  value={tier.cta}
-                  onChange={(e) => handleTierChange(tierIndex, 'cta', e.target.value)}
-                  fullWidth
-                />
-                
-                <div className="mt-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h5 className="font-medium">Características</h5>
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      size="sm"
-                      leftIcon={<Plus size={14} />}
-                      onClick={() => addFeature(tierIndex)}
-                    >
-                      Añadir
+
+        {tiers.map((tier, i) => (
+          <Card key={`${tier._id || 'new'}-${tier.tierId}`} className="mb-6">
+            <CardHeader className="flex justify-between items-center gap-2">
+              <Input
+                label="Título del plan"
+                value={tier.planTitle}
+                onChange={e => {
+                  // Actualizar planTitle en todos los tiers con mismo _id
+                  setTiers(current =>
+                    current.map(t => (t._id === tier._id ? { ...t, planTitle: e.target.value } : t))
+                  );
+                }}
+                fullWidth
+              />
+              <div className="flex gap-1">
+                <Button variant="ghost" size="sm" onClick={() => moveTier(i, 'up')} disabled={i === 0}>
+                  <Move size={16} />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => moveTier(i, 'down')} disabled={i === tiers.length - 1}>
+                  <Move size={16} className="rotate-180" />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => removeTier(i)}>
+                  <Trash size={16} />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Input label="Tipo de plan" value={tier.title} onChange={e => handleTierChange(i, 'title', e.target.value)} fullWidth />
+              <Input
+                label="Precio regular"
+                type="number"
+                value={tier.price}
+                onChange={e => handleTierChange(i, 'price', e.target.value)}
+                fullWidth
+              />
+              <Input
+                label="Precio con descuento"
+                type="number"
+                value={tier.discountPrice}
+                onChange={e => handleTierChange(i, 'discountPrice', e.target.value)}
+                fullWidth
+              />
+              <Input
+                label="URL imagen"
+                value={tier.planImageUrl}
+                onChange={e => {
+                  // Actualizar en todos tiers con mismo _id
+                  setTiers(current =>
+                    current.map(t => (t._id === tier._id ? { ...t, planImageUrl: e.target.value } : t))
+                  );
+                }}
+                fullWidth
+              />
+              <Textarea
+                label="Descripción del plan"
+                value={tier.planDescription}
+                onChange={e => {
+                  setTiers(current =>
+                    current.map(t => (t._id === tier._id ? { ...t, planDescription: e.target.value } : t))
+                  );
+                }}
+                rows={3}
+                fullWidth
+              />
+
+              <div className="mt-4">
+                <h4 className="font-semibold mb-2">Características</h4>
+                {tier.features.map((feature, idx) => (
+                  <div key={idx} className="flex items-center gap-2 mb-2">
+                    <Input
+                      value={feature}
+                      onChange={e => handleFeatureChange(i, idx, e.target.value)}
+                      fullWidth
+                    />
+                    <Button variant="ghost" size="sm" onClick={() => removeFeature(i, idx)}>
+                      <Trash size={14} />
                     </Button>
                   </div>
-                  
-                  <div className="space-y-2">
-                    {tier.features.map((feature, featureIndex) => (
-                      <div key={featureIndex} className="flex items-center">
-                        <Input
-                          value={feature}
-                          onChange={(e) => handleFeatureChange(tierIndex, featureIndex, e.target.value)}
-                          className="flex-grow"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeFeature(tierIndex, featureIndex)}
-                          className="ml-2 p-1 text-red-500 hover:text-red-700"
-                        >
-                          <Trash size={14} />
-                        </button>
-                      </div>
-                    ))}
-                    
-                    {tier.features.length === 0 && (
-                      <div className="text-center py-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">No hay características. Haga clic en "Añadir" para comenzar.</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-          
-          {formData.tiers.length === 0 && (
-            <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
-              <p className="text-gray-500 dark:text-gray-400">No hay planes de precios. Haga clic en "Añadir plan" para comenzar.</p>
-            </div>
-          )}
-        </div>
+                ))}
+                <Button variant="outline" size="sm" leftIcon={<Plus size={14} />} onClick={() => addFeature(i)}>
+                  Agregar característica
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </form>
     </div>
   );
-};
-
-export default PricingEditor;
+}

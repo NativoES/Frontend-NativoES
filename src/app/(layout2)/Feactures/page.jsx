@@ -1,198 +1,169 @@
 'use client'
 
-import React, { useState } from 'react';
- import { useAppContext} from '@/contexts/Context';
-
+import React, { useEffect, useState } from 'react';
 import Card, { CardContent, CardHeader } from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
-import Textarea from '@/components/ui/Textarea';
 import Button from '@/components/ui/Button';
 import { Plus, Trash, Move } from 'lucide-react';
+import { useAppContext } from '@/contexts/Context';
+import TextEditor from '@/components/TextEditor/TextEditor';
+import 'react-quill/dist/quill.snow.css';
+import 'react-quill/dist/quill.bubble.css';
+import 'react-quill/dist/quill.core.css';
+import Textarea from '@/components/ui/Textarea';
 
-const FeaturesEditor= () => {
-  const { siteData, updateSection } = useAppContext();
-  const [formData, setFormData] = useState({
-    title: siteData.features.title,
-    subtitle: siteData.features.subtitle,
-    items: [...siteData.features.items]
-  });
+const FeaturesEditor = () => {
+  const { language } = useAppContext();
+  const locale = language.toLowerCase();
+  const [features, setFeatures] = useState([]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  useEffect(() => {
+    fetch(`http://localhost:5000/api/form-study?locale=${locale}`)
+      .then(res => res.json())
+      .then(data => {
+        const items = data.map((item) => ({
+          _id: item._id,
+          titulo: item[locale]?.titulo || '',
+          descripcion: item[locale]?.descripcion || '',
+          typeIcon: item[locale]?.typeIcon || '',
+        }));
+        setFeatures(items);
+      })
+      .catch(err => console.error('Error cargando features:', err));
+  }, [language]);
 
   const handleFeatureChange = (index, field, value) => {
-    const updatedItems = [...formData.items];
-    updatedItems[index] = {
-      ...updatedItems[index],
-      [field]: value
-    };
-    setFormData(prev => ({
-      ...prev,
-      items: updatedItems
-    }));
+    const updated = [...features];
+    updated[index][field] = value;
+    setFeatures(updated);
   };
 
   const addFeature = () => {
-    const newFeature = {
-      id: Date.now().toString(),
-      title: 'Nueva característica',
-      description: 'Descripción de la nueva característica',
-      icon: 'star'
-    };
-    
-    setFormData(prev => ({
-      ...prev,
-      items: [...prev.items, newFeature]
-    }));
+    setFeatures(prev => [...prev, { titulo: '', descripcion: '', typeIcon: '' }]);
   };
 
   const removeFeature = (index) => {
-    const updatedItems = [...formData.items];
-    updatedItems.splice(index, 1);
-    setFormData(prev => ({
-      ...prev,
-      items: updatedItems
-    }));
+    const updated = [...features];
+    updated.splice(index, 1);
+    setFeatures(updated);
   };
 
   const moveFeature = (index, direction) => {
-    if (
-      (direction === 'up' && index === 0) || 
-      (direction === 'down' && index === formData.items.length - 1)
-    ) {
-      return;
-    }
-    
+    if ((direction === 'up' && index === 0) || (direction === 'down' && index === features.length - 1)) return;
     const newIndex = direction === 'up' ? index - 1 : index + 1;
-    const updatedItems = [...formData.items];
-    [updatedItems[index], updatedItems[newIndex]] = [updatedItems[newIndex], updatedItems[index]];
-    
-    setFormData(prev => ({
-      ...prev,
-      items: updatedItems
-    }));
+    const updated = [...features];
+    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+    setFeatures(updated);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    updateSection('features', formData);
+  const handleSave = async () => {
+    for (const feature of features) {
+      const payload = {
+        locale,
+        content: {
+          titulo: feature.titulo,
+          descripcion: feature.descripcion,
+          typeIcon: feature.typeIcon,
+        },
+      };
+
+      try {
+        if (feature._id) {
+          await fetch(`http://localhost:5000/api/form-study/${feature._id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+        } else {
+          await fetch('http://localhost:5000/api/form-study', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+        }
+      } catch (error) {
+        console.error('Error al guardar característica:', error);
+      }
+    }
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Editar Sección de Características</h2>
-        <Button type="submit" form="features-form">Guardar cambios</Button>
+        <Button onClick={handleSave}>Guardar cambios</Button>
       </div>
-      
-      <form id="features-form" onSubmit={handleSubmit}>
-        <Card className="mb-6">
-          <CardHeader>
-            <h3 className="text-lg font-semibold">Encabezado de la sección</h3>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Input
-              label="Título de la sección"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              fullWidth
-            />
-            
-            <Textarea
-              label="Subtítulo de la sección"
-              name="subtitle"
-              value={formData.subtitle}
-              onChange={handleInputChange}
-              rows={2}
-              fullWidth
-            />
-          </CardContent>
-        </Card>
-        
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Características</h3>
-          <Button 
-            type="button" 
-            variant="outline" 
-            size="sm"
-            leftIcon={<Plus size={16} />}
-            onClick={addFeature}
-          >
-            Añadir característica
-          </Button>
-        </div>
-        
-        <div className="space-y-4">
-          {formData.items.map((feature, index) => (
-            <Card key={feature.id} className="border border-gray-200 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between py-3">
-                <h4 className="text-md font-medium">Característica {index + 1}</h4>
-                <div className="flex items-center space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => moveFeature(index, 'up')}
-                    disabled={index === 0}
-                    className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-30"
-                  >
-                    <Move size={16} className="rotate-90" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => moveFeature(index, 'down')}
-                    disabled={index === formData.items.length - 1}
-                    className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-30"
-                  >
-                    <Move size={16} className="-rotate-90" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => removeFeature(index)}
-                    className="p-1 text-red-500 hover:text-red-700"
-                  >
-                    <Trash size={16} />
-                  </button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Input
-                  label="Título"
-                  value={feature.title}
-                  onChange={(e) => handleFeatureChange(index, 'title', e.target.value)}
-                  fullWidth
+
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        leftIcon={<Plus size={16} />}
+        onClick={addFeature}
+      >
+        Añadir característica
+      </Button>
+
+      <div className="space-y-4">
+        {features.map((feature, index) => (
+          <Card key={index} className="border border-gray-200 dark:border-gray-700">
+            <CardHeader className="flex flex-row items-center justify-between py-3">
+              <h4 className="text-md font-medium">Característica {index + 1}</h4>
+              <div className="flex items-center space-x-2">
+                <button onClick={() => moveFeature(index, 'up')} disabled={index === 0} className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-30">
+                  <Move size={16} className="rotate-90" />
+                </button>
+                <button onClick={() => moveFeature(index, 'down')} disabled={index === features.length - 1} className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-30">
+                  <Move size={16} className="-rotate-90" />
+                </button>
+                <button onClick={() => removeFeature(index)} className="p-1 text-red-500 hover:text-red-700">
+                  <Trash size={16} />
+                </button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Input
+                label="Título"
+                value={feature.titulo}
+                onChange={(e) => handleFeatureChange(index, 'titulo', e.target.value)}
+                fullWidth
+              />
+
+              {/* <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                <TextEditor
+                  value={feature.descripcion}
+                  setValue={(value) => handleFeatureChange(index, 'descripcion', value)}
+                  edit
                 />
-                
-                <Textarea
-                  label="Descripción"
-                  value={feature.description}
-                  onChange={(e) => handleFeatureChange(index, 'description', e.target.value)}
-                  rows={3}
-                  fullWidth
-                />
-                
-                <Input
-                  label="Icono"
-                  value={feature.icon}
-                  onChange={(e) => handleFeatureChange(index, 'icon', e.target.value)}
-                  placeholder="monitor, puzzle, video, etc."
-                  fullWidth
-                />
-              </CardContent>
-            </Card>
-          ))}
-          
-          {formData.items.length === 0 && (
-            <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
-              <p className="text-gray-500 dark:text-gray-400">No hay características. Haga clic en "Añadir característica" para comenzar.</p>
-            </div>
-          )}
-        </div>
-      </form>
+              </div> */}
+
+              <Textarea
+                label="Descripción"
+                value={feature.descripcion}
+                onChange={(e) => handleFeatureChange(index, 'descripcion', e.target.value)}
+                rows={3}
+                fullWidth
+              />
+
+              <Input
+                label="Icono"
+                value={feature.typeIcon}
+                onChange={(e) => handleFeatureChange(index, 'typeIcon', e.target.value)}
+                placeholder="monitor, puzzle, video, etc."
+                fullWidth
+              />
+            </CardContent>
+          </Card>
+        ))}
+
+        {features.length === 0 && (
+          <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+            <p className="text-gray-500 dark:text-gray-400">No hay características. Haga clic en "Añadir característica" para comenzar.</p>
+          </div>
+        )}
+      </div>
+
     </div>
   );
 };

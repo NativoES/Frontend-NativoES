@@ -16,7 +16,8 @@
     "next": "^15.1.0",
     "prop-types": "^15.8.1",
     "react": "^19.0.0",
-    "react-dom": "latest",
+    "react-dom": "^18",
+    "react-quill": "2.0.0",
     "tailwind-merge": "^2.5.5"
   },
   "type": "module",

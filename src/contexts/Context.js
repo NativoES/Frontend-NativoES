@@ -8,7 +8,7 @@ import React, {
   useContext
 } from 'react'
 
-import { initialData } from './initialData.js' // Asegúrate de que este archivo sea .js y exporte un objeto válido
+import { initialData } from './initialData.js'
 
 const AppContext = createContext(undefined)
 
@@ -21,7 +21,7 @@ export function AppProvider({ children }) {
   const [isOpenModal, setIsOpenModal] = useState(false)
   const [navItem, setNavItem] = useState('')
   const [success, setSuccess] = useState('')
-  const [language, setLanguage] = useState('ES');
+  const [language, setLanguage] = useState('ES')
 
   const setUserSuccess = (data) => {
     if (success === '') {
@@ -35,16 +35,22 @@ export function AppProvider({ children }) {
   }
 
   // --- Datos del sitio ---
-  const [siteData, setSiteData] = useState(() => {
-    const savedData = localStorage.getItem('nativoes-site-data')
-    return savedData ? JSON.parse(savedData) : initialData
-  })
-
+  const [siteData, setSiteData] = useState(initialData)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-  const [isDarkMode, setIsDarkMode] = useState(() => {
+  const [isDarkMode, setIsDarkMode] = useState(false)
+
+  // Leer localStorage solo en el cliente
+  useEffect(() => {
+    const savedData = localStorage.getItem('nativoes-site-data')
+    if (savedData) {
+      setSiteData(JSON.parse(savedData))
+    }
+
     const savedMode = localStorage.getItem('nativoes-dark-mode')
-    return savedMode ? JSON.parse(savedMode) : false
-  })
+    if (savedMode) {
+      setIsDarkMode(JSON.parse(savedMode))
+    }
+  }, [])
 
   useEffect(() => {
     localStorage.setItem('nativoes-site-data', JSON.stringify(siteData))

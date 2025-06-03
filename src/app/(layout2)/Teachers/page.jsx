@@ -14,6 +14,9 @@ const TeachersEditor = () => {
   const [formData, setFormData] = useState({});
   const [teachers, setTeachers] = useState([]);
   const idioma = language.toLowerCase();
+  const [selectedImages, setSelectedImages] = useState({});
+  const [selectedFiles, setSelectedFiles] = useState({});
+
 
   const fetchTeachers = async () => {
     try {
@@ -88,23 +91,19 @@ const TeachersEditor = () => {
     setTeachers(updated);
   };
 
-  const handleImageChange = (index, file) => {
-    const updated = [...teachers];
+  const handleImageUpload = (event, index) => {
+    const file = event.target?.files[0];
+    if (!file) return;
+
     const reader = new FileReader();
     reader.onload = () => {
-      updated[index] = {
-        ...updated[index],
-        [idioma]: {
-          ...updated[index][idioma],
-          fotografia: reader.result
-        }
-      };
-      setTeachers(updated);
+      const base64 = reader.result;
+      setSelectedImages(prev => ({ ...prev, [index]: base64 }));
+      setSelectedFiles(prev => ({ ...prev, [index]: file }));
     };
-    if (file) {
-      reader.readAsDataURL(file);
-    }
+    reader.readAsDataURL(file);
   };
+
 
   const addTeacher = () => {
     const newTeacher = {
@@ -140,7 +139,8 @@ const TeachersEditor = () => {
     // Esto sigue igual si no incluye archivos
     updateSection('teachers', formData);
 
-    for (const teacher of teachers) {
+    for (let index = 0; index < teachers.length; index++) {
+      const teacher = teachers[index];
       const formData = new FormData();
 
       formData.append('locale', idioma);
@@ -150,15 +150,14 @@ const TeachersEditor = () => {
       formData.append('resumenSecundario', JSON.stringify(teacher[idioma]?.resumenSecundario || []));
       formData.append('presentacion', JSON.stringify(teacher[idioma]?.presentacion || []));
 
-      // Adjuntar imagen si es un File
-      if (teacher.file instanceof File) {
-        formData.append('fotografia', teacher.file);
+      if (selectedFiles[index]) {
+        formData.append('file', selectedFiles[index]);
       }
 
       if (teacher._id) {
         await fetch(`http://localhost:5000/api/teacher/${teacher._id}`, {
           method: 'PATCH',
-          body: formData, // usamos FormData directamente
+          body: formData,
         });
       } else {
         await fetch(`http://localhost:5000/api/teacher`, {
@@ -167,7 +166,6 @@ const TeachersEditor = () => {
         });
       }
     }
-
     fetchTeachers();
   };
 
@@ -212,13 +210,15 @@ const TeachersEditor = () => {
                     <label className="block font-medium mb-1">Fotografía</label>
                     <div className="flex items-center space-x-4">
                       <div className="w-24 h-24 bg-gray-100 rounded overflow-hidden">
+
                         <img
-                          src={t.fotografia || '/no-image.png'}
+                          src={selectedImages[index] || t.fotografia || '/no-image.png'}
                           alt="preview"
                           className="w-full h-full object-cover"
                         />
+
                       </div>
-                      <input type="file" accept="image/*" onChange={(e) => handleImageChange(index, e.target.files[0])} />
+                      <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, index)} />
                     </div>
                   </div>
 

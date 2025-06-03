@@ -22,6 +22,9 @@ const emptyHeroData = {
 const HeroEditor = () => {
     const { siteData, updateSection, language } = useAppContext();
     const [formData, setFormData] = useState(emptyHeroData);
+    const [backgroundFile, setBackgroundFile] = useState(null);
+    const [backgroundPreview, setBackgroundPreview] = useState('');
+
     const idioma = language.toLowerCase();
 
     const loadHeroData = async (idioma) => {
@@ -29,10 +32,14 @@ const HeroEditor = () => {
             const res = await fetch(`http://localhost:5000/api/hero?locale=${idioma}`);
             const data = await res.json();
 
+            console.log('Datos del hero:', data);
+
+
             if (data.length > 0) {
                 setFormData({
                     ...data[0][idioma],
-                    _id: data[0]._id // opcional, si necesitas para PATCH
+                    backgroundImageUrl: data[0].backgroundImageUrl || '',
+                    _id: data[0]._id
                 });
             } else {
                 setFormData(emptyHeroData);
@@ -55,14 +62,39 @@ const HeroEditor = () => {
         }));
     };
 
+    const handleBackgroundImageChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            setBackgroundFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setBackgroundPreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const formDataConLocale = {
-            ...formData,
-            locale: idioma
-        };
+        const formDataToSend = new FormData();
+
+        formDataToSend.append('title', formData.title || '');
+        formDataToSend.append('title2', formData.title2 || '');
+        formDataToSend.append('subtitle', formData.subtitle || '');
+        formDataToSend.append('btcPrimary', formData.btcPrimary || '');
+        formDataToSend.append('btcSecondary', formData.btcSecondary || '');
+        formDataToSend.append('studentsCount', formData.studentsCount || '');
+        formDataToSend.append('studentsText', formData.studentsText || '');
+        formDataToSend.append('locale', idioma);
+
+        // Archivo o URL de imagen
+        if (backgroundFile) {
+            formDataToSend.append('file', backgroundFile);
+        } else {
+            formDataToSend.append('file', backgroundFile);
+        }
 
 
         try {
@@ -71,26 +103,26 @@ const HeroEditor = () => {
                 // PATCH
                 await fetch(`http://localhost:5000/api/hero/${formData._id}`, {
                     method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formDataConLocale)
+                    body: formDataToSend
                 });
             } else {
                 // POST
                 await fetch('http://localhost:5000/api/hero', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formDataConLocale)
+                    body: formDataToSend
                 });
             }
 
 
-            updateSection('hero', { ...siteData.hero, [idioma]: formDataConLocale });
-            console.log('hero actualizado/creado', formDataConLocale);
+            updateSection('hero', { ...siteData.hero, [idioma]: formDataToSend });
+            console.log('hero actualizado/creado', formDataToSend);
 
         } catch (error) {
             console.error('Error al enviar formulario:', error);
         }
     };
+
+    console.log('formData: ', formData);
 
 
     return (
@@ -167,13 +199,21 @@ const HeroEditor = () => {
                                 />
                             </div>
 
-                            <Input
-                                label="URL de imagen de fondo"
-                                name="backgroundImageUrl"
-                                value={formData?.backgroundImageUrl || ''}
-                                onChange={handleInputChange}
-                                fullWidth
-                            />
+                            <div>
+                                <label className="block font-medium mb-1">Imagen de fondo</label>
+                                <div className="flex items-center space-x-4">
+                                    <div className="w-40 h-24 bg-gray-100 rounded overflow-hidden border">
+                                        <img
+                                            src={backgroundPreview || formData?.backgroundImageUrl || '/no-image.png'}
+                                            alt="preview"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <input type="file" accept="image/*" onChange={handleBackgroundImageChange} />
+                                </div>
+                            </div>
+
+
 
                         </form>
                     </CardContent>
