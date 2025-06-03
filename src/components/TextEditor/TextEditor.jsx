@@ -1,19 +1,36 @@
 'use client'
-import 'react-quill/dist/quill.snow.css';
-import 'react-quill/dist/quill.bubble.css';
-import 'react-quill/dist/quill.core.css';
+// import 'react-quill/dist/quill.snow.css';
+// import 'react-quill/dist/quill.bubble.css';
+// import 'react-quill/dist/quill.core.css';
 import React, { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic'
+// import dynamic from 'next/dynamic'
 
-const ReactQuill = dynamic(async () => await import("react-quill"), { ssr: false })
+import dynamic from 'next/dynamic'
+import 'react-quill-new/dist/quill.snow.css'
+import 'react-quill-new/dist/quill.bubble.css'
+import 'react-quill-new/dist/quill.core.css'
+import ImageResize from 'quill-image-resize-module-react';
+
+const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false })
+// const ReactQuill = dynamic(async () => await import("react-quill"), { ssr: false })
 
 export default function TextEditor({ value, setValue, edit }) {
+
+    useEffect(() => {
+        // Dynamically import Quill and register the module
+        if (typeof window !== 'undefined') {
+            import('react-quill-new').then(({ Quill }) => {
+                Quill.register('modules/imageResize', ImageResize)
+            })
+        }
+    }, [])
+
     const [isLoading, setIsLoading] = useState(false)
     const [modules, setModules] = useState({
         toolbar: [
-            ['bold', 'italic', 'underline'], 
+            ['bold', 'italic', 'underline'],
 
-            [{ 'size': ['small', '', 'large'] }], 
+            [{ 'size': ['small', '', 'large'] }],
             [{ 'align': '' }],
             [{ 'align': 'center' }],
             [{ 'align': 'right' }],
@@ -57,13 +74,13 @@ export default function TextEditor({ value, setValue, edit }) {
         setIsLoading(true)
     }, []);
     return isLoading && <div className='bg-white text-black z-50'>
-   
+
         {
             edit
                 ?
                 <ReactQuill theme="snow" modules={modules}
                     formats={formats} value={value} onChange={setValue} />
-                :''
+                : ''
         }
     </div>
 }

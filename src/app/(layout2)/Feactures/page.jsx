@@ -6,10 +6,13 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { Plus, Trash, Move } from 'lucide-react';
 import { useAppContext } from '@/contexts/Context';
-import TextEditor from '@/components/TextEditor/TextEditor';
-import 'react-quill/dist/quill.snow.css';
-import 'react-quill/dist/quill.bubble.css';
-import 'react-quill/dist/quill.core.css';
+import TextEditor from '@/components/textEditor/TextEditor';
+// import 'react-quill/dist/quill.snow.css';
+// import 'react-quill/dist/quill.bubble.css';
+// import 'react-quill/dist/quill.core.css';
+import 'react-quill-new/dist/quill.snow.css'
+import 'react-quill-new/dist/quill.bubble.css'
+import 'react-quill-new/dist/quill.core.css'
 import Textarea from '@/components/ui/Textarea';
 
 const FeaturesEditor = () => {
@@ -42,11 +45,32 @@ const FeaturesEditor = () => {
     setFeatures(prev => [...prev, { titulo: '', descripcion: '', typeIcon: '' }]);
   };
 
-  const removeFeature = (index) => {
-    const updated = [...features];
-    updated.splice(index, 1);
-    setFeatures(updated);
+  const removeFeature = async (index, id) => {
+    console.log("id: ", id);
+    if (!id) {
+      const updated = [...features];
+      updated.splice(index, 1);
+      setFeatures(updated);
+      return;
+    }
+    
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) throw new Error('Error al eliminar en el servidor');
+
+      const updated = [...features];
+      updated.splice(index, 1);
+      setFeatures(updated);
+    } catch (err) {
+      console.error('Error al eliminar característica:', err);
+      alert('No se pudo eliminar la característica');
+    }
   };
+
 
   const moveFeature = (index, direction) => {
     if ((direction === 'up' && index === 0) || (direction === 'down' && index === features.length - 1)) return;
@@ -116,7 +140,7 @@ const FeaturesEditor = () => {
                 <button onClick={() => moveFeature(index, 'down')} disabled={index === features.length - 1} className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-30">
                   <Move size={16} className="-rotate-90" />
                 </button>
-                <button onClick={() => removeFeature(index)} className="p-1 text-red-500 hover:text-red-700">
+                <button onClick={() => removeFeature(index, feature?._id)} className="p-1 text-red-500 hover:text-red-700">
                   <Trash size={16} />
                 </button>
               </div>
@@ -129,22 +153,22 @@ const FeaturesEditor = () => {
                 fullWidth
               />
 
-              {/* <div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
                 <TextEditor
                   value={feature.descripcion}
                   setValue={(value) => handleFeatureChange(index, 'descripcion', value)}
                   edit
                 />
-              </div> */}
+              </div>
 
-              <Textarea
+              {/* <Textarea
                 label="Descripción"
                 value={feature.descripcion}
                 onChange={(e) => handleFeatureChange(index, 'descripcion', e.target.value)}
                 rows={3}
                 fullWidth
-              />
+              /> */}
 
               <Input
                 label="Icono"
