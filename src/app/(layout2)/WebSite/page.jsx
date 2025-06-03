@@ -57,7 +57,7 @@ const DashboardHome = () => {
               </div>
               <div>
                 <p className="text-sm text-emerald-600 dark:text-emerald-300">Profesores</p>
-                <p className="font-semibold">{siteData.teachers.profiles.length}</p>
+                <p className="font-semibold">{siteData?.teachers?.profiles?.length}</p>
               </div>
             </div>
             
