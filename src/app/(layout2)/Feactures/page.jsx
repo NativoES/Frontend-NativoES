@@ -7,9 +7,6 @@ import Button from '@/components/ui/Button';
 import { Plus, Trash, Move } from 'lucide-react';
 import { useAppContext } from '@/contexts/Context';
 import TextEditor from '@/components/textEditor/TextEditor';
-// import 'react-quill/dist/quill.snow.css';
-// import 'react-quill/dist/quill.bubble.css';
-// import 'react-quill/dist/quill.core.css';
 import 'react-quill-new/dist/quill.snow.css'
 import 'react-quill-new/dist/quill.bubble.css'
 import 'react-quill-new/dist/quill.core.css'
@@ -27,8 +24,10 @@ const FeaturesEditor = () => {
           _id: item._id,
           titulo: item[locale]?.titulo || '',
           descripcion: item[locale]?.descripcion || '',
-          typeIcon: item[locale]?.typeIcon || '',
+          visible: item[locale]?.visible || false,
+          media: item[locale]?.media || { url: '', type: 'image' },
         }));
+
         setFeatures(items);
       })
       .catch(err => console.error('Error cargando features:', err));
@@ -52,7 +51,7 @@ const FeaturesEditor = () => {
       setFeatures(updated);
       return;
     }
-    
+
 
     try {
       const res = await fetch(`http://localhost:5000/api/${id}`, {
@@ -81,27 +80,36 @@ const FeaturesEditor = () => {
 
   const handleSave = async () => {
     for (const feature of features) {
-      const payload = {
-        locale,
-        content: {
-          titulo: feature.titulo,
-          descripcion: feature.descripcion,
-          typeIcon: feature.typeIcon,
-        },
+      const formData = new FormData();
+
+      formData.append('locale', locale);
+
+      const content = {
+        titulo: feature.titulo,
+        descripcion: feature.descripcion,
+        visible: feature.visible ?? false,
       };
+
+      // Si hay media y es tipo File (imagen nueva seleccionada)
+      if (feature.media instanceof File) {
+        formData.append('file', feature.media); // clave debe coincidir con Multer
+      } else if (feature.media?.url && feature.media?.type) {
+        // Si ya hay media previa, la incluimos como parte del content
+        content.media = feature.media;
+      }
+
+      formData.append('content', JSON.stringify(content));
 
       try {
         if (feature._id) {
           await fetch(`http://localhost:5000/api/form-study/${feature._id}`, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
+            body: formData,
           });
         } else {
           await fetch('http://localhost:5000/api/form-study', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
+            body: formData,
           });
         }
       } catch (error) {
@@ -109,6 +117,7 @@ const FeaturesEditor = () => {
       }
     }
   };
+
 
   return (
     <div className="space-y-6">
@@ -161,21 +170,58 @@ const FeaturesEditor = () => {
                 />
               </div>
 
-              {/* <Textarea
-                label="Descripción"
-                value={feature.descripcion}
-                onChange={(e) => handleFeatureChange(index, 'descripcion', e.target.value)}
-                rows={3}
-                fullWidth
-              /> */}
+              <div>
+                <label className="text-sm font-medium mb-1 block">¿Visible?</label>
+                <input
+                  type="checkbox"
+                  checked={feature.visible}
+                  onChange={(e) => handleFeatureChange(index, 'visible', e.target.checked)}
+                />
+              </div>
 
-              <Input
-                label="Icono"
-                value={feature.typeIcon}
-                onChange={(e) => handleFeatureChange(index, 'typeIcon', e.target.value)}
-                placeholder="monitor, puzzle, video, etc."
-                fullWidth
-              />
+              <div>
+                <label className="text-sm font-medium mb-1 block">Tipo de media</label>
+                <select
+                  value={feature.media?.type || 'image'}
+                  onChange={(e) =>
+                    handleFeatureChange(index, 'media', {
+                      ...feature.media,
+                      type: e.target.value,
+                    })
+                  }
+                >
+                  <option value="image">Imagen</option>
+                  <option value="video">Video</option>
+                </select>
+              </div>
+
+              {feature.media?.type === 'image' ? (
+                <Input
+                  label="Subir imagen"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const url = URL.createObjectURL(file); // solo preview, luego debes subirla
+                      handleFeatureChange(index, 'media', { type: 'image', url });
+                      // Aquí luego debes implementar subida real a S3 y reemplazar `url`
+                    }
+                  }}
+                />
+              ) : (
+                <Input
+                  label="URL del video"
+                  value={feature.media?.url || ''}
+                  onChange={(e) =>
+                    handleFeatureChange(index, 'media', {
+                      ...feature.media,
+                      url: e.target.value,
+                    })
+                  }
+                />
+              )}
+
             </CardContent>
           </Card>
         ))}
