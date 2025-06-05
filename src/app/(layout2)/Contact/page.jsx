@@ -16,38 +16,58 @@ const ContactEditor = () => {
   const [telefono, setTelefono] = useState('');
   const [email, setEmail] = useState('');
   const [horarios, setHorarios] = useState([]);
+  const [redesSociales, setRedesSociales] = useState([]);
 
   const locale = language.toLowerCase();
 
-  // Normalizar días: asegurar que estén todos
-  const normalizarHorarios = (data) => {
+  const normalizarHorarios = (data = []) => {
     return DIAS_SEMANA.map((dia) => {
       const existente = data.find(h => h.dia === dia);
       return existente || { dia, abierto: false };
     });
-  };  
+  };
+
+  const normalizarRedes = (data = []) => {
+    const redesPredefinidas = [
+      { nombre: 'WhatsApp', icon: '🟢' },
+      { nombre: 'Telegram', icon: '🔵' },
+      { nombre: 'Twitter', icon: '🐦' },
+      { nombre: 'Instagram', icon: '📸' },
+      { nombre: 'Facebook', icon: '📘' },
+      { nombre: 'LinkedIn', icon: '💼' }
+    ];
+
+    return redesPredefinidas.map((r) => {
+      const existente = data.find(d => d.nombre === r.nombre);
+      return {
+        nombre: r.nombre,
+        url: existente?.url || '',
+        icon: r.icon
+      };
+    });
+  };
 
   const fetchHorarios = (len) => {
-  fetch(`http://localhost:5000/api/information?locale=${len}`)
-    .then(res => res.json())
-    .then(data => {
-      const info = data[0];
-      if (info && info[locale]) {
-        setInfoId(info._id);
-        setTelefono(info[locale].telefono || '');
-        setEmail(info[locale].email || '');
-        setHorarios(normalizarHorarios(info[locale].horarios || []));
-      } else {
-        // No hay datos para este idioma, resetear estado
-        setInfoId(null); // << IMPORTANTE
-        setTelefono('');
-        setEmail('');
-        setHorarios(normalizarHorarios([]));
-      }
-    })
-    .catch(err => console.error('Error al cargar información:', err));
-};
-
+    fetch(`http://localhost:5000/api/information?locale=${len}`)
+      .then(res => res.json())
+      .then(data => {
+        const info = data[0];
+        if (info && info[locale]) {
+          setInfoId(info._id);
+          setTelefono(info[locale].telefono || '');
+          setEmail(info[locale].email || '');
+          setHorarios(normalizarHorarios(info[locale].horarios || []));
+          setRedesSociales(normalizarRedes(info[locale].redesSociales || []));
+        } else {
+          setInfoId(null);
+          setTelefono('');
+          setEmail('');
+          setHorarios(normalizarHorarios([]));
+          setRedesSociales(normalizarRedes([]));
+        }
+      })
+      .catch(err => console.error('Error al cargar información:', err));
+  };
 
   useEffect(() => {
     fetchHorarios(locale);
@@ -65,14 +85,19 @@ const ContactEditor = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     const payload = {
       locale,
       informacion: {
         telefono,
         email,
-        horarios
+        horarios,
+        redesSociales,
       }
     };
+
+    console.log("payload: ", payload);
+    
 
     const url = infoId
       ? `http://localhost:5000/api/information/${infoId}`
@@ -168,6 +193,38 @@ const ContactEditor = () => {
                         />
                       </>
                     )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-md font-medium mb-3">Redes Sociales</h4>
+              <div className="space-y-3">
+                {redesSociales.map((r, index) => (
+                  <div
+                    key={r.nombre}
+                    className="flex items-center gap-4 border p-3 rounded-lg"
+                  >
+                    <div className="text-2xl w-20 text-center">{r.icon}</div>
+                    <Input
+                      label="Nombre"
+                      value={r.nombre}
+                      disabled
+                      className="w-1/2"
+                    />
+                    <Input
+                      label="URL"
+                      value={r.url}
+                      onChange={(e) =>
+                        setRedesSociales(prev =>
+                          prev.map((x, i) =>
+                            i === index ? { ...x, url: e.target.value } : x
+                          )
+                        )
+                      }
+                      className="w-full"
+                    />
                   </div>
                 ))}
               </div>
