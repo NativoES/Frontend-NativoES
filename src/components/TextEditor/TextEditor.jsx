@@ -9,9 +9,10 @@ import dynamic from 'next/dynamic'
 import 'react-quill-new/dist/quill.snow.css'
 import 'react-quill-new/dist/quill.bubble.css'
 import 'react-quill-new/dist/quill.core.css'
-import ImageResize from 'quill-image-resize-module-react';
+// import { ImageResize } from 'quill-image-resize-module-react';
 
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false })
+const ImageResize = dynamic(() => import('quill-image-resize-module-react'), { ssr: false })
 // const ReactQuill = dynamic(async () => await import("react-quill"), { ssr: false })
 
 export default function TextEditor({ value, setValue, edit }) {

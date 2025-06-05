@@ -13,7 +13,6 @@ import TextEditor from '@/components/textEditor/TextEditor';
 import 'react-quill-new/dist/quill.snow.css'
 import 'react-quill-new/dist/quill.bubble.css'
 import 'react-quill-new/dist/quill.core.css'
-import Textarea from '@/components/ui/Textarea';
 
 const FeaturesEditor = () => {
   const { language } = useAppContext();
