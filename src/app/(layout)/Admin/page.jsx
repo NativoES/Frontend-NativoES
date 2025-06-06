@@ -18,7 +18,7 @@ const teachersItem = {
   schedule: [
     { day: 'Monday', time: '10:00' },
     { day: 'Wednesday', time: '10:00' },
-  ],
+  ],        
 }
 
 const studentsItem = {
