@@ -9,6 +9,7 @@ import { useParams } from 'next/navigation';
 
 const DraggableWords = () => {
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [textToComplete, setTextToComplete] = useState("");
   const [droppedTexts, setDroppedTexts] = useState([]);
   const [correctWords, setCorrectWords] = useState([]);
@@ -89,26 +90,29 @@ const DraggableWords = () => {
     }
   };
   console.log("pathname", id)
+
   const handleSave = async () => {
+
+    const content = {
+      titulo: title,
+      descripcion: description,
+      textoOriginal: textToComplete,
+      palabrasCorrectas: correctWords,
+      claseId: id
+    }
+
+    console.log("content: ", content);
+
     const res = await fetch(
       window?.location?.href?.includes("localhost")
-        ? `http://localhost:4001/api/exercises/register`
+        ? `http://localhost:5001/api/completar-texto`
         : ``,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json", // ← necesario
         },
-        body: JSON.stringify({
-          template: "conpletar texto ",
-          content: {
-            title,
-            textToComplete,
-            correctWords,
-            droppedTexts,
-            feedback,
-          },
-        }),
+        body: JSON.stringify(content),
       }
     );
 
@@ -118,7 +122,7 @@ const DraggableWords = () => {
     if (res.ok) {
 
       const response = await fetch(window?.location?.href?.includes('localhost')
-        ? `http://localhost:4001/api/classes/addExercise/${id}`
+        ? `http://localhost:5001/api/completar-texto/${id}`
         : '', {
         method: "PUT",
         headers: {
@@ -135,6 +139,7 @@ const DraggableWords = () => {
       alert("Error al guardar el ejercicio");
     }
     setTitle("");
+    setDescription("");
     setTextToComplete("");
     setDroppedTexts([]);
     setCorrectWords([]);
@@ -153,6 +158,15 @@ const DraggableWords = () => {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            className="border rounded p-2 w-full"
+          />
+        </div>
+        <div className="mb-4">
+          <Label>Descripcion:</Label>
+          <input
+            type="text"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             className="border rounded p-2 w-full"
           />
         </div>

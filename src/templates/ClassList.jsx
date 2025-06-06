@@ -26,7 +26,7 @@ export const ClassList = ({  onNavigate, onDelete }) => {
 
     const res = await fetch(
       window?.location?.href?.includes("localhost")
-        ? `http://localhost:4001/api/classes?limit=${finalLimit}&page=${finalPage}`
+        ? `http://localhost:5001/api/classes?limit=${finalLimit}&page=${finalPage}`
         : ``
     );
 
@@ -59,7 +59,7 @@ console.log('classes', classes)
 
   return (
     <ul className="space-y-4">
-      {classes.map((classItem) => (
+      {classes?.map((classItem) => (
         <li key={classItem._id}>
           <ClassCreateCard
             classItem={classItem}

@@ -22,11 +22,29 @@ const SingleSelectQuestion = () => {
   };
 
   const handleSave = () => {
+    console.log("Parts original:", parts);
+
     const filtered = parts.filter((part) => part.trim() !== "");
+    console.log("Filtered (sin espacios vacíos):", filtered);
+
     const shuffled = shuffleArray(filtered);
+    console.log("Shuffled (orden aleatorio):", shuffled);
+
     setShuffledParts(shuffled);
     setOrderedParts(Array(filtered.length).fill(null));
     setFeedback(Array(filtered.length).fill(null));
+
+    const ejercicioAGuardar = {
+      titulo: "Título de ejemplo",
+      textoACompletar: parts.join(" "), // o como construyas el texto
+      palabrasCorrectas: filtered,
+      textosColocados: Array(filtered.length).fill(""),
+      retroalimentacion: Array(filtered.length).fill(null),
+      claseId: "id-de-la-clase-aqui", // reemplaza dinámicamente
+      creadoEn: new Date().toISOString()
+    };
+
+    console.log("Ejercicio a guardar:", ejercicioAGuardar);
   };
 
   const shuffleArray = (array) => {

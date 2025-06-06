@@ -29,14 +29,15 @@ export default function ClassForm({ formData, onChange, onSubmit }) {
 
       const data = new FormData();
       data.append("file", file);
-      data.append("nombreDeLaClase", selectValue.nombreDeLaClase);
-      data.append("nivel", selectValue.nivel);
+      data.append("nombreClase", selectValue.nombreDeLaClase);
+      // data.append("nivel", Number(selectValue.nivel));
+      data.append("nivel", String(Number(selectValue.nivel))); 
       data.append("idioma", selectValue.idioma);
       data.append("horario", selectValue.horario);
       data.append("descripcion", selectValue.descripcion);
 
       const response = await fetch(window?.location?.href?.includes('localhost')
-        ? 'http://localhost:4001/api/classes/register'
+        ? 'http://localhost:5001/api/classes'
         : '', {
         method: 'POST',
         body: data,

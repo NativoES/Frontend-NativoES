@@ -198,7 +198,7 @@ function getData() {
 useEffect(() => {
   const fetchData = async () => {
     try {
-      const response = await fetch('/api/exercises/getExercises');
+      const response = await fetch('http://localhost:5001/api/completar-texto');
       const data = await response.json();
       setExercises(data);
     } catch (error) {
@@ -208,6 +208,7 @@ useEffect(() => {
   fetchData();
 }, []);
  
+ console.log("ejercicios: ", exercises);
  
 
 
@@ -235,18 +236,24 @@ useEffect(() => {
                     <div>
                       <img
                         src={exercise.imgURL}
-                        alt={exercise.tituloPlantilla}
+                        alt={exercise.titulo}
                         className="w-full h-80 object-cover rounded-md"
                       />
-                      {exercise.tituloPlantilla && (
-                        <h3 className="mt-2 text-xl font-semibold text-gray-800">{exercise.tituloPlantilla}</h3>
+                      {exercise.titulo && (
+                        <h3 className="mt-2 text-xl font-semibold text-gray-800">{exercise.titulo}</h3>
                       )}
-                      {exercise.description && (
-                        <p className="mt-2 text-sm text-gray-600">{exercise.description}</p>
+                      {exercise.descripcion && (
+                        <p className="mt-2 text-sm text-gray-600">{exercise.descripcion}</p>
                       )}
                     </div>
                   )}
 
+                  {exercise.titulo && (
+                    <h3 className="mt-2 text-xl font-semibold text-gray-800">{exercise.titulo}</h3>
+                  )}
+                  {exercise.descripcion && (
+                    <p className="mt-2 text-sm text-gray-600">{exercise.descripcion}</p>
+                  )}
                   {exercise.audio && (
                     <div className="p-4 border rounded-lg shadow-md">
 
@@ -269,8 +276,8 @@ useEffect(() => {
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">{exercise.nombre}</h3>
                   )}
 
-                  {exercise.textoEjercicio &&
-                    exercise.textoEjercicio.split(/(\[.*?\])/).map((part, idx) => {
+                  {exercise.textoOriginal &&
+                    exercise.textoOriginal.split(/(\[.*?\])/).map((part, idx) => {
                       if (part.startsWith('[') && part.endsWith(']')) {
                         return (
                           <input
