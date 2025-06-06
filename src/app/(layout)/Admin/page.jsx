@@ -7,7 +7,7 @@ import { ButtonTemplate } from '@/templates/ButtonTemplate';
 import { SubtitleTemplate } from '@/templates/SubtittleTemplate';
 import { Users, Star, ArrowRight } from 'lucide-react';
 import InputFlotante from '@/components/InputFlotante';
-
+   
 const teachersItem = {
   id: '1',
   name: 'Profesores',
