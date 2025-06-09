@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Circle } from 'lucide-react';
 import { InputTemplate } from '@/templates/InputTemplate';
 import TextAreaTemplate from '@/templates/TextAreaTemplate';
@@ -9,10 +9,7 @@ import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useParams } from 'next/navigation';
 
-const Notes = () => {
-  const [title, setTitle] = useState('');
-  const [message, setMessage] = useState('');
-  const [selectedColor, setSelectedColor] = useState('blue');
+const Notes = ({ nota = null, onClose, onSave }) => {
   const params = useParams();
   const id = params.id;
 
@@ -24,11 +21,24 @@ const Notes = () => {
     { name: 'gray', bg: '#F5F5F5', text: '#424242' }
   ];
 
+  const [title, setTitle] = useState('');
+  const [message, setMessage] = useState('');
+  const [selectedColor, setSelectedColor] = useState('blue');
+
+  useEffect(() => {
+    if (nota) {
+      setTitle(nota.titulo || '');
+      setMessage(nota.mensaje || '');
+      const matchedColor = colors.find(c => c.bg === nota.color);
+      setSelectedColor(matchedColor?.name || 'blue');
+    }
+  }, [nota]);
+
   const handleSave = async () => {
     const selected = colors.find((c) => c.name === selectedColor);
     if (!selected) return;
 
-    const nota = {
+    const notaData = {
       titulo: title,
       mensaje: message,
       color: selected.bg,
@@ -38,29 +48,30 @@ const Notes = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:5001/api/nota', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(nota),
-      });
+      const response = await fetch(
+        `http://localhost:5001/api/nota${nota ? `/${nota.id}` : ''}`,
+        {
+          method: nota ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(notaData),
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error('Error al crear la nota');
-      }
+      if (!response.ok) throw new Error('Error al guardar la nota');
 
       const result = await response.json();
-      console.log('Nota creada:', result);
-      handleCancel(); // limpia el formulario
+      console.log(nota ? 'Nota actualizada:' : 'Nota creada:', result);
+
+      if (onSave) onSave(result);
+      if (onClose) onClose();
+
+      handleCancel();
     } catch (error) {
       console.error('Error al guardar la nota:', error);
     }
   };
 
-
   const handleCancel = () => {
-    // Lógica para cancelar y limpiar el formulario
     setTitle('');
     setMessage('');
     setSelectedColor('blue');
@@ -69,8 +80,10 @@ const Notes = () => {
   return (
     <ModalTemplate>
       <div className="space-y-4">
+        <h3 className='font-bold text-center text-[24px]'>
+          {nota ? 'Editar Nota' : 'Crear Nota'}
+        </h3>
 
-        <h3 className='font-bold text-center text-[24px]'>Crear Notas</h3>
         <div>
           <Label htmlFor="title">Título:</Label>
           <InputTemplate
@@ -78,11 +91,10 @@ const Notes = () => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Ingresa un título"
-            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#FEAB5F] focus:border-[#FEAB5F]"
+            className="mt-1 block w-full"
           />
         </div>
 
-        {/* Mensaje de texto */}
         <div>
           <Label htmlFor="message">Mensaje de texto:</Label>
           <TextAreaTemplate
@@ -93,7 +105,6 @@ const Notes = () => {
           />
         </div>
 
-        {/* Selección de color */}
         <div>
           <Label htmlFor="color">Color:</Label>
           <div className="flex space-x-4">
@@ -101,8 +112,9 @@ const Notes = () => {
               <button
                 key={color.name}
                 onClick={() => setSelectedColor(color.name)}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${selectedColor === color.name ? 'ring-2 ring-offset-2 ring-gray-400' : ''
-                  }`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                  selectedColor === color.name ? 'ring-2 ring-offset-2 ring-gray-400' : ''
+                }`}
                 style={{ backgroundColor: color.bg }}
               >
                 <Circle size={20} fill={color.text} color={color.text} />
@@ -111,14 +123,13 @@ const Notes = () => {
           </div>
         </div>
 
-        {/* Vista previa */}
         <div>
           <Label>Vista previa:</Label>
           <div
             className="p-4 rounded-lg"
             style={{
               backgroundColor: colors.find((c) => c.name === selectedColor)?.bg,
-              color: colors.find((c) => c.name === selectedColor)?.text
+              color: colors.find((c) => c.name === selectedColor)?.text,
             }}
           >
             <h3 className="text-lg font-semibold mb-2">{title || 'Sin título'}</h3>
@@ -126,12 +137,10 @@ const Notes = () => {
           </div>
         </div>
 
-        {/* Botones */}
         <div className="flex justify-end space-x-4">
           <Button onClick={handleSave} variant="primary" className="w-full">
-            Guardar
+            {nota ? 'Guardar Cambios' : 'Guardar'}
           </Button>
-
         </div>
       </div>
     </ModalTemplate>

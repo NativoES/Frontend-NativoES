@@ -1,28 +1,38 @@
-'use client'
+'use client';
 
-import React, { useState, useEffect } from 'react'
-import Button from '@/templates/Button'
-import { CardTemplate } from '@/templates/CardTemplate'
-import { InputTemplate } from '@/templates/InputTemplate'
-import TextAreaTemplate from '@/templates/TextAreaTemplate'
-import Label from '@/templates/Labels'
-import ModalTemplate from '@/templates/ModalTemplate'
+import React, { useState, useEffect } from 'react';
+import Button from '@/templates/Button';
+import { CardTemplate } from '@/templates/CardTemplate';
+import { InputTemplate } from '@/templates/InputTemplate';
+import TextAreaTemplate from '@/templates/TextAreaTemplate';
+import Label from '@/templates/Labels';
+import ModalTemplate from '@/templates/ModalTemplate';
 
-const ExerciseCreator = () => {
-  const [title, setTitle] = useState('')
-  const [exerciseText, setExerciseText] = useState('')
-  const [processedText, setProcessedText] = useState([])
+const ExerciseCreator = ({ exercise = null, onSave, onClose }) => {
+  const [title, setTitle] = useState('');
+  const [exerciseText, setExerciseText] = useState('');
+  const [processedText, setProcessedText] = useState([]);
+
+  // Al abrir modal, si hay un ejercicio, precarga los datos
+
+  console.log();
+  
+  useEffect(() => {
+    if (exercise) {
+      setTitle(exercise.titulo || '');
+      setExerciseText(exercise.texto || '');
+    }
+  }, [exercise]);
 
   useEffect(() => {
-    processExerciseText()
-  }, [exerciseText])
+    processExerciseText();
+  }, [exerciseText]);
 
   const processExerciseText = () => {
-    const parts = exerciseText.split(/\[|\]/)
+    const parts = exerciseText.split(/\[|\]/);
     const processed = parts.map((part, index) => {
       if (index % 2 === 1) {
-        // This part was inside brackets
-        const options = part.split('/')
+        const options = part.split('/');
         return (
           <select
             key={index}
@@ -34,28 +44,36 @@ const ExerciseCreator = () => {
               </option>
             ))}
           </select>
-        )
+        );
       } else {
-        return part
+        return part;
       }
-    })
-    setProcessedText(processed)
-  }
+    });
+    setProcessedText(processed);
+  };
 
   const handleSave = () => {
+    const data = {
+      ...exercise,
+      titulo: title,
+      texto: exerciseText,
+      template: 'notaTexto',
+    };
 
-    console.log('Saving exercise:', { title, exerciseText })
-  }
+    if (onSave) onSave(data); // lo manejas desde el componente padre
+  };
 
   const handleCancel = () => {
-
-    setTitle('')
-    setExerciseText('')
-  }
+    setTitle('');
+    setExerciseText('');
+    if (onClose) onClose(); // para cerrar el modal desde el padre
+  };
 
   return (
-    <ModalTemplate className="w-full ">
-      <h1 className="text-2xl font-bold mb-4">Creador de Ejercicios</h1>
+    <ModalTemplate className="w-full">
+      <h1 className="text-2xl font-bold mb-4">
+        {exercise ? 'Editar Ejercicio' : 'Crear Nuevo Ejercicio'}
+      </h1>
 
       <div className="mb-4">
         <Label htmlFor="title">Título:</Label>
@@ -69,7 +87,7 @@ const ExerciseCreator = () => {
 
       <div className="mb-4 p-3 bg-yellow-100 rounded-md">
         <p className="text-sm font-bold">
-          Las palabras entre [ ] se pasarán a selección. Si quiere agregar más palabras, use "/" y agregue más.
+          Las palabras entre [ ] se pasarán a selección. Use "/" para múltiples opciones.
         </p>
       </div>
 
@@ -85,18 +103,20 @@ const ExerciseCreator = () => {
       </div>
 
       <div className="mb-4 p-3 bg-gray-100 rounded-md">
-        <h2 className="text-lg font-semibold mb-2">Vista previa del ejercicio:</h2>
+        <h2 className="text-lg font-semibold mb-2">Vista previa:</h2>
         <div>{processedText}</div>
       </div>
 
       <div className="flex justify-end space-x-4">
-        <Button onClick={handleSave}>Guardar</Button>
+        <Button onClick={handleSave}>
+          {exercise ? 'Guardar Cambios' : 'Guardar'}
+        </Button>
         <Button onClick={handleCancel} variant="secondary">
           Cancelar
         </Button>
       </div>
     </ModalTemplate>
-  )
-}
+  );
+};
 
-export default ExerciseCreator
+export default ExerciseCreator;

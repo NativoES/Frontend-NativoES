@@ -25,6 +25,10 @@ import { NotesText } from '@/components/templates/NotesText';
 import Label from '@/templates/Labels';
 import DraggableCard from '@/templates/DraggableCard';
 import DroppableContainer from '@/templates/DroppableContainer';
+import { ArrastrarAlTextoExercise } from '@/components/ejercicios/ArrastrarAlTextoExercise';
+import { ExerciseCardHeader } from '@/components/headers/ExerciseCardHeader';
+import { NotaExercise } from '@/components/ejercicios/NotaExercise';
+import { NotaTextoExercise } from '@/components/ejercicios/NotaTextoExercise';
 
 
 const templates = [
@@ -145,6 +149,22 @@ export default function AddExercise() {
 
   const [correctWordsMap, setCorrectWordsMap] = useState({});
 
+  const handleEdit = (exercise) => {
+  if (confirm("¿Estás seguro de editar este ejercicio?")) {
+    console.log("Ejercicio editado:", exercise._id);
+  }
+  // setSelectedExercise(exercise);
+  // openEditModal();
+};
+
+const handleDelete = (exercise) => {
+  if (confirm("¿Estás seguro de eliminar este ejercicio?")) {
+    // tu lógica para eliminar
+    console.log("Ejercicio eliminado:", exercise.id);
+  }
+};
+
+
   const handleDragStart = (e, text) => {
     e.dataTransfer.setData("text/plain", text);
   };
@@ -250,28 +270,18 @@ export default function AddExercise() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [res1, res2, res3] = await Promise.all([
-          fetch('http://localhost:5001/api/completar-texto'),
-          fetch('http://localhost:5001/api/nota-texto'),
-          fetch('http://localhost:5001/api/nota'),
-        ]);
+        const res = await fetch('http://localhost:5001/api/ejercicios');
+        const data = await res.json();
 
-        const [data1, data2, data3] = await Promise.all([
-          res1.json(),
-          res2.json(),
-          res3.json(),
-        ]);
+        setExercises(data);
 
-        const combined = [...data1, ...data2, ...data3];
-        setExercises(combined);
-
-        // ← Generamos el mapa de palabras correctas por ejercicio
         const map = {};
-        combined.forEach((ex, i) => {
+        data.forEach((ex, i) => {
           if (ex.template === 'arrastrarAlTexto') {
             map[i] = ex.palabrasCorrectas || [];
           }
         });
+
         setCorrectWordsMap(map);
       } catch (error) {
         console.error('Error fetching exercises:', error);
@@ -322,12 +332,12 @@ export default function AddExercise() {
                     </div>
                   )}
 
-                  {exercise.titulo && (
+                  {/* {exercise.titulo && (
                     <h3 className="mt-2 text-xl font-semibold text-gray-800">{exercise.titulo}</h3>
                   )}
                   {exercise.descripcion && (
                     <p className="mt-2 text-sm text-gray-600">{exercise.descripcion}</p>
-                  )}
+                  )} */}
                   {exercise.audio && (
                     <div className="p-4 border rounded-lg shadow-md">
 
@@ -346,7 +356,7 @@ export default function AddExercise() {
                     </div>
                   )}
 
-                  {exercise.mensaje && (
+                  {/* {exercise.mensaje && (
                     <div>
                       <div
                         className="p-4 rounded-lg"
@@ -359,80 +369,79 @@ export default function AddExercise() {
                         <p className="whitespace-pre-wrap">{exercise.mensaje || 'Sin mensaje'}</p>
                       </div>
                     </div>
+                  )} */}
+
+                  {/* {exercise.template === "nota" && (
+                    <>
+                      <ExerciseCardHeader
+                        title={exercise.titulo || 'Ejercicio sin título'}
+                        onEdit={() => handleEdit(exercise)}
+                        onDelete={() => handleDelete(exercise)}
+                      />
+                      <p className="my-4 text-sm text-gray-600">{exercise.descripcion ?? ""}</p>
+                      <div
+                        className="p-4 rounded-lg"
+                        style={{
+                          backgroundColor: exercise.colorTexto,
+                          color: exercise.color
+                        }}
+                      >
+                        <h3 className="text-lg font-semibold mb-2">{exercise.titulo || 'Sin título'}</h3>
+                        <p className="whitespace-pre-wrap">{exercise.mensaje || 'Sin mensaje'}</p>
+                      </div>
+                    </>
+                  )} */}
+
+                  {/* {exercise.template === "notaTexto" && (
+                    <>
+                      <ExerciseCardHeader
+                        title={exercise.titulo || 'Ejercicio sin título'}
+                        onEdit={() => handleEdit(exercise)}
+                        onDelete={() => handleDelete(exercise)}
+                      />
+                      <p className="my-4 text-sm text-gray-600">{exercise.descripcion ?? ""}</p>
+                      <div
+                        className="whitespace-pre-wrap"
+                        dangerouslySetInnerHTML={{ __html: exercise.texto }}
+                      />
+                    </>
+                  )} */}
+
+
+                  {exercise.template === "nota" && (
+                    <NotaExercise
+                      exercise={exercise}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                    />
                   )}
 
-                  {exercise.texto && (
-                    <div
-                      className="whitespace-pre-wrap"
-                      dangerouslySetInnerHTML={{ __html: exercise.texto }}
+                  {exercise.template === "notaTexto" && (
+                    <NotaTextoExercise
+                      exercise={exercise}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
                     />
                   )}
 
                   {exercise.template === "arrastrarAlTexto" && (
-                    <div className="mb-4">
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {exercise?.palabrasCorrectas?.map((word, wordIndex) => (
-                          <DraggableCard key={wordIndex} word={word} onDragStart={handleDragStart} />
-                        ))}
-                      </div>
-
-                      <div className="border rounded p-4 flex flex-wrap items-center">
-                        {exercise.textoOriginal &&
-                          exercise.textoOriginal.split(/(\[.*?\])/).map((part, idx) => {
-                            if (part.startsWith('[') && part.endsWith(']')) {
-                              return (
-                                <DroppableContainer
-                                  key={idx}
-                                  droppedText={droppedTextsMap[index]?.[idx]}
-                                  feedback={feedbackMap[index]?.[idx]}
-                                  onDrop={(e) => handleDrop(e, idx, index)}
-                                  onDragOver={handleDragOver}
-                                />
-                              );
-                            }
-                            return (
-                              <span key={idx} className="mr-1">
-                                {part}
-                              </span>
-                            );
-                          })}
-                      </div>
-                    </div>
+                    <ArrastrarAlTextoExercise
+                      exercise={exercise}
+                      index={index}
+                      droppedTextsMap={droppedTextsMap}
+                      feedbackMap={feedbackMap}
+                      handleDragStart={handleDragStart}
+                      handleDrop={handleDrop}
+                      handleDragOver={handleDragOver}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                    />
                   )}
 
-                  {exercise.nombre && (
+                  {/* {exercise.nombre && (
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">{exercise.nombre}</h3>
-                  )}
+                  )} */}
 
-                  {/* {exercise.textoOriginal &&
-                    exercise.textoOriginal.split(/(\[.*?\])/).map((part, idx) => {
-                      if (part.startsWith('[') && part.endsWith(']')) {
-                        const value = answers[index]?.[idx] || '';
-
-                        const handleChange = (e) => {
-                          const newValue = e.target.value;
-                          setAnswers((prev) => ({
-                            ...prev,
-                            [index]: {
-                              ...(prev[index] || {}),
-                              [idx]: newValue,
-                            },
-                          }));
-                        };
-
-                        return (
-                          <input
-                            key={idx}
-                            type="text"
-                            className="border-b border-gray-300 focus:border-[#FEAB5F] outline-none px-1 w-20 inline-block"
-                            placeholder="Completar"
-                            value={value}
-                            onChange={handleChange}
-                          />
-                        );
-                      }
-                      return <span key={idx}>{part}</span>;
-                    })} */}
 
                 </div>
               ))}
