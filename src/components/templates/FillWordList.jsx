@@ -98,7 +98,8 @@ const DraggableWords = () => {
       descripcion: description,
       textoOriginal: textToComplete,
       palabrasCorrectas: correctWords,
-      claseId: id
+      claseId: id,
+      template: "arrastrarAlTexto"
     }
 
     console.log("content: ", content);

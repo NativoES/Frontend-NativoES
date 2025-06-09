@@ -1,7 +1,7 @@
 // components/templates/Button.js
 import React from 'react';
 
-const Button = ({ onClick, children, variant = "primary", className }) => {
+const Button = ({ onClick, children, variant = "primary", className, disabled }) => {
   const baseStyles = "px-4 py-2 rounded text-black";
   const variants = {
     primary: "bg-[#FEAB5F] text-gray-900 rounded-md cursor-pointer hover:bg-gray-900 hover:text-white transition duration-300",
@@ -13,6 +13,7 @@ const Button = ({ onClick, children, variant = "primary", className }) => {
 
   return (
     <button
+      disabled={disabled}
       onClick={onClick}
       className={`${baseStyles} ${variants[variant]} ${className}`}
     >

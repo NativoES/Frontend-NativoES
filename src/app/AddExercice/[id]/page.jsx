@@ -18,8 +18,13 @@ import Notes from '@/components/templates/Notes';
 import CardTemplate from '@/components/CardTemplate';
 import ModalTemplate from '@/templates/ModalTemplate';
 
-import { useAppContext
- } from '@/contexts/Context';
+import {
+  useAppContext
+} from '@/contexts/Context';
+import { NotesText } from '@/components/templates/NotesText';
+import Label from '@/templates/Labels';
+import DraggableCard from '@/templates/DraggableCard';
+import DroppableContainer from '@/templates/DroppableContainer';
 
 
 const templates = [
@@ -51,7 +56,7 @@ const templates = [
   {
     title: 'Articulo, ensayo o texto',
     description: 'Sube una imagen para el ejercicio',
-    openModal: 'cargarImagen',
+    openModal: 'textAndArticle',
   },
   {
     title: 'Grabacion de audio',
@@ -132,8 +137,55 @@ export default function AddExercise() {
 
   const [exercises, setExercises] = useState([]);
   const [userAnswers, setUserAnswers] = useState({});
-
+  const [answers, setAnswers] = useState({});
   const modalRef = useRef(null);
+
+  const [droppedTextsMap, setDroppedTextsMap] = useState({});
+  const [feedbackMap, setFeedbackMap] = useState({});
+
+  const [correctWordsMap, setCorrectWordsMap] = useState({});
+
+  const handleDragStart = (e, text) => {
+    e.dataTransfer.setData("text/plain", text);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e, blankIndex, exerciseIndex) => {
+    e.preventDefault();
+    const text = e.dataTransfer.getData("text/plain");
+    if (!text) return;
+
+    setDroppedTextsMap(prev => {
+      const updated = { ...prev };
+      const current = [...(updated[exerciseIndex] || [])];
+      current[blankIndex] = text; // asignamos directamente
+      updated[exerciseIndex] = current;
+      return updated;
+    });
+
+    checkAnswer(text, blankIndex, exerciseIndex);
+  };
+
+  const checkAnswer = (text, blankIndex, exerciseIndex) => {
+    const correct = correctWordsMap[exerciseIndex]?.[blankIndex];
+
+    setFeedbackMap(prev => {
+      const updated = { ...prev };
+      const current = [...(updated[exerciseIndex] || [])];
+      current[blankIndex] = text === correct ? "Correct!" : "Incorrect!";
+      updated[exerciseIndex] = current;
+      return updated;
+    });
+  };
+
+
+  console.log("dropedText: ", droppedTextsMap);
+  console.log("feedback: ", feedbackMap);
+
+
 
   useEffect(() => {
     const modalState = localStorage.getItem('isOpenModal');
@@ -191,26 +243,48 @@ export default function AddExercise() {
   // const openNotes = () => setisOpenModal('notes');
 
 
-function getData() {
+  function getData() {
 
-}
+  }
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const response = await fetch('http://localhost:5001/api/completar-texto');
-      const data = await response.json();
-      setExercises(data);
-    } catch (error) {
-      console.error('Error fetching exercises:', error);
-    }
-  };
-  fetchData();
-}, []);
- 
- console.log("ejercicios: ", exercises);
- 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [res1, res2, res3] = await Promise.all([
+          fetch('http://localhost:5001/api/completar-texto'),
+          fetch('http://localhost:5001/api/nota-texto'),
+          fetch('http://localhost:5001/api/nota'),
+        ]);
 
+        const [data1, data2, data3] = await Promise.all([
+          res1.json(),
+          res2.json(),
+          res3.json(),
+        ]);
+
+        const combined = [...data1, ...data2, ...data3];
+        setExercises(combined);
+
+        // ← Generamos el mapa de palabras correctas por ejercicio
+        const map = {};
+        combined.forEach((ex, i) => {
+          if (ex.template === 'arrastrarAlTexto') {
+            map[i] = ex.palabrasCorrectas || [];
+          }
+        });
+        setCorrectWordsMap(map);
+      } catch (error) {
+        console.error('Error fetching exercises:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+
+
+  console.log("ejercicios: ", exercises);
+  console.log("modal: ", isOpenModal);
 
   return (
     <div className="h-screen flex flex-col items-center justify-center bg-gray-100">
@@ -272,26 +346,94 @@ useEffect(() => {
                     </div>
                   )}
 
+                  {exercise.mensaje && (
+                    <div>
+                      <div
+                        className="p-4 rounded-lg"
+                        style={{
+                          backgroundColor: exercise.colorTexto,
+                          color: exercise.color
+                        }}
+                      >
+                        <h3 className="text-lg font-semibold mb-2">{exercise.titulo || 'Sin título'}</h3>
+                        <p className="whitespace-pre-wrap">{exercise.mensaje || 'Sin mensaje'}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {exercise.texto && (
+                    <div
+                      className="whitespace-pre-wrap"
+                      dangerouslySetInnerHTML={{ __html: exercise.texto }}
+                    />
+                  )}
+
+                  {exercise.template === "arrastrarAlTexto" && (
+                    <div className="mb-4">
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {exercise?.palabrasCorrectas?.map((word, wordIndex) => (
+                          <DraggableCard key={wordIndex} word={word} onDragStart={handleDragStart} />
+                        ))}
+                      </div>
+
+                      <div className="border rounded p-4 flex flex-wrap items-center">
+                        {exercise.textoOriginal &&
+                          exercise.textoOriginal.split(/(\[.*?\])/).map((part, idx) => {
+                            if (part.startsWith('[') && part.endsWith(']')) {
+                              return (
+                                <DroppableContainer
+                                  key={idx}
+                                  droppedText={droppedTextsMap[index]?.[idx]}
+                                  feedback={feedbackMap[index]?.[idx]}
+                                  onDrop={(e) => handleDrop(e, idx, index)}
+                                  onDragOver={handleDragOver}
+                                />
+                              );
+                            }
+                            return (
+                              <span key={idx} className="mr-1">
+                                {part}
+                              </span>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  )}
+
                   {exercise.nombre && (
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">{exercise.nombre}</h3>
                   )}
 
-                  {exercise.textoOriginal &&
+                  {/* {exercise.textoOriginal &&
                     exercise.textoOriginal.split(/(\[.*?\])/).map((part, idx) => {
                       if (part.startsWith('[') && part.endsWith(']')) {
+                        const value = answers[index]?.[idx] || '';
+
+                        const handleChange = (e) => {
+                          const newValue = e.target.value;
+                          setAnswers((prev) => ({
+                            ...prev,
+                            [index]: {
+                              ...(prev[index] || {}),
+                              [idx]: newValue,
+                            },
+                          }));
+                        };
+
                         return (
                           <input
                             key={idx}
                             type="text"
                             className="border-b border-gray-300 focus:border-[#FEAB5F] outline-none px-1 w-20 inline-block"
                             placeholder="Completar"
-                            value={userAnswers[idx] || ''}
-                            onChange={(e) => handleInputChange(idx, e.target.value)}
+                            value={value}
+                            onChange={handleChange}
                           />
                         );
                       }
                       return <span key={idx}>{part}</span>;
-                    })}
+                    })} */}
+
                 </div>
               ))}
             </div>
@@ -334,8 +476,8 @@ useEffect(() => {
       {isOpenModal === 'completeText' && (
         <CompleteText onClose={closeModal} onSave={handleExerciseAdd} />
       )}
-      {isOpenModal === 'orderColumn' && (
-        <WordMatchGame onClose={closeModal} onSave={handleExerciseAdd} />
+      {isOpenModal === 'textAndArticle' && (
+        <NotesText onClose={closeModal} onSave={handleExerciseAdd} />
       )}
       {isOpenModal === 'orderText' && (
         <OrderText onClose={closeModal} onSave={handleExerciseAdd} />

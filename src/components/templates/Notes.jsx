@@ -7,11 +7,14 @@ import TextAreaTemplate from '@/templates/TextAreaTemplate';
 import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
+import { useParams } from 'next/navigation';
 
 const Notes = () => {
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [selectedColor, setSelectedColor] = useState('blue');
+  const params = useParams();
+  const id = params.id;
 
   const colors = [
     { name: 'blue', bg: '#E3F2FD', text: '#1565C0' },
@@ -21,10 +24,40 @@ const Notes = () => {
     { name: 'gray', bg: '#F5F5F5', text: '#424242' }
   ];
 
-  const handleSave = () => {
-    // Lógica para guardar la nota
-    console.log('Guardando nota:', { title, message, color: selectedColor });
+  const handleSave = async () => {
+    const selected = colors.find((c) => c.name === selectedColor);
+    if (!selected) return;
+
+    const nota = {
+      titulo: title,
+      mensaje: message,
+      color: selected.bg,
+      colorTexto: selected.text,
+      claseId: id,
+      template: 'nota',
+    };
+
+    try {
+      const response = await fetch('http://localhost:5001/api/nota', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(nota),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al crear la nota');
+      }
+
+      const result = await response.json();
+      console.log('Nota creada:', result);
+      handleCancel(); // limpia el formulario
+    } catch (error) {
+      console.error('Error al guardar la nota:', error);
+    }
   };
+
 
   const handleCancel = () => {
     // Lógica para cancelar y limpiar el formulario
@@ -98,7 +131,7 @@ const Notes = () => {
           <Button onClick={handleSave} variant="primary" className="w-full">
             Guardar
           </Button>
-       
+
         </div>
       </div>
     </ModalTemplate>
