@@ -7,7 +7,7 @@ import { ButtonTemplate } from '@/templates/ButtonTemplate';
 import { SubtitleTemplate } from '@/templates/SubtittleTemplate';
 import { Users, Star, ArrowRight } from 'lucide-react';
 import InputFlotante from '@/components/InputFlotante';
-
+   
 const teachersItem = {
   id: '1',
   name: 'Profesores',
@@ -18,7 +18,7 @@ const teachersItem = {
   schedule: [
     { day: 'Monday', time: '10:00' },
     { day: 'Wednesday', time: '10:00' },
-  ],
+  ],        
 }
 
 const studentsItem = {
