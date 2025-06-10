@@ -8,6 +8,7 @@ import InputTemplate from '@/templates/InputTemplate';
 import TextAreaTemplate from '@/templates/TextAreaTemplate';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useAppContext } from '@/contexts/Context';
+import { useParams } from 'next/navigation';
 
 export const parseExerciseText = (exerciseText, fillInWords, handleInputChange, errors) => {
   const parts = exerciseText.split(/(\[.*?\])/);
@@ -38,24 +39,29 @@ export const parseExerciseText = (exerciseText, fillInWords, handleInputChange, 
 
 export default function FillInTheBlanksModal({ onSave }) {
   const { isOpenModal, setIsOpenModal, select } = useAppContext();
+  const [descripcion, setDescripcion] = useState('');
   const [task, setTask] = useState('');
   const [exerciseText, setExerciseText] = useState('');
   const [fillInWords, setFillInWords] = useState({});
   const [errors, setErrors] = useState({});
+  const params = useParams();
+  const id = params.id;
 
   // Prellenar campos en caso de edición
   useEffect(() => {
     if (select && select.template === 'rellenar') {
       setTask(select.nombre || '');
       setExerciseText(select.textoEjercicio || '');
-      // Opcional: setFillInWords con los datos si se guardaron previamente
+      setDescripcion(select.descripcion || '');
     } else {
       setTask('');
       setExerciseText('');
+      setDescripcion('');
       setFillInWords({});
       setErrors({});
     }
   }, [select]);
+
 
   const handleInputChange = (index, value) => {
     setFillInWords((prev) => ({ ...prev, [index]: value }));
@@ -78,23 +84,54 @@ export default function FillInTheBlanksModal({ onSave }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = () => {
+  const extractWordsFromBrackets = (text) => {
+    const matches = text.match(/\[(.*?)\]/g) || [];
+    return matches.map((m) => m.slice(1, -1));
+  };
+
+
+  const handleSave = async () => {
     const isValid = validateAnswers();
 
     if (isValid && task && exerciseText) {
-      const result = {
-        nombre: task,
-        textoEjercicio: exerciseText,
-        template: 'rellenar',
-        ...(select?.id && { id: select.id }), // Para identificar si es edición
+      const palabras = extractWordsFromBrackets(exerciseText);
+
+      const payload = {
+        titulo: task,
+        textoOriginal: exerciseText,
+        palabras,
+        claseId: select?.claseId || '', // asegúrate de que venga del contexto
+        template: 'rellenarTexto',
+        descripcion: descripcion || '',
+        claseId: id
       };
 
-      onSave(result); // ya sea creando o actualizando
-      setIsOpenModal(false);
+      try {
+        const response = await fetch('http://localhost:5001/api/llenar-espacio', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          alert(`Error: ${errorData.message || 'No se pudo guardar el ejercicio'}`);
+          return;
+        }
+
+        onSave(payload);
+        setIsOpenModal(false);
+      } catch (error) {
+        alert('Error al conectar con el servidor');
+        console.error(error);
+      }
     } else {
       alert('Por favor, completa todos los campos correctamente.');
     }
   };
+
 
   const handleClose = () => {
     setIsOpenModal(false);
@@ -117,6 +154,18 @@ export default function FillInTheBlanksModal({ onSave }) {
           placeholder="Escribe un título"
         />
       </div>
+
+      <div className="mb-4">
+        <LabelTemplate htmlFor="descripcion">Descripción (opcional)</LabelTemplate>
+        <TextAreaTemplate
+          id="descripcion"
+          value={descripcion}
+          onChange={(e) => setDescripcion(e.target.value)}
+          placeholder="Agrega una descripción del ejercicio"
+          className="h-24"
+        />
+      </div>
+
 
       <div className="mb-4">
         <LabelTemplate htmlFor="exercise-text">Texto del ejercicio</LabelTemplate>

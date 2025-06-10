@@ -2,116 +2,126 @@
 
 import React, { useState, useEffect } from 'react';
 import Button from '@/templates/Button';
-import { CardTemplate } from '@/templates/CardTemplate';
+import ModalTemplate from '@/templates/ModalTemplate';
 import { InputTemplate } from '@/templates/InputTemplate';
 import TextAreaTemplate from '@/templates/TextAreaTemplate';
 import Label from '@/templates/Labels';
-import ModalTemplate from '@/templates/ModalTemplate';
+import { useAppContext } from '@/contexts/Context';
+import { useParams } from 'next/navigation';
 
-const ExerciseCreator = ({ exercise = null, onSave, onClose }) => {
+const FormCreateSeleccionPalabras = ({ onSave }) => {
+  const { setIsOpenModal } = useAppContext();
   const [title, setTitle] = useState('');
   const [exerciseText, setExerciseText] = useState('');
-  const [processedText, setProcessedText] = useState([]);
-
-  // Al abrir modal, si hay un ejercicio, precarga los datos
-
-  console.log();
-  
-  useEffect(() => {
-    if (exercise) {
-      setTitle(exercise.titulo || '');
-      setExerciseText(exercise.texto || '');
-    }
-  }, [exercise]);
+  const [preview, setPreview] = useState([]);
+  const [descripcion, setDescripcion] = useState('');
+  const { id: claseId } = useParams();
 
   useEffect(() => {
-    processExerciseText();
+    const parts = exerciseText.split(/\[|\]/);
+    const rendered = parts.map((part, index) =>
+      index % 2 === 1 ? (
+        <select key={index} className="mx-1 border rounded px-1 py-0.5 text-sm">
+          {part.split('/').map((opt, i) => (
+            <option key={i}>{opt}</option>
+          ))}
+        </select>
+      ) : (
+        <span key={index}>{part}</span>
+      )
+    );
+    setPreview(rendered);
   }, [exerciseText]);
 
-  const processExerciseText = () => {
-    const parts = exerciseText.split(/\[|\]/);
-    const processed = parts.map((part, index) => {
-      if (index % 2 === 1) {
-        const options = part.split('/');
-        return (
-          <select
-            key={index}
-            className="inline-block px-2 py-1 text-sm bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            {options.map((option, optIndex) => (
-              <option key={optIndex} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        );
-      } else {
-        return part;
-      }
-    });
-    setProcessedText(processed);
+  const extractOpcionesPorGrupo = (text) => {
+    const matches = text.match(/\[(.*?)\]/g) || [];
+    return matches.map((m) => ({
+      opciones: m.slice(1, -1).split('/'),
+    }));
   };
 
-  const handleSave = () => {
-    const data = {
-      ...exercise,
+  const handleSave = async () => {
+    if (!title || !exerciseText || !claseId) {
+      alert('Por favor, completa todos los campos.');
+      return;
+    }
+
+    const payload = {
       titulo: title,
-      texto: exerciseText,
-      template: 'notaTexto',
+      textoOriginal: exerciseText,
+      opcionesPorGrupo: extractOpcionesPorGrupo(exerciseText),
+      claseId,
+      template: 'seleccionPalabra',
+      descripcion,
     };
 
-    if (onSave) onSave(data); // lo manejas desde el componente padre
+    try {
+      const res = await fetch('http://localhost:5001/api/seleccion-palabra', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        alert(error.message || 'Error al guardar el ejercicio');
+        return;
+      }
+
+      const data = await res.json();
+      onSave?.(data);
+      setIsOpenModal(false);
+    } catch (err) {
+      console.error(err);
+      alert('Error al conectar con el servidor');
+    }
   };
 
   const handleCancel = () => {
-    setTitle('');
-    setExerciseText('');
-    if (onClose) onClose(); // para cerrar el modal desde el padre
+    setIsOpenModal(false);
   };
 
   return (
     <ModalTemplate className="w-full">
-      <h1 className="text-2xl font-bold mb-4">
-        {exercise ? 'Editar Ejercicio' : 'Crear Nuevo Ejercicio'}
-      </h1>
+      <h1 className="text-2xl font-bold mb-4">Crear ejercicio de Selección de Palabras</h1>
 
       <div className="mb-4">
         <Label htmlFor="title">Título:</Label>
         <InputTemplate
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full"
-          placeholder="Ingrese el título del ejercicio"
+          placeholder="Título del ejercicio"
         />
       </div>
 
-      <div className="mb-4 p-3 bg-yellow-100 rounded-md">
-        <p className="text-sm font-bold">
-          Las palabras entre [ ] se pasarán a selección. Use "/" para múltiples opciones.
-        </p>
+      <div className="mb-4">
+        <Label htmlFor="descripcion">Descripción (opcional):</Label>
+        <TextAreaTemplate
+          value={descripcion}
+          onChange={(e) => setDescripcion(e.target.value)}
+          placeholder="Descripción del ejercicio"
+          rows={2}
+        />
       </div>
 
       <div className="mb-4">
         <Label htmlFor="exerciseText">Texto del ejercicio:</Label>
         <TextAreaTemplate
-          id="exerciseText"
           value={exerciseText}
           onChange={(e) => setExerciseText(e.target.value)}
-          placeholder="Ingrese el texto del ejercicio. Use [palabra1/palabra2] para crear selecciones."
-          rows={5}
+          placeholder="Ejemplo: El color del cielo es [azul/rojo/verde]"
+          rows={4}
         />
       </div>
 
       <div className="mb-4 p-3 bg-gray-100 rounded-md">
         <h2 className="text-lg font-semibold mb-2">Vista previa:</h2>
-        <div>{processedText}</div>
+        <div className="flex flex-wrap">{preview}</div>
       </div>
 
       <div className="flex justify-end space-x-4">
-        <Button onClick={handleSave}>
-          {exercise ? 'Guardar Cambios' : 'Guardar'}
-        </Button>
-        <Button onClick={handleCancel} variant="secondary">
+        <Button onClick={handleSave}>Guardar</Button>
+        <Button variant="secondary" onClick={handleCancel}>
           Cancelar
         </Button>
       </div>
@@ -119,4 +129,4 @@ const ExerciseCreator = ({ exercise = null, onSave, onClose }) => {
   );
 };
 
-export default ExerciseCreator;
+export default FormCreateSeleccionPalabras;

@@ -1,23 +1,25 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { InputTemplate } from '@/templates/InputTemplate';
 import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
-import { useParams } from 'next/navigation';
+import { useAppContext } from '@/contexts/Context';
 
-const SingleSelectQuestion = () => {
+export const FormEditOrdenarTexto = () => {
+  const { select, setIsOpenModal } = useAppContext();
   const [title, setTitle] = useState('');
   const [parts, setParts] = useState(['']);
   const [shuffledParts, setShuffledParts] = useState([]);
   const [orderedParts, setOrderedParts] = useState([]);
   const [feedback, setFeedback] = useState([]);
-  const params = useParams();
-  const id = params.id;
 
-  const handleAddPart = () => {
-    setParts([...parts, '']);
-  };
+  useEffect(() => {
+    if (select) {
+      setTitle(select.titulo || '');
+      setParts(select.palabrasOriginales || ['']);
+    }
+  }, [select]);
 
   const handlePartChange = (index, value) => {
     const updated = [...parts];
@@ -25,46 +27,45 @@ const SingleSelectQuestion = () => {
     setParts(updated);
   };
 
+  const handleAddPart = () => {
+    setParts([...parts, '']);
+  };
+
   const shuffleArray = (array) => {
     return [...array].sort(() => Math.random() - 0.5);
   };
 
-  const handleSave = async () => {
-    const filtered = parts.filter((part) => part.trim() !== '');
-
-    if (!title.trim() || filtered.length < 2) {
-      alert('Debes ingresar un título y al menos dos partes válidas.');
-      return;
-    }
-
+  const handlePreview = () => {
+    const filtered = parts.filter((p) => p.trim() !== '');
     const shuffled = shuffleArray(filtered);
     setShuffledParts(shuffled);
     setOrderedParts(Array(filtered.length).fill(null));
     setFeedback(Array(filtered.length).fill(null));
+  };
 
-    const payload = {
-      titulo: title.trim(),
-      palabrasOriginales: filtered,
-      claseId: id,
-      template: "ordenarTexto",
-    };
-    
+  const handleSave = async () => {
+    const filtered = parts.filter((p) => p.trim() !== '');
+    if (!title.trim() || filtered.length < 2) {
+      alert('Debe tener un título y al menos dos partes.');
+      return;
+    }
+
     try {
-      const res = await fetch('http://localhost:5001/api/ordenar-texto', {
-        method: 'POST',
+      const res = await fetch(`http://localhost:5001/api/ordenar-texto/${select._id}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          titulo: title.trim(),
+          palabrasOriginales: filtered,
+        }),
       });
 
       const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message || 'Error al guardar el ejercicio');
-
-      alert('Ejercicio guardado correctamente');
-      setTitle('');
-      setParts(['']);
+      if (!res.ok) throw new Error(data.message);
+      alert('Ejercicio actualizado correctamente');
+      setIsOpenModal(null);
     } catch (err) {
-      alert('Error al guardar: ' + err.message);
+      alert('Error al actualizar: ' + err.message);
     }
   };
 
@@ -75,11 +76,9 @@ const SingleSelectQuestion = () => {
   const handleDrop = (e, index) => {
     e.preventDefault();
     const part = e.dataTransfer.getData('text/plain');
-
     const newOrdered = [...orderedParts];
     newOrdered[index] = part;
     setOrderedParts(newOrdered);
-
     const newFeedback = [...feedback];
     newFeedback[index] = part === parts[index] ? 'OK!' : 'X';
     setFeedback(newFeedback);
@@ -89,7 +88,7 @@ const SingleSelectQuestion = () => {
 
   return (
     <ModalTemplate>
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Ordenar Texto Largo</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Editar: Ordenar Texto</h2>
 
       <div className="space-y-4">
         <div>
@@ -98,12 +97,12 @@ const SingleSelectQuestion = () => {
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Ingrese el título de la actividad"
+            placeholder="Ingrese el título"
           />
         </div>
 
         <div>
-          <Label>Partes del texto a ordenar:</Label>
+          <Label>Partes del texto:</Label>
           {parts.map((part, index) => (
             <InputTemplate
               key={index}
@@ -120,16 +119,19 @@ const SingleSelectQuestion = () => {
           </div>
         </div>
 
-        <Button onClick={handleSave} className="w-full" variant="primary">
-          Guardar
-        </Button>
+        <div className="flex gap-4">
+          <Button onClick={handlePreview} variant="secondary">
+            Vista previa
+          </Button>
+          <Button onClick={handleSave} variant="primary">
+            Guardar Cambios
+          </Button>
+        </div>
       </div>
 
       {shuffledParts.length > 0 && (
         <div className="mt-6">
-          <h3 className="text-xl font-semibold mb-4 text-gray-700">
-            Arrastra las partes en el orden correcto:
-          </h3>
+          <h3 className="text-xl font-semibold mb-4 text-gray-700">Arrastra en el orden correcto:</h3>
           <div className="flex flex-col gap-2 mb-4">
             {shuffledParts.map((part, index) => (
               <div
@@ -165,5 +167,3 @@ const SingleSelectQuestion = () => {
     </ModalTemplate>
   );
 };
-
-export default SingleSelectQuestion;

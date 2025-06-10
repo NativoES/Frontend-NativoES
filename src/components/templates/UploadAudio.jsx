@@ -6,10 +6,14 @@ import TextAreaTemplate from '@/templates/TextAreaTemplate';
 import Button from '@/templates/Button';
 import ModalTemplate from '@/templates/ModalTemplate';
 import AudioRecorder from '../AudioRecorder';
+import { useParams } from 'next/navigation';
+
 export default function UploadAudio({ isOpen, onClose, onAudioUpload }) {
   const [audioFile, setAudioFile] = useState(null);
   const [audioInputName, setAudioInputName] = useState('');
   const [description, setDescription] = useState('');
+  const params = useParams();
+  const claseId = params.id;
 
   const handleAudioUpload = (event) => {
     const file = event.target.files[0];
@@ -18,75 +22,88 @@ export default function UploadAudio({ isOpen, onClose, onAudioUpload }) {
     }
   };
 
-  const handleSave = () => {
-    if (audioFile && audioInputName) {
-      onAudioUpload({
-        nombre: audioInputName,
-        audio: audioFile,
-        description,
+  const handleSave = async () => {
+    // if (!audioFile || !audioInputName.trim()) {
+    //   alert('Por favor, completa el nombre del audio y selecciona un archivo.');
+    //   return;
+    // }
+
+    const formData = new FormData();
+    formData.append('file', audioFile); // nombre del campo esperado en backend
+    formData.append('titulo', audioInputName.trim());
+    formData.append('descripcion', description.trim());
+    formData.append('claseId', claseId);
+    formData.append('template', 'audio');
+
+    try {
+      const res = await fetch('http://localhost:5001/api/audio', {
+        method: 'POST',
+        body: formData,
       });
-      onClose(); // Cierra el modal
-    } else {
-      alert('Por favor, completa todos los campos.');
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || 'Error al guardar el audio');
+
+      alert('Audio guardado correctamente');
+      onAudioUpload?.(data);
+      onClose();
+    } catch (err) {
+      alert('Error al guardar: ' + err.message);
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <ModalTemplate className="w-full ">
+    <ModalTemplate className="w-full">
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">Agregar Audio</h2>
 
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Agregar Audio</h2>
+      <div className="mb-4">
+        <InputTemplate
+          label="Nombre del Audio"
+          value={audioInputName}
+          onChange={(e) => setAudioInputName(e.target.value)}
+          placeholder="Ingrese el nombre del audio"
+        />
+      </div>
 
-        <div className="mb-4">
-          <InputTemplate
-            label="Nombre del Audio"
-            value={audioInputName}
-            onChange={(e) => setAudioInputName(e.target.value)}
-            placeholder="Ingrese el nombre del audio"
-          />
-        </div>
+      <div className="mb-4">
+        <TextAreaTemplate
+          label="Descripción"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Ingrese una descripción para el audio"
+        />
+      </div>
 
-        <div className="mb-4">
-          <TextAreaTemplate
-            label="Descripción"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Ingrese una descripción para el audio"
-          />
-        </div>
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          Archivo de Audio
+        </h3>
+        <input
+          type="file"
+          accept="audio/*"
+          onChange={handleAudioUpload}
+          className="hidden"
+          id="audio-upload"
+        />
+        <Button
+          onClick={() => document.getElementById('audio-upload').click()}
+          variant="success"
+        >
+          Elegir archivo
+        </Button>
+        {audioFile && (
+          <p className="mt-2 text-sm text-gray-600">{audioFile.name}</p>
+        )}
+      </div>
 
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Archivo de Audio
-          </h3>
-          <input
-            type="file"
-            accept="audio/*"
-            onChange={handleAudioUpload}
-            className="hidden"
-            id="audio-upload"
-          />
-          <Button
-            onClick={() => document.getElementById('audio-upload').click()}
-            variant="success"
-          >
-            Elegir archivo
-          </Button>
-          {audioFile && (
-            <p className="mt-2 text-sm text-gray-600">{audioFile.name}</p>
-          )}
-        </div>
+      <AudioRecorder />
 
-
-        <AudioRecorder/>
-
-
-          <Button onClick={handleSave} className="w-full" variant="primary">
-            Guardar
-          </Button>
-       
-        </ModalTemplate >
-    
+      <Button onClick={handleSave} className="w-full" variant="primary">
+        Guardar
+      </Button>
+    </ModalTemplate>
   );
 }

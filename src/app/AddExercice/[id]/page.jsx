@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { BookOpen } from 'lucide-react';
 import ImageProvider from '@/components/templates/ImageProvider';
 import UploadAudio from '@/components/templates/UploadAudio';
@@ -29,6 +29,9 @@ import { ArrastrarAlTextoExercise } from '@/components/ejercicios/ArrastrarAlTex
 import { ExerciseCardHeader } from '@/components/headers/ExerciseCardHeader';
 import { NotaExercise } from '@/components/ejercicios/NotaExercise';
 import { NotaTextoExercise } from '@/components/ejercicios/NotaTextoExercise';
+import { OrdenarTextoExercise } from '@/components/ejercicios/OrdenarTextoExercise';
+import { LlenarTextoExercise } from '@/components/ejercicios/LlenarTextoExercise';
+import { SeleccionarPalabraExercise } from '@/components/ejercicios/SeleccionarPalabraExercise';
 
 
 const templates = [
@@ -143,6 +146,8 @@ export default function AddExercise() {
   const [userAnswers, setUserAnswers] = useState({});
   const [answers, setAnswers] = useState({});
   const modalRef = useRef(null);
+  const params = useParams();
+  const id = params.id;
 
   const [droppedTextsMap, setDroppedTextsMap] = useState({});
   const [feedbackMap, setFeedbackMap] = useState({});
@@ -150,19 +155,19 @@ export default function AddExercise() {
   const [correctWordsMap, setCorrectWordsMap] = useState({});
 
   const handleEdit = (exercise) => {
-  if (confirm("¿Estás seguro de editar este ejercicio?")) {
-    console.log("Ejercicio editado:", exercise._id);
-  }
-  // setSelectedExercise(exercise);
-  // openEditModal();
-};
+    if (confirm("¿Estás seguro de editar este ejercicio?")) {
+      console.log("Ejercicio editado:", exercise._id);
+    }
+    // setSelectedExercise(exercise);
+    // openEditModal();
+  };
 
-const handleDelete = (exercise) => {
-  if (confirm("¿Estás seguro de eliminar este ejercicio?")) {
-    // tu lógica para eliminar
-    console.log("Ejercicio eliminado:", exercise.id);
-  }
-};
+  const handleDelete = (exercise) => {
+    if (confirm("¿Estás seguro de eliminar este ejercicio?")) {
+      // tu lógica para eliminar
+      console.log("Ejercicio eliminado:", exercise.id);
+    }
+  };
 
 
   const handleDragStart = (e, text) => {
@@ -263,33 +268,30 @@ const handleDelete = (exercise) => {
   // const openNotes = () => setisOpenModal('notes');
 
 
-  function getData() {
+  const fetchData = async (claseId) => {
+    try {
+      const res = await fetch(`http://localhost:5001/api/ejercicios/${claseId}`);
+      const data = await res.json();
 
-  }
+      setExercises(data);
+
+      const map = {};
+      data.forEach((ex, i) => {
+        if (ex.template === 'arrastrarAlTexto') {
+          map[i] = ex.palabrasCorrectas || [];
+        }
+      });
+
+      setCorrectWordsMap(map);
+    } catch (error) {
+      console.error('Error fetching exercises:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch('http://localhost:5001/api/ejercicios');
-        const data = await res.json();
 
-        setExercises(data);
-
-        const map = {};
-        data.forEach((ex, i) => {
-          if (ex.template === 'arrastrarAlTexto') {
-            map[i] = ex.palabrasCorrectas || [];
-          }
-        });
-
-        setCorrectWordsMap(map);
-      } catch (error) {
-        console.error('Error fetching exercises:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
+    fetchData(id);
+  }, [id]);
 
 
 
@@ -407,6 +409,22 @@ const handleDelete = (exercise) => {
                     </>
                   )} */}
 
+
+                  {exercise.template === "seleccionPalabra" && (
+                    <SeleccionarPalabraExercise
+                      exercise={exercise}
+                    />
+                  )}
+                  {exercise.template === "rellenarTexto" && (
+                    <LlenarTextoExercise
+                      exercise={exercise}
+                    />
+                  )}
+                  {exercise.template === "ordenarTexto" && (
+                    <OrdenarTextoExercise
+                      exercise={exercise}
+                    />
+                  )}
 
                   {exercise.template === "nota" && (
                     <NotaExercise
