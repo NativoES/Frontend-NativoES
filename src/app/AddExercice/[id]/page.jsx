@@ -411,7 +411,7 @@ const handleDelete = (exercise) => {
                   {exercise.template === "nota" && (
                     <NotaExercise
                       exercise={exercise}
-                      onEdit={handleEdit}
+                      // onEdit={handleEdit}
                       onDelete={handleDelete}
                     />
                   )}
@@ -419,7 +419,7 @@ const handleDelete = (exercise) => {
                   {exercise.template === "notaTexto" && (
                     <NotaTextoExercise
                       exercise={exercise}
-                      onEdit={handleEdit}
+                      // onEdit={handleEdit}
                       onDelete={handleDelete}
                     />
                   )}
@@ -433,7 +433,7 @@ const handleDelete = (exercise) => {
                       handleDragStart={handleDragStart}
                       handleDrop={handleDrop}
                       handleDragOver={handleDragOver}
-                      onEdit={handleEdit}
+                      // onEdit={handleEdit}
                       onDelete={handleDelete}
                     />
                   )}

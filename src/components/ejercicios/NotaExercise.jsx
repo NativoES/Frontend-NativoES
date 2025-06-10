@@ -1,36 +1,29 @@
 import React from 'react';
 import { ExerciseCardHeader } from '../headers/ExerciseCardHeader';
-import Notes from '../templates/Notes';
 import { useAppContext } from '@/contexts/Context';
+import { FormEditNote } from '../formsEdit/FormEditNote';
+import { DeleteExercise } from './DeleteExercise';
 
 export const NotaExercise = ({ exercise, onDelete }) => {
   const { setSelect, setIsOpenModal, isOpenModal } = useAppContext();
 
   const handleEdit = () => {
-    setSelect(exercise);       
-    setIsOpenModal('nota'); 
+    setSelect(exercise);
+    setIsOpenModal('editNotes');
   };
 
-  const handleClose = () => {
-    setIsOpenModal(false);          
-    setSelect(null);             
-  };
 
-  const handleSave = (savedNote) => {
-    console.log('Guardado:', savedNote);
-    handleClose();
-    // Podrías actualizar una lista global aquí
-  };
-
-  console.log("modal  abrir: ", isOpenModal);
-  
+  const handleDelete = () => {
+        setSelect(exercise);
+        setIsOpenModal('deleteExercise');
+    };
 
   return (
     <>
       <ExerciseCardHeader
         title={exercise.titulo || 'Ejercicio sin título'}
         onEdit={handleEdit}
-        onDelete={() => onDelete(exercise)}
+        onDelete={handleDelete}
       />
 
       <p className="my-4 text-sm text-gray-600">{exercise.descripcion ?? ""}</p>
@@ -50,13 +43,10 @@ export const NotaExercise = ({ exercise, onDelete }) => {
         </p>
       </div>
 
-      {isOpenModal && (
-        <Notes
-          nota={exercise}
-          onClose={handleClose}
-          onSave={handleSave}
-        />
-      )}
+      {isOpenModal === 'editNotes' && <FormEditNote />}
+      {isOpenModal === 'deleteExercise' && <DeleteExercise />}
+
+
     </>
   );
 };

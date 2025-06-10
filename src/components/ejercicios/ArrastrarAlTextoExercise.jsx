@@ -2,7 +2,9 @@ import React from 'react';
 import DraggableCard from '@/templates/DraggableCard';
 import DroppableContainer from '@/templates/DroppableContainer';
 import { ExerciseCardHeader } from '../headers/ExerciseCardHeader';
-import FillInTheBlanks from '@/components/templates/FillInTheBlanks'
+import { useAppContext } from '@/contexts/Context';
+import { FormEditArrastrarTexto } from '../formsEdit/FormEditArrastrarTexto';
+import { DeleteExercise } from './DeleteExercise';
 
 export const ArrastrarAlTextoExercise = ({
   exercise,
@@ -15,12 +17,24 @@ export const ArrastrarAlTextoExercise = ({
   onEdit,
   onDelete,
 }) => {
+  const { setSelect, setIsOpenModal, isOpenModal } = useAppContext();
+
+  const handleEdit = () => {
+    setSelect(exercise);
+    setIsOpenModal("EditarArrastrarTexto");
+  };
+
+  const handleDelete = () => {
+    setSelect(exercise);
+    setIsOpenModal('deleteExercise');
+  };
+
   return (
     <>
       <ExerciseCardHeader
         title={exercise.titulo || 'Ejercicio sin título'}
-        onEdit={() => onEdit(exercise)}
-        onDelete={() => onDelete(exercise)}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
       />
 
       <p className="my-4 text-sm text-gray-600">{exercise.descripcion ?? ""}</p>
@@ -54,8 +68,10 @@ export const ArrastrarAlTextoExercise = ({
             })}
         </div>
       </div>
-      <FillInTheBlanks isOpen={true} onClose={closeModal} onSave={handleExerciseAdd} />
-        
+
+      {isOpenModal === "EditarArrastrarTexto" && <FormEditArrastrarTexto />}
+      {isOpenModal === 'deleteExercise' && <DeleteExercise />}
+
     </>
   );
 };

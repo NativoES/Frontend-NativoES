@@ -3,31 +3,29 @@
 import React from 'react';
 import { ExerciseCardHeader } from '../headers/ExerciseCardHeader';
 import { useAppContext } from '@/contexts/Context';
-import { NotesText } from '../templates/NotesText';
+import { FormEditNoteText } from '../formsEdit/FormEditNoteText';
+import { DeleteExercise } from './DeleteExercise';
 
 export const NotaTextoExercise = ({ exercise, onDelete }) => {
     const { setSelect, setIsOpenModal, isOpenModal } = useAppContext();
 
-    const closeModal = () => {
-        setIsOpenModal(false);
-        setSelect(null);
+    const handleEdit = () => {
+        setSelect(exercise);
+        setIsOpenModal('editNoteText');
+
     };
 
-    const onSave = () => {
-        if (confirm("¿Guardar cambios?")) {
-            closeModal();
-        }
+    const handleDelete = () => {
+        setSelect(exercise);
+        setIsOpenModal('deleteExercise');
     };
 
     return (
         <>
             <ExerciseCardHeader
                 title={exercise.titulo || 'Ejercicio sin título'}
-                onEdit={() => {
-                    setSelect(exercise);
-                    setIsOpenModal(true);
-                }}
-                onDelete={() => onDelete(exercise)}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
             />
 
             <p className="my-4 text-sm text-gray-600">{exercise.descripcion ?? ""}</p>
@@ -37,17 +35,9 @@ export const NotaTextoExercise = ({ exercise, onDelete }) => {
                 dangerouslySetInnerHTML={{ __html: exercise.texto }}
             />
 
-            {isOpenModal && (
-                <NotesText
-                    nota={exercise} // null si es nueva
-                    onClose={() => setIsOpenModal(false)}
-                    onSave={(updatedOrCreatedNote) => {
-                        // actualizas el estado general
-                        console.log('Guardado:', updatedOrCreatedNote);
-                    }}
-                />
+            {isOpenModal === 'editNoteText' && <FormEditNoteText />}
+            {isOpenModal === 'deleteExercise' && <DeleteExercise />}
 
-            )}
         </>
     );
 };
