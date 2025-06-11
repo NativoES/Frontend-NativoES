@@ -32,6 +32,8 @@ import { NotaTextoExercise } from '@/components/ejercicios/NotaTextoExercise';
 import { OrdenarTextoExercise } from '@/components/ejercicios/OrdenarTextoExercise';
 import { LlenarTextoExercise } from '@/components/ejercicios/LlenarTextoExercise';
 import { SeleccionarPalabraExercise } from '@/components/ejercicios/SeleccionarPalabraExercise';
+import { OrderWordsExercise } from '@/components/ejercicios/OrderWordsExercise';
+import { OrdenarPalabraExercise } from '@/components/ejercicios/OrdenarPalabrasExercise';
 
 
 const templates = [
@@ -300,22 +302,24 @@ export default function AddExercise() {
 
   return (
     <div className="h-screen flex flex-col items-center justify-center bg-gray-100">
-      <div className="w-full max-w-4xl p-6 bg-white rounded-lg shadow-md">
+      <div className="w-full max-w-4xl p-6 bg-white rounded-lg shadow-md flex flex-col h-[90vh]">
+        {/* Título fijo */}
+        <p className="text-3xl font-bold py-2 mb-4">Lista de Ejercicios</p>
 
-        <div>
-          <h1 className="text-3xl font-bold py-2 mb-6">Lista de Ejercicios</h1>
+        {/* Si no hay ejercicios, se muestra el ícono y mensaje centrado (también fijo) */}
+        {exercises.length === 0 && (
+          <div className="flex-1 flex flex-col items-center justify-center">
+            <BookOpen className="h-16 w-16 text-gray-400" />
+            <p className="mt-4 text-center text-gray-600">
+              No tienes ejercicios en esta sección, ¿deseas agregar ejercicios?
+            </p>
+          </div>
+        )}
 
-          {exercises.length === 0 && (
-            <div className="flex flex-col items-center">
-              <BookOpen className="h-16 w-16 text-gray-400" />
-              <p className="mt-4 text-center text-gray-600">
-                No tienes ejercicios en esta seccion, desea agregar ejercicios.
-              </p>
-            </div>
-          )}
-
-          {exercises.length > 0 && (
-            <div className="grid grid-cols-1  gap-4 mt-4">
+        {/* Lista con scroll solo si hay ejercicios */}
+        {exercises.length > 0 && (
+          <div className="flex-1 overflow-y-auto pr-2 mt-2">
+            <div className="grid grid-cols-1 gap-4">
               {exercises.map((exercise, index) => (
                 <div key={index} className="p-4 border rounded-lg shadow-md">
                   {exercise.imgURL && (
@@ -334,112 +338,43 @@ export default function AddExercise() {
                     </div>
                   )}
 
-                  {/* {exercise.titulo && (
-                    <h3 className="mt-2 text-xl font-semibold text-gray-800">{exercise.titulo}</h3>
-                  )}
-                  {exercise.descripcion && (
-                    <p className="mt-2 text-sm text-gray-600">{exercise.descripcion}</p>
-                  )} */}
                   {exercise.audio && (
                     <div className="p-4 border rounded-lg shadow-md">
-
                       {exercise.nombre && (
                         <h3 className="text-xl font-semibold text-gray-800">{exercise.nombre}</h3>
                       )}
-
                       {exercise.description && (
                         <p className="mt-2 text-sm text-gray-600">{exercise.description}</p>
                       )}
-
                       <audio controls className="w-full mt-2">
                         <source src={URL.createObjectURL(exercise.audio)} type="audio/mpeg" />
-                        tu buscador no soporta este elemento.
+                        Tu navegador no soporta este elemento.
                       </audio>
                     </div>
                   )}
 
-                  {/* {exercise.mensaje && (
-                    <div>
-                      <div
-                        className="p-4 rounded-lg"
-                        style={{
-                          backgroundColor: exercise.colorTexto,
-                          color: exercise.color
-                        }}
-                      >
-                        <h3 className="text-lg font-semibold mb-2">{exercise.titulo || 'Sin título'}</h3>
-                        <p className="whitespace-pre-wrap">{exercise.mensaje || 'Sin mensaje'}</p>
-                      </div>
-                    </div>
-                  )} */}
-
-                  {/* {exercise.template === "nota" && (
-                    <>
-                      <ExerciseCardHeader
-                        title={exercise.titulo || 'Ejercicio sin título'}
-                        onEdit={() => handleEdit(exercise)}
-                        onDelete={() => handleDelete(exercise)}
-                      />
-                      <p className="my-4 text-sm text-gray-600">{exercise.descripcion ?? ""}</p>
-                      <div
-                        className="p-4 rounded-lg"
-                        style={{
-                          backgroundColor: exercise.colorTexto,
-                          color: exercise.color
-                        }}
-                      >
-                        <h3 className="text-lg font-semibold mb-2">{exercise.titulo || 'Sin título'}</h3>
-                        <p className="whitespace-pre-wrap">{exercise.mensaje || 'Sin mensaje'}</p>
-                      </div>
-                    </>
-                  )} */}
-
-                  {/* {exercise.template === "notaTexto" && (
-                    <>
-                      <ExerciseCardHeader
-                        title={exercise.titulo || 'Ejercicio sin título'}
-                        onEdit={() => handleEdit(exercise)}
-                        onDelete={() => handleDelete(exercise)}
-                      />
-                      <p className="my-4 text-sm text-gray-600">{exercise.descripcion ?? ""}</p>
-                      <div
-                        className="whitespace-pre-wrap"
-                        dangerouslySetInnerHTML={{ __html: exercise.texto }}
-                      />
-                    </>
-                  )} */}
-
-
                   {exercise.template === "seleccionPalabra" && (
-                    <SeleccionarPalabraExercise
-                      exercise={exercise}
-                    />
+                    <SeleccionarPalabraExercise exercise={exercise} />
                   )}
                   {exercise.template === "rellenarTexto" && (
-                    <LlenarTextoExercise
-                      exercise={exercise}
-                    />
+                    <LlenarTextoExercise exercise={exercise} />
                   )}
                   {exercise.template === "ordenarTexto" && (
-                    <OrdenarTextoExercise
-                      exercise={exercise}
-                    />
+                    <OrdenarTextoExercise exercise={exercise} />
                   )}
-
                   {exercise.template === "nota" && (
-                    <NotaExercise
-                      exercise={exercise}
-                      // onEdit={handleEdit}
-                      onDelete={handleDelete}
-                    />
+                    <NotaExercise exercise={exercise} onDelete={handleDelete} />
+                  )}
+                  {exercise.template === "formarPalabra" && (
+                    <OrderWordsExercise exercise={exercise} onDelete={handleDelete} />
                   )}
 
                   {exercise.template === "notaTexto" && (
-                    <NotaTextoExercise
-                      exercise={exercise}
-                      // onEdit={handleEdit}
-                      onDelete={handleDelete}
-                    />
+                    <NotaTextoExercise exercise={exercise} onDelete={handleDelete} />
+                  )}
+
+                  {exercise.template === "ordenarPalabras" && (
+                    <OrdenarPalabraExercise exercise={exercise} onDelete={handleDelete} />
                   )}
 
                   {exercise.template === "arrastrarAlTexto" && (
@@ -451,31 +386,28 @@ export default function AddExercise() {
                       handleDragStart={handleDragStart}
                       handleDrop={handleDrop}
                       handleDragOver={handleDragOver}
-                      // onEdit={handleEdit}
                       onDelete={handleDelete}
                     />
                   )}
-
-                  {/* {exercise.nombre && (
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">{exercise.nombre}</h3>
-                  )} */}
-
-
                 </div>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        <div className="flex justify-center mt-6">
+        {/* Botón fijo */}
+        <div className="mt-4">
           <button
-            onClick={() => { setIsOpenModal('templates'); }}
-            className="flex items-center px-4 py-2 bg-[#FEAB5F] text-gray-900 rounded-md hover:bg-gray-900 hover:text-white transition duration-300"
+            onClick={() => setIsOpenModal('templates')}
+            className="flex items-center px-4 py-2 bg-[#FEAB5F] text-gray-900 rounded-md hover:bg-gray-900 hover:text-white transition duration-300 w-full justify-center"
           >
             Agregar Ejercicio
           </button>
         </div>
       </div>
+
+
+
 
       {isOpenModal === 'templates' && (
         <ModalTemplate className="w-full ">

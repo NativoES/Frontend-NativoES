@@ -1,21 +1,37 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { InputTemplate } from '@/templates/InputTemplate';
 import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
+import { useAppContext } from '@/contexts/Context';
 import { useParams } from 'next/navigation';
 
-const DraggableText = () => {
+export const FormEditOrdenarPalabrass = () => {
+  const { select, setIsOpenModal } = useAppContext();
+  const params = useParams();
+  const id = params.id;
+
   const [titulo, setTitulo] = useState('');
+  const [descripcion, setDescripcion] = useState('');
   const [textoOriginal, setTextoOriginal] = useState('');
   const [palabrasEnOrden, setPalabrasEnOrden] = useState([]);
   const [droppedTexts, setDroppedTexts] = useState([]);
   const [feedback, setFeedback] = useState([]);
-  const [descripcion, setDescripcion] = useState('');
-  const params = useParams();
-  const id = params.id;
+
+  useEffect(() => {
+    if (select) {
+      setTitulo(select.titulo || '');
+      setDescripcion(select.descripcion || '');
+      setTextoOriginal(select.textoOriginal || '');
+
+      const palabras = select.palabrasEnOrden || [];
+      setPalabrasEnOrden(palabras);
+      setDroppedTexts(Array(palabras.length).fill(''));
+      setFeedback(Array(palabras.length).fill(null));
+    }
+  }, [select]);
 
   const handleTextChange = (e) => {
     const inputText = e.target.value;
@@ -62,12 +78,13 @@ const DraggableText = () => {
   const DroppableContainer = ({ index }) => (
     <div className="rounded-lg flex flex-col items-center justify-center space-y-4 my-4">
       <div
-        className={`border-dashed border-2 border-gray-300 px-4 py-2 w-full flex items-center justify-center rounded-[5px] ${feedback[index] === 'Correcto'
+        className={`border-dashed border-2 border-gray-300 px-4 py-2 w-full flex items-center justify-center rounded-[5px] ${
+          feedback[index] === 'Correcto'
             ? 'bg-green-300'
             : feedback[index] === 'Incorrecto'
-              ? 'bg-red-200'
-              : ''
-          }`}
+            ? 'bg-red-200'
+            : ''
+        }`}
         onDrop={(e) => handleDrop(e, index)}
         onDragOver={handleDragOver}
       >
@@ -85,22 +102,20 @@ const DraggableText = () => {
       titulo,
       textoOriginal,
       palabrasEnOrden,
-      claseId: id,
-      template: 'ordenarPalabras',
       descripcion,
     };
 
     try {
-      const response = await fetch('http://localhost:5001/api/ordenar-palabra', {
-        method: 'POST',
+      const response = await fetch(`http://localhost:5001/api/ordenar-palabra/${select._id}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) throw new Error('Error al guardar el ejercicio');
+      if (!response.ok) throw new Error('Error al editar el ejercicio');
 
-      console.log('Ejercicio guardado correctamente');
-      // puedes cerrar el modal aquí si quieres
+      console.log('Ejercicio editado correctamente');
+      setIsOpenModal(null);
     } catch (error) {
       console.error(error);
     }
@@ -108,7 +123,7 @@ const DraggableText = () => {
 
   return (
     <ModalTemplate>
-      <h3 className="font-bold text-center text-2xl mb-4">Ordenar texto</h3>
+      <h3 className="font-bold text-center text-2xl mb-4">Editar ejercicio: Ordenar Palabra</h3>
 
       <div className="mb-4">
         <Label htmlFor="titulo">Título:</Label>
@@ -167,10 +182,8 @@ const DraggableText = () => {
       </div>
 
       <Button onClick={handleSave} variant="primary" className="w-full mt-4">
-        Guardar ejercicio
+        Guardar cambios
       </Button>
     </ModalTemplate>
   );
 };
-
-export default DraggableText;
