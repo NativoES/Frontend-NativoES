@@ -7,7 +7,7 @@ import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate'
 
-export function WordMatchGame({ onSave, onCancel }) {
+export default function WordMatchGame({ onSave, onCancel }) {
   const [title, setTitle] = useState('');
   const [pairs, setPairs] = useState([{ spanish: '', english: '' }]);
 

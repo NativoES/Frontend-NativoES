@@ -14,17 +14,17 @@ export function ClassCard({ classItem, className, onClick }) {
     >
       <div className="flex items-start justify-between" onClick={onClick}>
         <div>
-          <Label className="text-lg font-semibold text-black mb-2">{classItem.name}</Label>
-          <p className="text-gray-600 text-sm mb-4">{classItem.description}</p>
+          <Label className="text-lg font-semibold text-black mb-2">{classItem?.name}</Label>
+          <p className="text-gray-600 text-sm mb-4">{classItem?.description}</p>
         </div>
         <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
           Administrar
         </span>
       </div>
       <div className="flex items-center space-x-4 text-sm text-gray-500">
-        <InfoItem icon={Globe2} text={classItem.language?.name || 'No language specified'} />
-        <InfoItem icon={Users} text={`${classItem.students} profesores`} />
-        <InfoItem icon={Calendar} text={`${classItem.schedule?.length || 0} sessions/week`} />
+        <InfoItem icon={Globe2} text={classItem?.language?.name || 'No language specified'} />
+        <InfoItem icon={Users} text={`${classItem?.students} profesores`} />
+        <InfoItem icon={Calendar} text={`${classItem?.schedule?.length || 0} sessions/week`} />
       </div>
     </CardTemplate>
   );

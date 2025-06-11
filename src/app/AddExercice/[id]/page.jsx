@@ -34,6 +34,10 @@ import { LlenarTextoExercise } from '@/components/ejercicios/LlenarTextoExercise
 import { SeleccionarPalabraExercise } from '@/components/ejercicios/SeleccionarPalabraExercise';
 import { OrderWordsExercise } from '@/components/ejercicios/OrderWordsExercise';
 import { OrdenarPalabraExercise } from '@/components/ejercicios/OrdenarPalabrasExercise';
+import { ImagenPalabraExercise } from '@/components/ejercicios/ImagenPalabraExercise';
+import GifUploadModal from '@/components/templates/GifUploadModal';
+import VideoUploadModal from '@/components/templates/VideoUploadModal';
+import { GifExercise, MediaExercise } from '@/components/ejercicios/MediaExercise';
 
 
 const templates = [
@@ -45,12 +49,12 @@ const templates = [
   {
     title: 'Cargar GIF',
     description: 'Sube una imagen para el ejercicio',
-    openModal: 'cargarImagen',
+    openModal: 'gif',
   },
   {
     title: 'Cargar video',
     description: 'Sube una imagen para el ejercicio',
-    openModal: 'cargarImagen',
+    openModal: 'video',
   },
   {
     title: 'Completar espacios en blanco con palabras de lista',
@@ -377,6 +381,15 @@ export default function AddExercise() {
                     <OrdenarPalabraExercise exercise={exercise} onDelete={handleDelete} />
                   )}
 
+                  {exercise.template === "imagenPalabra" && (
+                    <ImagenPalabraExercise exercise={exercise} onDelete={handleDelete} />
+                  )}
+
+                  {['gif', 'audio', 'video', 'imagen'].includes(exercise.template) && (
+                    <MediaExercise exercise={exercise} />
+                  )}
+
+
                   {exercise.template === "arrastrarAlTexto" && (
                     <ArrastrarAlTextoExercise
                       exercise={exercise}
@@ -459,6 +472,15 @@ export default function AddExercise() {
       {isOpenModal === 'notes' && (
         <Notes onClose={closeModal} onSave={handleExerciseAdd} />
       )}
+
+      {isOpenModal === 'gif' && (
+        <GifUploadModal closeModal={closeModal} onGifUpload={handleExerciseAdd} />
+      )}
+
+      {isOpenModal === 'video' && (
+        <VideoUploadModal closeModal={closeModal} onVideoUpload={handleExerciseAdd} />
+      )}
+
     </div>
   );
 }

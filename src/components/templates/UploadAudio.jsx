@@ -99,7 +99,7 @@ export default function UploadAudio({ isOpen, onClose, onAudioUpload }) {
         )}
       </div>
 
-      <AudioRecorder />
+      <AudioRecorder onAudioRecorded={setAudioFile} />
 
       <Button onClick={handleSave} className="w-full" variant="primary">
         Guardar

@@ -1,24 +1,31 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAppContext } from '@/contexts/Context';
 import { InputTemplate } from '@/templates/InputTemplate';
 import TextAreaTemplate from '@/templates/TextAreaTemplate';
 import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
-import { useParams } from 'next/navigation';
 
-export default function ImageUploadModal({ closeModal, onImageUpload }) {
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+export default function FormEditImage() {
+  const { select, setIsOpenModal } = useAppContext();
+
+  const [imageFile, setImageFile] = useState(null);      
+  const [imagePreview, setImagePreview] = useState(null);  
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const params = useParams();
-  const id = params.id;
 
-  const handleImageUpload = (event) => {
-    const file = event.target.files?.[0];
+  useEffect(() => {
+    if (!select) return;
+    setTitle(select.titulo || '');
+    setDescription(select.descripcion || '');
+    setImagePreview(select.imageUrl || null);
+  }, [select]);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
@@ -26,53 +33,42 @@ export default function ImageUploadModal({ closeModal, onImageUpload }) {
   };
 
   const handleSaveImage = async () => {
-    if (!imageFile || !title) {
-      alert('Por favor, ingrese un título y seleccione una imagen.');
+    if (!title.trim()) {
+      alert('Por favor, ingrese un título para la imagen.');
       return;
     }
 
     try {
       setIsLoading(true);
       const formData = new FormData();
-      formData.append('file', imageFile);
-      formData.append('titulo', title);
-      formData.append('descripcion', description);
-      formData.append('claseId', id);
-      formData.append('template', 'imagen');
+      formData.append('titulo', title.trim());
+      formData.append('descripcion', description.trim());
+      if (imageFile) formData.append('file', imageFile);
 
-      const response = await fetch('http://localhost:5001/api/image', {
-        method: 'POST',
+      const res = await fetch(`http://localhost:5001/api/image/${select._id}`, {
+        method: 'PATCH',
         body: formData,
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error?.error || 'Error al subir imagen');
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Error al actualizar la imagen');
 
-      const result = await response.json();
-      if (onImageUpload) onImageUpload(result);
-      closeModal();
-    } catch (err) {
-      alert(err.message);
+      setIsOpenModal(null);
+    } catch (error) {
+      alert('Error al guardar: ' + error.message);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleCancel = () => {
-    setImageFile(null);
-    setImagePreview(null);
-    setTitle('');
-    setDescription('');
-    closeModal();
+    setIsOpenModal(null);
   };
 
   return (
     <ModalTemplate className="w-full">
-      <h2 className="text-2xl font-bold mb-4">Imagen Ejercicio</h2>
+      <h2 className="text-2xl font-bold mb-4">Editar Imagen</h2>
 
-      {/* Título */}
       <div className="mb-4">
         <Label htmlFor="title">Título:</Label>
         <InputTemplate
@@ -84,7 +80,6 @@ export default function ImageUploadModal({ closeModal, onImageUpload }) {
         />
       </div>
 
-      {/* Selector de imagen */}
       <div className="mb-4">
         <label
           htmlFor="file-upload"
@@ -101,7 +96,6 @@ export default function ImageUploadModal({ closeModal, onImageUpload }) {
         />
       </div>
 
-      {/* Imagen seleccionada */}
       {imagePreview && (
         <div className="mt-4">
           <img
@@ -112,7 +106,6 @@ export default function ImageUploadModal({ closeModal, onImageUpload }) {
         </div>
       )}
 
-      {/* Descripción */}
       <div className="mb-4 mt-4">
         <Label htmlFor="description">Descripción:</Label>
         <TextAreaTemplate
@@ -123,7 +116,6 @@ export default function ImageUploadModal({ closeModal, onImageUpload }) {
         />
       </div>
 
-      {/* Botones */}
       <div className="flex justify-between mt-4">
         <Button onClick={handleSaveImage} variant="primary" disabled={isLoading}>
           {isLoading ? 'Guardando...' : 'Guardar'}

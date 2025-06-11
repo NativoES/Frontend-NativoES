@@ -8,61 +8,63 @@ import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useParams } from 'next/navigation';
 
-export default function ImageUploadModal({ closeModal, onImageUpload }) {
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+export default function VideoUploadModal({ closeModal, onVideoUpload }) {
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoPreview, setVideoPreview] = useState(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const params = useParams();
   const id = params.id;
 
-  const handleImageUpload = (event) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+  const handleVideoUpload = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type.includes('video')) {
+      setVideoFile(file);
+      setVideoPreview(URL.createObjectURL(file));
+    } else {
+      alert('Por favor selecciona un archivo de video válido.');
     }
   };
 
-  const handleSaveImage = async () => {
-    if (!imageFile || !title) {
-      alert('Por favor, ingrese un título y seleccione una imagen.');
+  const handleSaveVideo = async () => {
+    if (!videoFile || !title) {
+      alert('Por favor, ingrese un título y seleccione un video.');
       return;
     }
 
     try {
       setIsLoading(true);
       const formData = new FormData();
-      formData.append('file', imageFile);
+      formData.append('file', videoFile);
       formData.append('titulo', title);
       formData.append('descripcion', description);
       formData.append('claseId', id);
-      formData.append('template', 'imagen');
+      formData.append('template', 'video');
 
-      const response = await fetch('http://localhost:5001/api/image', {
+      const response = await fetch('http://localhost:5001/api/video', {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error?.error || 'Error al subir imagen');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al subir el video');
       }
 
       const result = await response.json();
-      if (onImageUpload) onImageUpload(result);
+      if (onVideoUpload) onVideoUpload(result);
       closeModal();
-    } catch (err) {
-      alert(err.message);
+    } catch (error) {
+      alert(error.message);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleCancel = () => {
-    setImageFile(null);
-    setImagePreview(null);
+    setVideoFile(null);
+    setVideoPreview(null);
     setTitle('');
     setDescription('');
     closeModal();
@@ -70,49 +72,43 @@ export default function ImageUploadModal({ closeModal, onImageUpload }) {
 
   return (
     <ModalTemplate className="w-full">
-      <h2 className="text-2xl font-bold mb-4">Imagen Ejercicio</h2>
+      <h2 className="text-2xl font-bold mb-4">Video Ejercicio</h2>
 
-      {/* Título */}
       <div className="mb-4">
         <Label htmlFor="title">Título:</Label>
         <InputTemplate
           id="title"
-          name="title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Ingrese el título de la imagen"
+          placeholder="Ingrese el título del video"
         />
       </div>
 
-      {/* Selector de imagen */}
       <div className="mb-4">
         <label
-          htmlFor="file-upload"
-          className="flex items-center justify-center px-4 py-2 bg-[#FEAB5F] text-gray-900 rounded-md cursor-pointer hover:bg-gray-900 hover:text-white transition duration-300"
+          htmlFor="video-upload"
+          className="flex items-center justify-center px-4 py-2 bg-blue-400 text-gray-900 rounded-md cursor-pointer hover:bg-gray-900 hover:text-white transition duration-300"
         >
-          <span>Subir Imagen</span>
+          <span>Subir Video</span>
         </label>
         <input
-          id="file-upload"
+          id="video-upload"
           type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
+          accept="video/*"
+          onChange={handleVideoUpload}
           className="hidden"
         />
       </div>
 
-      {/* Imagen seleccionada */}
-      {imagePreview && (
+      {videoPreview && (
         <div className="mt-4">
-          <img
-            src={imagePreview}
-            alt="Imagen seleccionada"
-            className="w-full h-40 object-cover rounded-lg"
-          />
+          <video controls className="w-full h-40 object-cover rounded-lg">
+            <source src={videoPreview} />
+            Tu navegador no soporta el video.
+          </video>
         </div>
       )}
 
-      {/* Descripción */}
       <div className="mb-4 mt-4">
         <Label htmlFor="description">Descripción:</Label>
         <TextAreaTemplate
@@ -123,9 +119,8 @@ export default function ImageUploadModal({ closeModal, onImageUpload }) {
         />
       </div>
 
-      {/* Botones */}
       <div className="flex justify-between mt-4">
-        <Button onClick={handleSaveImage} variant="primary" disabled={isLoading}>
+        <Button onClick={handleSaveVideo} variant="primary" disabled={isLoading}>
           {isLoading ? 'Guardando...' : 'Guardar'}
         </Button>
         <Button onClick={handleCancel} variant="secondary" disabled={isLoading}>
