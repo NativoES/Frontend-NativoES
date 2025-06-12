@@ -1,19 +1,34 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Plus, Save, X } from 'lucide-react';
 import { InputTemplate } from '@/templates/InputTemplate';
 import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
-import { useParams } from 'next/navigation';
+import { useAppContext } from '@/contexts/Context';
 
-export default function WordMatchGame({ onSave, onCancel }) {
+export const FormEditRelacionarPalabra = () => {
+  const { select, setIsOpenModal } = useAppContext();
   const [title, setTitle] = useState('');
-  const [pairs, setPairs] = useState([{ spanish: '', english: '' }]);
   const [descripcion, setDescripcion] = useState('');
-  const params = useParams();
-  const claseId = params.id;
+  const [pairs, setPairs] = useState([{ spanish: '', english: '' }]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (select) {
+      setTitle(select.titulo || '');
+      setDescripcion(select.descripcion || '');
+      setPairs(
+        Array.isArray(select.parejas)
+          ? select.parejas.map(p => ({
+              spanish: p.palabra || '',
+              english: p.significado || ''
+            }))
+          : [{ spanish: '', english: '' }]
+      );
+    }
+  }, [select]);
 
   const addPair = () => {
     setPairs([...pairs, { spanish: '', english: '' }]);
@@ -30,7 +45,7 @@ export default function WordMatchGame({ onSave, onCancel }) {
     setPairs(pairs.filter((_, i) => i !== index));
   };
 
-  const handleSave = () => {
+  const handleUpdate = async () => {
     if (title.trim() === '') {
       alert('Por favor agregue un Título');
       return;
@@ -51,33 +66,31 @@ export default function WordMatchGame({ onSave, onCancel }) {
     const payload = {
       titulo: title,
       descripcion,
-      parejas: validPairs,
-      claseId,
-      template: "relacionarPalabra"
+      parejas: validPairs
     };
 
-    fetch('http://localhost:5001/api/relacionar-palabra', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('Error al guardar');
-        return res.json();
-      })
-      .then(data => {
-        console.log('Guardado exitoso:', data);
-        onSave && onSave(data);
-      })
-      .catch(err => {
-        console.error(err);
-        alert('Ocurrió un error al guardar.');
+    try {
+      setLoading(true);
+      const res = await fetch(`http://localhost:5001/api/relacionar-palabra/${select._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
+
+      if (!res.ok) throw new Error('Error al actualizar');
+
+      alert('Actualizado correctamente');
+      setIsOpenModal(false);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <ModalTemplate className="w-full">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Relacionar palabras</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Editar ejercicio: Relacionar Palabras</h2>
 
       <div className="mb-4">
         <Label htmlFor="title">Título:</Label>
@@ -135,8 +148,14 @@ export default function WordMatchGame({ onSave, onCancel }) {
 
       <br /><br />
 
-      <Button onClick={handleSave} className="w-full" variant="primary" icon={<Save size={20} />}>
-        Guardar
+      <Button
+        onClick={handleUpdate}
+        className="w-full"
+        variant="primary"
+        icon={<Save size={20} />}
+        disabled={loading}
+      >
+        {loading ? 'Actualizando...' : 'Actualizar'}
       </Button>
     </ModalTemplate>
   );

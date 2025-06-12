@@ -10,7 +10,7 @@ import CompleteText from '@/components/templates/CompleteText';
 import OrderText from '@/components/templates/OrderText';
 import SingleSelectQuestion from '@/components/templates/OrderLargeText';
 import WordsAndImage from '@/components/templates/WordsAndImage';
-import { WordMatchGame } from '@/components/templates/OrderColumn';
+import WordMatchGame from '@/components/templates/OrderColumn';
 import DraggableWords from '@/components/templates/FillWordList';
 import DraggableLetters from '@/components/templates/OrderWords';
 import ExternalLinkCard from '@/components/templates/ExternalLink';
@@ -38,6 +38,11 @@ import { ImagenPalabraExercise } from '@/components/ejercicios/ImagenPalabraExer
 import GifUploadModal from '@/components/templates/GifUploadModal';
 import VideoUploadModal from '@/components/templates/VideoUploadModal';
 import { GifExercise, MediaExercise } from '@/components/ejercicios/MediaExercise';
+import EnlaceExterno from '@/components/templates/EnlaceExterno';
+import TrueFalseModal from '@/components/templates/TrueFalse';
+import { EnlaceExternoExercise } from '@/components/ejercicios/EnlaceExternoExercise';
+import { RelacionarPalabrasExercise } from '@/components/ejercicios/RelacionarPalabrasExercise';
+import { FalsoVerdaderoExercise } from '@/components/ejercicios/FalsoVerdaderoExercise';
 
 
 const templates = [
@@ -48,22 +53,22 @@ const templates = [
   },
   {
     title: 'Cargar GIF',
-    description: 'Sube una imagen para el ejercicio',
+    description: 'Sube un gif para el ejercicio',
     openModal: 'gif',
   },
   {
     title: 'Cargar video',
-    description: 'Sube una imagen para el ejercicio',
+    description: 'Sube una video para el ejercicio',
     openModal: 'video',
   },
   {
     title: 'Completar espacios en blanco con palabras de lista',
-    description: 'Sube una imagen para el ejercicio',
+    description: 'Completa los espacios en blanco con una lista de palabras que encontraras en la parte superios.',
     openModal: 'fillWordsList',
   },
   {
-    title: 'De seleion',
-    description: 'Sube una imagen para el ejercicio',
+    title: 'De seleccion',
+    description: 'Selecciona y arrastra la opcion correcta de los diferentes cuadros.',
     openModal: 'selectQuestion',
   },
   {
@@ -99,12 +104,12 @@ const templates = [
   {
     title: 'Falso o verdadero',
     description: 'Sube una imagen para el ejercicio',
-    openModal: 'cargarImagen',
+    openModal: 'trueFalse',
   },
   {
     title: 'Relacionar palabras',
     description: 'Sube una imagen para el ejercicio',
-    openModal: 'cargarImagen',
+    openModal: 'relacionarPalabra',
   },
   {
     title: 'Formar palabras con letras',
@@ -124,7 +129,7 @@ const templates = [
   {
     title: 'Enlace externo',
     description: 'Sube una imagen para el ejercicio',
-    openModal: 'cargarImagen',
+    openModal: 'enlaceExterno',
   },
   {
     title: 'Nota',
@@ -138,7 +143,7 @@ const templates = [
   },
   {
     title: 'Relacionar palabras y definiciones',
-    description: 'Sube una imagen para el ejercicio',
+    description: 'Relaciona una plabra con su definicion.',
     openModal: 'cargarImagen',
   },
 ]
@@ -385,6 +390,17 @@ export default function AddExercise() {
                     <ImagenPalabraExercise exercise={exercise} onDelete={handleDelete} />
                   )}
 
+                  {/* modificaciones de tres tipos  */}
+                  {exercise.template === "relacionarPalabra" && (
+                    <RelacionarPalabrasExercise exercise={exercise} onDelete={handleDelete} />
+                  )}
+                  {exercise.template === "enlaceExterno" && (
+                    <EnlaceExternoExercise exercise={exercise} onDelete={handleDelete} />
+                  )}
+                  {exercise.template === "falsoVerdadero" && (
+                    <FalsoVerdaderoExercise exercise={exercise} onDelete={handleDelete} />
+                  )}
+
                   {['gif', 'audio', 'video', 'imagen'].includes(exercise.template) && (
                     <MediaExercise exercise={exercise} />
                   )}
@@ -479,6 +495,17 @@ export default function AddExercise() {
 
       {isOpenModal === 'video' && (
         <VideoUploadModal closeModal={closeModal} onVideoUpload={handleExerciseAdd} />
+      )}
+
+      {isOpenModal === 'relacionarPalabra' && (
+        <WordMatchGame closeModal={closeModal} onVideoUpload={handleExerciseAdd} />
+      )}
+
+      {isOpenModal === 'enlaceExterno' && (
+        <EnlaceExterno closeModal={closeModal} onVideoUpload={handleExerciseAdd} />
+      )}
+      {isOpenModal === 'trueFalse' && (
+        <TrueFalseModal closeModal={closeModal} onVideoUpload={handleExerciseAdd} />
       )}
 
     </div>
