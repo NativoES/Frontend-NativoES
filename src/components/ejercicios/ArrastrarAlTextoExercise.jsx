@@ -14,8 +14,6 @@ export const ArrastrarAlTextoExercise = ({
   handleDragStart,
   handleDrop,
   handleDragOver,
-  onEdit,
-  onDelete,
 }) => {
   const { setSelect, setIsOpenModal, isOpenModal } = useAppContext();
 

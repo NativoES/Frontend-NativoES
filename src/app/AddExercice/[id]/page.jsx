@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useRef, useEffect, use } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useParams, } from 'next/navigation';
 import { BookOpen } from 'lucide-react';
 import ImageProvider from '@/components/templates/ImageProvider';
 import UploadAudio from '@/components/templates/UploadAudio';
@@ -22,11 +22,7 @@ import {
   useAppContext
 } from '@/contexts/Context';
 import { NotesText } from '@/components/templates/NotesText';
-import Label from '@/templates/Labels';
-import DraggableCard from '@/templates/DraggableCard';
-import DroppableContainer from '@/templates/DroppableContainer';
 import { ArrastrarAlTextoExercise } from '@/components/ejercicios/ArrastrarAlTextoExercise';
-import { ExerciseCardHeader } from '@/components/headers/ExerciseCardHeader';
 import { NotaExercise } from '@/components/ejercicios/NotaExercise';
 import { NotaTextoExercise } from '@/components/ejercicios/NotaTextoExercise';
 import { OrdenarTextoExercise } from '@/components/ejercicios/OrdenarTextoExercise';
@@ -37,126 +33,19 @@ import { OrdenarPalabraExercise } from '@/components/ejercicios/OrdenarPalabrasE
 import { ImagenPalabraExercise } from '@/components/ejercicios/ImagenPalabraExercise';
 import GifUploadModal from '@/components/templates/GifUploadModal';
 import VideoUploadModal from '@/components/templates/VideoUploadModal';
-import { GifExercise, MediaExercise } from '@/components/ejercicios/MediaExercise';
+import { MediaExercise } from '@/components/ejercicios/MediaExercise';
 import EnlaceExterno from '@/components/templates/EnlaceExterno';
 import TrueFalseModal from '@/components/templates/TrueFalse';
 import { EnlaceExternoExercise } from '@/components/ejercicios/EnlaceExternoExercise';
 import { RelacionarPalabrasExercise } from '@/components/ejercicios/RelacionarPalabrasExercise';
 import { FalsoVerdaderoExercise } from '@/components/ejercicios/FalsoVerdaderoExercise';
-
-
-const templates = [
-  {
-    title: 'Cargar imagen',
-    description: 'Sube una imagen para el ejercicio',
-    openModal: 'imageProvider',
-  },
-  {
-    title: 'Cargar GIF',
-    description: 'Sube un gif para el ejercicio',
-    openModal: 'gif',
-  },
-  {
-    title: 'Cargar video',
-    description: 'Sube una video para el ejercicio',
-    openModal: 'video',
-  },
-  {
-    title: 'Completar espacios en blanco con palabras de lista',
-    description: 'Completa los espacios en blanco con una lista de palabras que encontraras en la parte superios.',
-    openModal: 'fillWordsList',
-  },
-  {
-    title: 'De seleccion',
-    description: 'Selecciona y arrastra la opcion correcta de los diferentes cuadros.',
-    openModal: 'selectQuestion',
-  },
-  {
-    title: 'Articulo, ensayo o texto',
-    description: 'Sube una imagen para el ejercicio',
-    openModal: 'textAndArticle',
-  },
-  {
-    title: 'Grabacion de audio',
-    description: 'Sube una imagen para el ejercicio',
-    openModal: 'audioProvider',
-  },
-  {
-    title: 'Completa espacios en blanco',
-    description: 'Sube una imagen para el ejercicio',
-    openModal: 'fillInTheBlanks',
-  },
-  {
-    title: 'Une palabras con imagenes',
-    description: 'Sube una imagen para el ejercicio',
-    openModal: 'wordsAndImage',
-  },
-  {
-    title: 'Organiza palabras',
-    description: 'Sube una imagen para el ejercicio',
-    openModal: 'completeText',
-  },
-  {
-    title: 'Selecciona la opcion correcta',
-    description: 'Sube una imagen para el ejercicio',
-    openModal: 'cargarImagen',
-  },
-  {
-    title: 'Falso o verdadero',
-    description: 'Sube una imagen para el ejercicio',
-    openModal: 'trueFalse',
-  },
-  {
-    title: 'Relacionar palabras',
-    description: 'Sube una imagen para el ejercicio',
-    openModal: 'relacionarPalabra',
-  },
-  {
-    title: 'Formar palabras con letras',
-    description: 'Sube una imagen para el ejercicio',
-    openModal: 'orderWords',
-  },
-  {
-    title: 'Clasificar palabras',
-    description: 'Sube una imagen para el ejercicio',
-    openModal: 'orderColumn',
-  },
-  {
-    title: 'Ordenar texto',
-    description: 'Sube una imagen para el ejercicio',
-    openModal: 'orderText',
-  },
-  {
-    title: 'Enlace externo',
-    description: 'Sube una imagen para el ejercicio',
-    openModal: 'enlaceExterno',
-  },
-  {
-    title: 'Nota',
-    description: 'Sube una imagen para el ejercicio',
-    openModal: 'notes',
-  },
-  {
-    title: 'Grabacion de audio',
-    description: 'Sube una imagen para el ejercicio',
-    openModal: 'cargarImagen',
-  },
-  {
-    title: 'Relacionar palabras y definiciones',
-    description: 'Relaciona una plabra con su definicion.',
-    openModal: 'cargarImagen',
-  },
-]
+import { templates } from '@/data/templates';
 
 
 export default function AddExercise() {
-  const router = useRouter();
-  const { setSelect, setIsOpenModal, isOpenModal } = useAppContext()
+  const { setIsOpenModal, isOpenModal } = useAppContext()
 
   const [exercises, setExercises] = useState([]);
-  const [userAnswers, setUserAnswers] = useState({});
-  const [answers, setAnswers] = useState({});
-  const modalRef = useRef(null);
   const params = useParams();
   const id = params.id;
 
@@ -165,21 +54,8 @@ export default function AddExercise() {
 
   const [correctWordsMap, setCorrectWordsMap] = useState({});
 
-  const handleEdit = (exercise) => {
-    if (confirm("¿Estás seguro de editar este ejercicio?")) {
-      console.log("Ejercicio editado:", exercise._id);
-    }
-    // setSelectedExercise(exercise);
-    // openEditModal();
-  };
-
-  const handleDelete = (exercise) => {
-    if (confirm("¿Estás seguro de eliminar este ejercicio?")) {
-      // tu lógica para eliminar
-      console.log("Ejercicio eliminado:", exercise.id);
-    }
-  };
-
+  console.log("modal uno: ", isOpenModal);
+  
 
   const handleDragStart = (e, text) => {
     e.dataTransfer.setData("text/plain", text);
@@ -197,7 +73,7 @@ export default function AddExercise() {
     setDroppedTextsMap(prev => {
       const updated = { ...prev };
       const current = [...(updated[exerciseIndex] || [])];
-      current[blankIndex] = text; // asignamos directamente
+      current[blankIndex] = text;
       updated[exerciseIndex] = current;
       return updated;
     });
@@ -217,67 +93,22 @@ export default function AddExercise() {
     });
   };
 
-
-  console.log("dropedText: ", droppedTextsMap);
-  console.log("feedback: ", feedbackMap);
-
-
-
   useEffect(() => {
     const modalState = localStorage.getItem('isOpenModal');
     if (modalState === 'true') {
-      setisOpenModal(true);
+      setIsOpenModal(true);
     }
   }, []);
 
-  const openModal = () => {
-    setisOpenModal(true);
-    localStorage.setItem('isOpenModal', 'true');
-  };
-
   const closeModal = () => {
-    setisOpenModal(false);
-    setisOpenModal('');
-  };
-
-  const handleOverlayClick = (e) => {
-    if (modalRef.current && !modalRef.current.contains(e.target)) {
-      closeModal();
-    }
+    setIsOpenModal(false);
+    setIsOpenModal("");
   };
 
   const handleExerciseAdd = (newExercise) => {
     setExercises((prevExercises) => [...prevExercises, newExercise]);
     closeModal();
   };
-
-
-  const handleInputChange = (index, value) => {
-    setUserAnswers((prev) => ({
-      ...prev,
-      [index]: value,
-    }));
-  };
-
-
-  const openExternalLinkCard = () => {
-    console.log('Abriendo enlace externo');
-    setisOpenModal('externalLink');
-    openModal();
-  };
-  // const openImageProvider = () => setisOpenModal('imageProvider');
-  // const openAudioProvider = () => setisOpenModal('audioProvider');
-  // const openFillInTheBlanks = () => setisOpenModal('fillInTheBlanks');
-  // const openDropdownParagraph = () => setisOpenModal('completeText');
-  // const openWordMatchGame = () => setisOpenModal('orderColumn');
-  // const openDraggableText = () => setisOpenModal('orderText');
-  // const openSingleSelectQuestion = () => setisOpenModal('selectQuestion');
-  // const openDraggableimage = () => setisOpenModal('wordsAndImage');
-  // const openDraggableWords = () => setisOpenModal('fillWordsList');
-  // const openDraggableLetters = () => setisOpenModal('orderWords');
-
-  // const openNotes = () => setisOpenModal('notes');
-
 
   const fetchData = async (claseId) => {
     try {
@@ -304,18 +135,15 @@ export default function AddExercise() {
     fetchData(id);
   }, [id]);
 
-
-
   console.log("ejercicios: ", exercises);
   console.log("modal: ", isOpenModal);
 
   return (
     <div className="h-screen flex flex-col items-center justify-center bg-gray-100">
       <div className="w-full max-w-4xl p-6 bg-white rounded-lg shadow-md flex flex-col h-[90vh]">
-        {/* Título fijo */}
+
         <p className="text-3xl font-bold py-2 mb-4">Lista de Ejercicios</p>
 
-        {/* Si no hay ejercicios, se muestra el ícono y mensaje centrado (también fijo) */}
         {exercises.length === 0 && (
           <div className="flex-1 flex flex-col items-center justify-center">
             <BookOpen className="h-16 w-16 text-gray-400" />
@@ -325,7 +153,6 @@ export default function AddExercise() {
           </div>
         )}
 
-        {/* Lista con scroll solo si hay ejercicios */}
         {exercises.length > 0 && (
           <div className="flex-1 overflow-y-auto pr-2 mt-2">
             <div className="grid grid-cols-1 gap-4">
@@ -372,33 +199,33 @@ export default function AddExercise() {
                     <OrdenarTextoExercise exercise={exercise} />
                   )}
                   {exercise.template === "nota" && (
-                    <NotaExercise exercise={exercise} onDelete={handleDelete} />
+                    <NotaExercise exercise={exercise} />
                   )}
                   {exercise.template === "formarPalabra" && (
-                    <OrderWordsExercise exercise={exercise} onDelete={handleDelete} />
+                    <OrderWordsExercise exercise={exercise} />
                   )}
 
                   {exercise.template === "notaTexto" && (
-                    <NotaTextoExercise exercise={exercise} onDelete={handleDelete} />
+                    <NotaTextoExercise exercise={exercise} />
                   )}
 
                   {exercise.template === "ordenarPalabras" && (
-                    <OrdenarPalabraExercise exercise={exercise} onDelete={handleDelete} />
+                    <OrdenarPalabraExercise exercise={exercise} />
                   )}
 
                   {exercise.template === "imagenPalabra" && (
-                    <ImagenPalabraExercise exercise={exercise} onDelete={handleDelete} />
+                    <ImagenPalabraExercise exercise={exercise} />
                   )}
 
                   {/* modificaciones de tres tipos  */}
                   {exercise.template === "relacionarPalabra" && (
-                    <RelacionarPalabrasExercise exercise={exercise} onDelete={handleDelete} />
+                    <RelacionarPalabrasExercise exercise={exercise} />
                   )}
                   {exercise.template === "enlaceExterno" && (
-                    <EnlaceExternoExercise exercise={exercise} onDelete={handleDelete} />
+                    <EnlaceExternoExercise exercise={exercise} />
                   )}
                   {exercise.template === "falsoVerdadero" && (
-                    <FalsoVerdaderoExercise exercise={exercise} onDelete={handleDelete} />
+                    <FalsoVerdaderoExercise exercise={exercise} />
                   )}
 
                   {['gif', 'audio', 'video', 'imagen'].includes(exercise.template) && (
@@ -415,7 +242,6 @@ export default function AddExercise() {
                       handleDragStart={handleDragStart}
                       handleDrop={handleDrop}
                       handleDragOver={handleDragOver}
-                      onDelete={handleDelete}
                     />
                   )}
                 </div>
@@ -424,7 +250,6 @@ export default function AddExercise() {
           </div>
         )}
 
-        {/* Botón fijo */}
         <div className="mt-4">
           <button
             onClick={() => setIsOpenModal('templates')}
@@ -511,130 +336,3 @@ export default function AddExercise() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-{/* <div
-              className="flex flex-col justify-end items-end p-4 border rounded-lg hover:shadow-lg bg-cover bg-center w-full aspect-square min-h-[150px] sm:min-h-[200px] md:min-h-[250px] lg:min-h-[300px] bg-no-repeat"
-              style={{ backgroundImage: "url('/books.png')" }}
-              onClick={openImageProvider}
-            >
-              <h3 className="text-center px-4 py-2 bg-[#FEAB5F] text-gray-900 rounded-md hover:bg-gray-900 hover:text-white transition duration-300 w-full">
-                Cargar Imagen
-              </h3>
-            </div>
-
-            <CardTemplate img={''} title="Cargar Imagen" description={''} onCLick={openImageProvider} />
-
-            <div
-              className="flex flex-col justify-end items-end p-4 border rounded-lg hover:shadow-lg bg-cover bg-center w-full aspect-square min-h-[150px] sm:min-h-[200px] md:min-h-[250px] lg:min-h-[300px] bg-no-repeat"
-              style={{ backgroundImage: "url('/books.png')" }}
-              onClick={openAudioProvider}
-            >
-              <h3 className="text-center px-4 py-2 bg-[#FEAB5F] text-gray-900 rounded-md hover:bg-gray-900 hover:text-white transition duration-300 w-full">
-                Cargar Audio
-              </h3>
-            </div>
-            <div
-              className="flex flex-col justify-end items-end p-4 border rounded-lg hover:shadow-lg bg-cover bg-center w-full aspect-square min-h-[150px] sm:min-h-[200px] md:min-h-[250px] lg:min-h-[300px] bg-no-repeat"
-              style={{ backgroundImage: "url('/books.png')" }}
-              onClick={openFillInTheBlanks}
-            >
-              <h3 className="text-center px-4 py-2 bg-[#FEAB5F] text-gray-900 rounded-md hover:bg-gray-900 hover:text-white transition duration-300 w-full">
-                Rellenar espacion en blanco
-                <br />
-              </h3>
-            </div>
-            <CardTemplate img={''} title="Rellenar espacion en blanco" description={''} onClick={openFillInTheBlanks} />
-
-            <div
-              className="flex flex-col justify-end items-end p-4 border rounded-lg hover:shadow-lg bg-cover bg-center w-full aspect-square min-h-[150px] sm:min-h-[200px] md:min-h-[250px] lg:min-h-[300px] bg-no-repeat"
-              style={{ backgroundImage: "url('/books.png')" }}
-              onClick={openDropdownParagraph}
-            >
-              <h3 className="text-center px-4 py-2 bg-[#FEAB5F] text-gray-900 rounded-md hover:bg-gray-900 hover:text-white transition duration-300 w-full">
-                Seleccionar Para Completar
-              </h3>
-            </div>
-            <div
-              className="flex flex-col justify-end items-end p-4 border rounded-lg hover:shadow-lg bg-cover bg-center w-full aspect-square min-h-[150px] sm:min-h-[200px] md:min-h-[250px] lg:min-h-[300px] bg-no-repeat"
-              style={{ backgroundImage: "url('/books.png')" }}
-              onClick={openWordMatchGame}
-            >
-              <h3 className="text-center px-4 py-2 bg-[#FEAB5F] text-gray-900 rounded-md hover:bg-gray-900 hover:text-white transition duration-300 w-full">
-                Emparejar Columnas
-              </h3>
-            </div>
-            <div
-              className="flex flex-col justify-end items-end p-4 border rounded-lg hover:shadow-lg bg-cover bg-center w-full aspect-square min-h-[150px] sm:min-h-[200px] md:min-h-[250px] lg:min-h-[300px] bg-no-repeat"
-              style={{ backgroundImage: "url('/books.png')" }}
-              onClick={openDraggableText}
-            >
-              <h3 className="text-center px-4 py-2 bg-[#FEAB5F] text-gray-900 rounded-md hover:bg-gray-900 hover:text-white transition duration-300 w-full">
-                Organizar palabras
-              </h3>
-            </div>
-            <div
-              className="flex flex-col justify-end items-end p-4 border rounded-lg hover:shadow-lg bg-cover bg-center w-full aspect-square min-h-[150px] sm:min-h-[200px] md:min-h-[250px] lg:min-h-[300px] bg-no-repeat"
-              style={{ backgroundImage: "url('/books.png')" }}
-              onClick={openSingleSelectQuestion}
-            >
-              <h3 className="text-center px-4 py-2 bg-[#FEAB5F] text-gray-900 rounded-md hover:bg-gray-900 hover:text-white transition duration-300 w-full">
-                Ordenar Oraciones
-              </h3>
-            </div>
-            <div
-              className="flex flex-col justify-end items-end p-4 border rounded-lg hover:shadow-lg bg-cover bg-center w-full aspect-square min-h-[150px] sm:min-h-[200px] md:min-h-[250px] lg:min-h-[300px] bg-no-repeat"
-              style={{ backgroundImage: "url('/books.png')" }}
-              onClick={openDraggableimage}
-            >
-              <h3 className="text-center px-4 py-2 bg-[#FEAB5F] text-gray-900 rounded-md hover:bg-gray-900 hover:text-white transition duration-300 w-full">
-                Emparejar texto con Imagen
-              </h3>
-            </div>
-            <div
-              className="flex flex-col justify-end items-end p-4 border rounded-lg hover:shadow-lg bg-cover bg-center w-full aspect-square min-h-[150px] sm:min-h-[200px] md:min-h-[250px] lg:min-h-[300px] bg-no-repeat"
-              style={{ backgroundImage: "url('/books.png')" }}
-              onClick={openDraggableWords}
-            >
-              <h3 className="text-center px-4 py-2 bg-[#FEAB5F] text-gray-900 rounded-md hover:bg-gray-900 hover:text-white transition duration-300 w-full">
-                Rellenar con lista de palabras
-              </h3>
-            </div>
-            <div
-              className="flex flex-col justify-end items-end p-4 border rounded-lg hover:shadow-lg bg-cover bg-center w-full aspect-square min-h-[150px] sm:min-h-[200px] md:min-h-[250px] lg:min-h-[300px] bg-no-repeat"
-              style={{ backgroundImage: "url('/books.png')" }}
-              onClick={openDraggableLetters}
-            >
-              <h3 className="text-center px-4 py-2 bg-[#FEAB5F] text-gray-900 rounded-md hover:bg-gray-900 hover:text-white transition duration-300 w-full">
-                Organizar Palabras desde Letras
-              </h3>
-            </div>
-            <div
-              className="flex flex-col justify-end items-end p-4 border rounded-lg hover:shadow-lg bg-cover bg-center w-full aspect-square bg-no-repeat"
-              style={{ backgroundImage: "url('/books.png')" }}
-              onClick={openExternalLinkCard}
-            >
-              <h3 className="text-center px-4 py-2 bg-[#FEAB5F] text-gray-900 rounded-md hover:bg-gray-900 hover:text-white transition duration-300 w-full">
-                Crear Tarjeta de Enlace Externo
-              </h3>
-            </div>
-            <div
-              className="flex flex-col justify-end items-end p-4 border rounded-lg hover:shadow-lg bg-cover bg-center w-full aspect-square bg-no-repeat"
-              style={{ backgroundImage: "url('/books.png')" }}
-              onClick={openNotes}
-            >
-              <h3 className="text-center px-4 py-2 bg-[#FEAB5F] text-gray-900 rounded-md hover:bg-gray-900 hover:text-white transition duration-300 w-full">
-                Crear Nota
-              </h3>
-            </div> */}

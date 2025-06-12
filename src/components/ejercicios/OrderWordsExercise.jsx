@@ -7,7 +7,7 @@ import { DeleteExercise } from './DeleteExercise';
 import Label from '@/templates/Labels';
 import DraggableLetter from '@/components/templates/DraggableLetter';
 import DroppableContainer from '@/components/templates/DroppableContainer';
-import { FormEditOrdenarPalabra } from '../formsEdit/FormEditOrdenarPalabra';
+import { FormEditFormarPalabra } from '../formsEdit/FormEditFormarPalabra';
 
 export const OrderWordsExercise = ({ exercise, onDelete }) => {
   const { setSelect, setIsOpenModal, isOpenModal } = useAppContext();
@@ -28,7 +28,7 @@ export const OrderWordsExercise = ({ exercise, onDelete }) => {
 
   const handleEdit = () => {
     setSelect(exercise);
-    setIsOpenModal('editOrdenarPalabra');
+    setIsOpenModal('editFormarPalabra');
   };
 
   const handleDelete = () => {
@@ -100,7 +100,7 @@ export const OrderWordsExercise = ({ exercise, onDelete }) => {
         </div>
       </div>
 
-      {isOpenModal === 'editOrdenarPalabra' && <FormEditOrdenarPalabra />}
+      {isOpenModal === 'editFormarPalabra' && <FormEditFormarPalabra />}
       {isOpenModal === 'deleteExercise' && <DeleteExercise />}
     </>
   );

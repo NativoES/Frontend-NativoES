@@ -33,6 +33,9 @@ export const FormEditOrdenarPalabrass = () => {
     }
   }, [select]);
 
+  console.log("ejercicio: ", select);
+  
+
   const handleTextChange = (e) => {
     const inputText = e.target.value;
     setTextoOriginal(inputText);
