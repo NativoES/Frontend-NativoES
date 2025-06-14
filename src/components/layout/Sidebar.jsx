@@ -9,7 +9,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const pathname = usePathname()
   const navItems = [
     { name: 'Inicio', pathname:'/Students', icon: <Home className="h-5 w-5" />, active: pathname.includes('Home') },
-    { name: 'Profesores', pathname:'/Teachers', icon: <Users className="h-5 w-5" />, active: pathname.includes('Teachers') },
+    { name: 'Profesores', pathname:'/Profesores', icon: <Users className="h-5 w-5" />, active: pathname.includes('Teachers') },
     { name: 'Estudiantes', pathname:'/Students', icon: <GraduationCap className="h-5 w-5" />, active: pathname.includes('Students') },
     { name: 'Clases', pathname:'/Classes', icon: <BookOpen className="h-5 w-5" />, active: pathname.includes('Classes') },
     // { name: 'Reseñas', pathname:'/Students', icon: <MessageSquare className="h-5 w-5" />, active: pathname.includes('') },

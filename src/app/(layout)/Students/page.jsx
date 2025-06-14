@@ -7,19 +7,18 @@ import FormularioRegistroEstudiante from '@/components/FormularioResgitroEstudia
 import PerfilEstudiante from '@/components/StudentPerfil';
 import Button from '@/templates/Button';
 import { CardTemplate } from '@/templates/CardTemplate';
-import { useAppContext
- } from '@/contexts/Context';
+import {
+  useAppContext
+} from '@/contexts/Context';
 import { Paginator } from '@/components/Paginator';
+
 export default function VistaEstudiante() {
-  const { select, setSelect, setNavItem, loader, setLoader, isOpenModal, setIsOpenModal } = useAppContext()
+  const { loader, setLoader, isOpenModal, setIsOpenModal } = useAppContext()
 
   const router = useRouter();
   const [students, setStudents] = useState([]);
   const [activeStudentId, setActiveStudentId] = useState(null);
 
-
-
-  const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
@@ -65,15 +64,15 @@ export default function VistaEstudiante() {
 
   async function handlerFetch(limit, page) {
 
-    const defaultLimit = 5; // Valor predeterminado para limit
-    const defaultPage = 1; // Valor predeterminado para page
+    const defaultLimit = 5;
+    const defaultPage = 1;
 
     const finalLimit = limit || defaultLimit;
     const finalPage = page || defaultPage;
 
     const res = await fetch(
       window?.location?.href?.includes("localhost")
-        ? `http://localhost:4000/api/auth/users?limit=${finalLimit}&page=${finalPage}`
+        ? `http://localhost:5002/api/user?limit=${finalLimit}&page=${finalPage}&rol=ESTUDIANTE`
         : ``
     );
 
@@ -82,9 +81,9 @@ export default function VistaEstudiante() {
 
     setStudents(result.data);
 
-    setCurrentPage(result.currentPage);
+    setCurrentPage(result.page);
     setTotalPages(result.totalPages);
-    setTotalDocuments(result.totalDocuments);
+    setTotalDocuments(result.total);
     setLoader('');
   }
   const handleItemsPerPageChange = (itemsPerPage) => {
@@ -112,7 +111,7 @@ export default function VistaEstudiante() {
       localStorage.removeItem('activeStudentId');
     }
   }, [activeStudentId]);
-  console.log('students', isOpenModal)
+  
   return (
     <div className="h-[80vh] flex items-center justify-center">
       <div className="max-w-4xl w-full bg-white rounded-lg shadow-md p-8 border border-gray-200">
@@ -143,15 +142,15 @@ export default function VistaEstudiante() {
                 className="hover:shadow-sm transition-shadow duration-300 cursor-pointer hover:border-[#FEAB5F] mb-2 flex justify-between items-center"
               >
                 <div className="flex items-center">
-                  {student.perfilIMG && (
+                  {student.fotografia && (
                     <img
-                      src={student.perfilIMG}
+                      src={student.fotografia}
                       alt="Perfil"
                       className="w-16 h-16 object-cover rounded-full mr-4"
                     />
                   )}
                   <div>
-                    <h3 className="text-lg text-gray-900">{student.nombreDeEstudiante}</h3>
+                    <h3 className="text-lg text-gray-900">{student.nombreCompleto}</h3>
                     <p className="text-gray-600">{student.email}</p>
                   </div>
                 </div>

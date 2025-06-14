@@ -7,6 +7,7 @@ import { ButtonTemplate } from '@/templates/ButtonTemplate';
 import { SubtitleTemplate } from '@/templates/SubtittleTemplate';
 import { Users, Star, ArrowRight } from 'lucide-react';
 import InputFlotante from '@/components/InputFlotante';
+import { useAppContext } from '@/contexts/Context';
    
 const teachersItem = {
   id: '1',
@@ -50,7 +51,7 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem('userEmail');
+    const isAuthenticated = localStorage.getItem('token');
     if (!isAuthenticated) {
       router.push('/login');
     }
@@ -63,7 +64,7 @@ export default function Dashboard() {
   const ButtonSection = ({ label, path, icon }) => (
     <ButtonTemplate href={path} text={<><span className="mr-2">{icon}</span><span>{label}</span></>} />
   );
-
+  
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-[80px] space-y-8 ">
       <section>

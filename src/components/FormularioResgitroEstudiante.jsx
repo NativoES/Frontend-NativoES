@@ -1,37 +1,14 @@
 'use client';
 import React, { useState } from 'react';
 import Button from '@/templates/Button';
-import { InputTemplate } from '@/templates/InputTemplate';
-import Label from '@/templates/Labels';
 import { ImageUp } from 'lucide-react';
 import InputFlotante from '@/components/InputFlotante';
 import SelectSimple from '@/components/SelectSimple';
 import { useAppContext} from '@/contexts/Context';
 import { passwordGenerator } from '@/utils/passwordGenerator';
+import { ModalTemplate } from './templates/ModalTemplate';
 
-const ModalTemplate = ({ children, className }) => {
-
-  const { setSelect, setIsOpenModal } = useAppContext()
-
-  return (
-    <div
-      className={`fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-75 flex justify-center items-center backdrop-blur-lg duration-500 z-50 transition-all ${className}`}
-      onClick={() => { setSelect(false); setIsOpenModal(false) }}
-    >
-      <div className="flex flex-col justify-center relative bg-white p-4 rounded-lg shadow-md w-1/2 min-w-[500px] max-w-[800px]  h-[90%] max-h-[600px] overflow-x-auto" onClick={(e) => e.stopPropagation()}>
-        {children}
-        {/* <button
-        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-        onClick={onClose}
-      >
-        ✖
-      </button> */}
-      </div>
-    </div>
-  )
-};
-
-export default function FormularioRegistroEstudiante({ onCreate }) {
+export default function FormularioRegistroEstudiante() {
 
   const { setSelect, setIsOpenModal, loader, setLoader } = useAppContext()
   const [imagen, setImagen] = useState(null);
@@ -48,14 +25,14 @@ export default function FormularioRegistroEstudiante({ onCreate }) {
       console.log('password', password)
       const data = new FormData();
       data.append("file", file);
-      data.append("nombreDeEstudiante", selectValue.nombreDeEstudiante);
-      data.append("numeroDeCelular", selectValue.numeroDeCelular);
+      data.append("nombreCompleto", selectValue.nombreDeEstudiante);
+      data.append("telefono", selectValue.numeroDeCelular);
       data.append("email", selectValue.email);
       data.append("lenguaNativa", selectValue.lenguaNativa);
       data.append("password", password);
 
       const response = await fetch(window?.location?.href?.includes('localhost')
-        ? 'http://localhost:4000/api/auth/register'
+        ? 'http://localhost:5002/api/user'
         : '', {
         method: 'POST',
         body: data,
@@ -78,6 +55,7 @@ export default function FormularioRegistroEstudiante({ onCreate }) {
       const result = await response.json();
       alert('Cuenta creada!');
       setLoader('');
+      setIsOpenModal(false)
     } catch (error) {
       setLoader('');
       alert(error);

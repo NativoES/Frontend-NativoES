@@ -1,32 +1,43 @@
 "use client"
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAppContext } from "@/contexts/Context";
 
 export default function Login() {
+  const { setUser } = useAppContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+
   const handleLogin = async () => {
-    localStorage.setItem('userEmail', "ksdjhfkldsjlk");
+    setError("");
 
-    router.push('/Admin');
+    try {
+      const response = await fetch("http://localhost:5002/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    // setError("");
-    // try {
-    //   const response = await fetch("https://api.example.com/login", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({ email, password })
-    //   });
-    //   const data = await response.json();
-    //   if (!response.ok) throw new Error(data.message || "Login failed");
-    //   console.log("Login successful", data);
-    // } catch (err) {
-    //   setError(err.message);
-    // }
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Error al iniciar sesión");
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      setUser(data.user);
+
+      router.push("/Admin");
+    } catch (err) {
+      setError("Error de red o servidor");
+      console.error(err);
+    }
   };
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
