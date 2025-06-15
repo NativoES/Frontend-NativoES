@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import TextEditor from '../textEditor/TextEditor';
+import TextEditor from '../TextEditor/TextEditor';
 import ModalTemplate from '@/templates/ModalTemplate';
 import Button from '@/templates/Button';
 import { useParams } from 'next/navigation';

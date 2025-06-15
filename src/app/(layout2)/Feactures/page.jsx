@@ -6,7 +6,7 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { Plus, Trash, Move } from 'lucide-react';
 import { useAppContext } from '@/contexts/Context';
-import TextEditor from '@/components/textEditor/TextEditor';
+import TextEditor from '@/components/TextEditor/TextEditor';
 import 'react-quill-new/dist/quill.snow.css'
 import 'react-quill-new/dist/quill.bubble.css'
 import 'react-quill-new/dist/quill.core.css'
