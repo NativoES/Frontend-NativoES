@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppContext } from "@/contexts/Context";
+import { login } from "@/services/user/auth.service";
 
 export default function Login() {
   const { setUser } = useAppContext();
@@ -15,19 +16,7 @@ export default function Login() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5002/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Error al iniciar sesión");
-        return;
-      }
-
+      const data = await login({ body: { email, password } });
       localStorage.setItem("token", data.token);
       setUser(data.user);
 

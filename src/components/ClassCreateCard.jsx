@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { Users, Globe2, Calendar, Trash2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/utils';
 import { CardTemplate } from '@/templates/CardTemplate';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';

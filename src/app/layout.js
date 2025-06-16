@@ -1,7 +1,7 @@
 'use client'
 
 import '@/styles/globals.css'
-import { AppProvider } from '@/contexts/Context' // Asegúrate de usar el archivo renombrado correctamente
+import { AppProvider } from '@/contexts/Context'
 import NavbarAdmin from '@/components/NavbarAdmin'
 import { usePathname } from 'next/navigation'
 

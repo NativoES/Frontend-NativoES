@@ -4,7 +4,7 @@ import { Users, Globe2, FileText, Star, ArrowRightFromLine, ArrowRight, SquareAr
 import { ClassCard } from '@/components/ClassCard';
 import { TemplateCard } from '@/components/TemplateCard';
 import { languages } from '@/data/languages';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/utils';
 import Form from '@/components/Form';
 import WordsAndImage from '@/components/templates/WordsAndImage';
 import OrderText from '@/components/templates/OrderText';

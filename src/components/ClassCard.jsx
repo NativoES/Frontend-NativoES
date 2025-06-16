@@ -1,6 +1,6 @@
 import React from 'react';
 import { Users, Globe2, Calendar } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/utils';
 import Label from '@/templates/Labels';
 import  {CardTemplate} from '@/templates/CardTemplate'
 

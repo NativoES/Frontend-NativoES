@@ -3,11 +3,10 @@ import { Menu, Bell, Globe, LogOut, ChevronDown, User } from 'lucide-react';
 import { useAppContext } from '@/contexts/Context';
 
 const Header = ({ toggleSidebar }) => {
-  const { user, language, setLanguage } = useAppContext();
+  const { userDB, language, setLanguage } = useAppContext();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  // const [language, setLanguage] = useState('ES');
   
-  console.log("user: ", user);
+  console.log("user: ", userDB);
 
   const toggleDropdown = () => {
     setDropdownOpen(prev => !prev);
@@ -55,7 +54,7 @@ const Header = ({ toggleSidebar }) => {
               <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white mr-1">
                 <User className="h-4 w-4" />
               </div>
-              <span className="hidden md:block">Admin</span>
+              <span className="hidden md:block">{userDB?.rol}</span>
               <ChevronDown className="h-4 w-4 ml-1" />
             </button>
 
