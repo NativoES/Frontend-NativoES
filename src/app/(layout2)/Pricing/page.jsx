@@ -5,7 +5,7 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { useAppContext } from '@/contexts/Context';
 import { Plus, Trash } from 'lucide-react';
-import TextEditor from '@/components/textEditor/TextEditor';
+import TextEditor from '@/components/TextEditor/TextEditor';
 
 const API_URL = 'http://localhost:5000/api/plan';
 
