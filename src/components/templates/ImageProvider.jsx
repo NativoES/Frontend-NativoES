@@ -7,13 +7,15 @@ import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useParams } from 'next/navigation';
+import { uploadImage } from '@/services/exercises/exercises.service';
+// import { uploadImage } from '@/services/clases/exercises.service';
 
 export default function ImageUploadModal({ closeModal, onImageUpload }) {
+  const { loader, setLoader } = useAppContext();
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const params = useParams();
   const id = params.id;
 
@@ -32,7 +34,8 @@ export default function ImageUploadModal({ closeModal, onImageUpload }) {
     }
 
     try {
-      setIsLoading(true);
+      setLoader(true);
+
       const formData = new FormData();
       formData.append('file', imageFile);
       formData.append('titulo', title);
@@ -40,25 +43,17 @@ export default function ImageUploadModal({ closeModal, onImageUpload }) {
       formData.append('claseId', id);
       formData.append('template', 'imagen');
 
-      const response = await fetch('http://localhost:5001/api/image', {
-        method: 'POST',
-        body: formData,
-      });
+      const result = await uploadImage(formData);
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error?.error || 'Error al subir imagen');
-      }
-
-      const result = await response.json();
       if (onImageUpload) onImageUpload(result);
       closeModal();
     } catch (err) {
       alert(err.message);
     } finally {
-      setIsLoading(false);
+      setLoader(false);
     }
   };
+
 
   const handleCancel = () => {
     setImageFile(null);
@@ -125,10 +120,10 @@ export default function ImageUploadModal({ closeModal, onImageUpload }) {
 
       {/* Botones */}
       <div className="flex justify-between mt-4">
-        <Button onClick={handleSaveImage} variant="primary" disabled={isLoading}>
-          {isLoading ? 'Guardando...' : 'Guardar'}
+        <Button onClick={handleSaveImage} variant="primary" disabled={loader}>
+          {loader ? 'Guardando...' : 'Guardar'}
         </Button>
-        <Button onClick={handleCancel} variant="secondary" disabled={isLoading}>
+        <Button onClick={handleCancel} variant="secondary" disabled={loader}>
           Cancelar
         </Button>
       </div>

@@ -7,8 +7,11 @@ import Button from '@/templates/Button';
 import ModalTemplate from '@/templates/ModalTemplate';
 import AudioRecorder from '../AudioRecorder';
 import { useParams } from 'next/navigation';
+import { useAppContext } from '@/contexts/Context';
+import { uploadAudio } from '@/services/exercises/exercises.service';
 
 export default function UploadAudio({ isOpen, onClose, onAudioUpload }) {
+  const { setLoader, loader } = useAppContext();
   const [audioFile, setAudioFile] = useState(null);
   const [audioInputName, setAudioInputName] = useState('');
   const [description, setDescription] = useState('');
@@ -27,7 +30,7 @@ export default function UploadAudio({ isOpen, onClose, onAudioUpload }) {
     //   alert('Por favor, completa el nombre del audio y selecciona un archivo.');
     //   return;
     // }
-
+    setLoader(true);
     const formData = new FormData();
     formData.append('file', audioFile); // nombre del campo esperado en backend
     formData.append('titulo', audioInputName.trim());
@@ -36,20 +39,14 @@ export default function UploadAudio({ isOpen, onClose, onAudioUpload }) {
     formData.append('template', 'audio');
 
     try {
-      const res = await fetch('http://localhost:5001/api/audio', {
-        method: 'POST',
-        body: formData,
-      });
+      const result = await uploadAudio(formData);
 
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message || 'Error al guardar el audio');
-
-      alert('Audio guardado correctamente');
-      onAudioUpload?.(data);
+      onAudioUpload?.(result);
       onClose();
     } catch (err) {
       alert('Error al guardar: ' + err.message);
+    } finally {
+      setLoader(false);
     }
   };
 

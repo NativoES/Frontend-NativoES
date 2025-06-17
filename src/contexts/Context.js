@@ -9,6 +9,7 @@ import React, {
 } from 'react'
 
 import { initialData } from './initialData.js'
+import { getUserProfile } from '@/services/user/auth.service.js'
 
 const AppContext = createContext(undefined)
 
@@ -41,23 +42,8 @@ export function AppProvider({ children }) {
 
   useEffect(() => {
     async function loadUserFromToken() {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-
       try {
-        const response = await fetch("http://localhost:5002/api/user/profile", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`Error HTTP: ${response.status}`);
-        }
-
-        const data = await response.json();
+        const data = await getUserProfile();
         setUserDB(data);
       } catch (error) {
         console.error("Error cargando usuario desde token:", error);

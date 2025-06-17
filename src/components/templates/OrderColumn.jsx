@@ -7,8 +7,11 @@ import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useParams } from 'next/navigation';
+import { useAppContext } from '@/contexts/Context';
+import { relacionarPalabra } from '@/services/exercises/exercises.service';
 
-export default function WordMatchGame({ onSave, onCancel }) {
+export default function WordMatchGame({ onSave, closeModal }) {
+  const { loader, setLoader } = useAppContext();
   const [title, setTitle] = useState('');
   const [pairs, setPairs] = useState([{ spanish: '', english: '' }]);
   const [descripcion, setDescripcion] = useState('');
@@ -30,7 +33,7 @@ export default function WordMatchGame({ onSave, onCancel }) {
     setPairs(pairs.filter((_, i) => i !== index));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (title.trim() === '') {
       alert('Por favor agregue un Título');
       return;
@@ -56,24 +59,19 @@ export default function WordMatchGame({ onSave, onCancel }) {
       template: "relacionarPalabra"
     };
 
-    fetch('http://localhost:5001/api/relacionar-palabra', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('Error al guardar');
-        return res.json();
-      })
-      .then(data => {
-        console.log('Guardado exitoso:', data);
-        onSave && onSave(data);
-      })
-      .catch(err => {
-        console.error(err);
-        alert('Ocurrió un error al guardar.');
-      });
+    try {
+      setLoader(true);
+      const result = await relacionarPalabra(payload);
+      if (onSave) onSave(result);
+      closeModal();
+    } catch (error) {
+      console.error(error);
+      alert('Ocurrió un error al guardar');
+    } finally {
+      setLoader(false);
+    }
   };
+
 
   return (
     <ModalTemplate className="w-full">

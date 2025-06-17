@@ -9,16 +9,16 @@ import DraggableLetter from '@/components/templates/DraggableLetter';
 import { shuffleArray } from '@/utils/ArrayUtils';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useAppContext } from '@/contexts/Context';
+import { updateFormarPalabra } from '@/services/exercises/exercises.service';
 
 export const FormEditFormarPalabra = () => {
-  const { select, setIsOpenModal } = useAppContext();
+  const { select, setIsOpenModal, loader, setLoader } = useAppContext();
   const [title, setTitle] = useState('');
   const [word, setWord] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [droppedLetters, setDroppedLetters] = useState([]);
   const [feedback, setFeedback] = useState([]);
   const [shuffledLetters, setShuffledLetters] = useState([]);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (select) {
@@ -69,7 +69,7 @@ export const FormEditFormarPalabra = () => {
       return;
     }
 
-    setLoading(true);
+    setLoader(true);
 
     const payload = {
       titulo: title,
@@ -79,20 +79,14 @@ export const FormEditFormarPalabra = () => {
     };
 
     try {
-      const res = await fetch(`http://localhost:5001/api/formar-palabra/${select._id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) throw new Error('Error al actualizar el ejercicio');
+      await updateFormarPalabra(select._id, payload);
 
       setIsOpenModal(null);
     } catch (err) {
       console.error(err);
       alert('Hubo un error al actualizar.');
     } finally {
-      setLoading(false);
+      setLoader(false);
     }
   };
 
@@ -162,9 +156,9 @@ export const FormEditFormarPalabra = () => {
           onClick={handleSave}
           className="w-full"
           variant="primary"
-          disabled={loading}
+          disabled={loader}
         >
-          {loading ? 'Guardando...' : 'Guardar cambios'}
+          {loader ? 'Guardando...' : 'Guardar cambios'}
         </Button>
       </div>
     </ModalTemplate>

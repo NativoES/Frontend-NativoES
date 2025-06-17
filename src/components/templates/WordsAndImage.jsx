@@ -7,8 +7,10 @@ import ModalTemplate from '@/templates/ModalTemplate';
 import { ImageUp } from 'lucide-react';
 import Label from '@/templates/Labels';
 import { useParams } from 'next/navigation';
+import { palabraImagen } from '@/services/exercises/exercises.service';
 
-const DraggableText = () => {
+const DraggableText = ({ closeModal, onSave }) => {
+  const { setLoader, loader } = useAppContext();
   const [title, setTitle] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [images, setImages] = useState([]);
@@ -63,6 +65,7 @@ const DraggableText = () => {
 
   const handleSave = async () => {
     try {
+      setLoader(true);
       const formData = new FormData();
       formData.append('titulo', title);
       formData.append('descripcion', descripcion);
@@ -74,15 +77,13 @@ const DraggableText = () => {
         formData.append('imagenes', fileImages[i]);
       });
 
-      const res = await fetch('http://localhost:5001/api/imagen-palabra', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!res.ok) throw new Error('Error al guardar el ejercicio');
-      console.log('Ejercicio guardado correctamente');
+      const result = palabraImagen(formData);
+      if (onSave) onSave(result);
+      closeModal();
     } catch (err) {
-      console.error(err);
+      alert(err.message);
+    } finally {
+      setLoader(false);
     }
   };
 

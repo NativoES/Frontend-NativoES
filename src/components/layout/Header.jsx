@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Menu, Bell, Globe, LogOut, ChevronDown, User } from 'lucide-react';
 import { useAppContext } from '@/contexts/Context';
+import { useRouter } from 'next/navigation';
 
 const Header = ({ toggleSidebar }) => {
   const { userDB, language, setLanguage } = useAppContext();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  
+  const router = useRouter();
+
   console.log("user: ", userDB);
 
   const toggleDropdown = () => {
@@ -18,6 +20,12 @@ const Header = ({ toggleSidebar }) => {
       if (prev === 'EN') return 'FR';
       return 'ES';
     });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    console.log('Sesión cerrada');
+    router.push('/');
   };
 
   return (
@@ -67,10 +75,13 @@ const Header = ({ toggleSidebar }) => {
                   Configuración
                 </a>
                 <hr className="my-1" />
-                <a href="#logout" className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                >
                   <LogOut className="h-4 w-4 mr-2" />
                   Cerrar Sesión
-                </a>
+                </button>
               </div>
             )}
           </div>

@@ -7,8 +7,10 @@ import Label from '@/templates/Labels';
 import Button from '@/templates/Button';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { Plus, Save, Trash2 } from 'lucide-react';
+import { falsoVerdadero } from '@/services/exercises/exercises.service';
 
-export default function TrueFalseModal({ onClose }) {
+export default function TrueFalseModal({ closeModal, onSave }) {
+  const { setLoader, loader } = useAppContext();
   const { id: claseId } = useParams();
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -45,18 +47,15 @@ export default function TrueFalseModal({ onClose }) {
     };
 
     try {
-      const res = await fetch('http://localhost:5001/api/falso-verdadero', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (!res.ok) throw new Error('Error al guardar el ejercicio');
-      alert('Ejercicio guardado correctamente');
-      onClose();
+      setLoader(true);
+      const result = falsoVerdadero(payload);
+      if (onSave) onSave(result);
+      closeModal();
     } catch (error) {
       console.error(error);
       alert('Ocurrió un error al guardar');
+    } finally {
+      setLoader(false);
     }
   };
 

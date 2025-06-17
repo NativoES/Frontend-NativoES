@@ -7,15 +7,17 @@ import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useParams } from 'next/navigation';
+import { useAppContext } from '@/contexts/Context';
+import { enlaceExterno } from '@/services/exercises/exercises.service';
 
-export default function EnlaceExterno({ onClose }) {
+export default function EnlaceExterno({ onSave, closeModal }) {
+  const {loader, setLoader} = useAppContext();
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [enlace, setEnlace] = useState('');
-  const [loading, setLoading] = useState(false);
   const params = useParams();
   const claseId = params.id;
-  
+
 
   const handleSave = async () => {
     if (!titulo.trim() || !enlace.trim()) {
@@ -32,26 +34,14 @@ export default function EnlaceExterno({ onClose }) {
     };
 
     try {
-      setLoading(true);
-      const response = await fetch('http://localhost:5001/api/enlace-externo', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Error al guardar el enlace');
-      }
-
-      alert('Enlace guardado exitosamente');
-      onClose?.();
+      setLoader(true);
+      const result = await enlaceExterno(payload);
+      if (onSave) onSave(result);
+      closeModal();
     } catch (error) {
       alert(error.message);
     } finally {
-      setLoading(false);
+      setLoader(false);
     }
   };
 
@@ -94,9 +84,9 @@ export default function EnlaceExterno({ onClose }) {
         className="w-full"
         variant="primary"
         icon={<Save size={20} />}
-        disabled={loading}
+        disabled={loader}
       >
-        {loading ? 'Guardando...' : 'Guardar'}
+        {loader ? 'Guardando...' : 'Guardar'}
       </Button>
     </ModalTemplate>
   );

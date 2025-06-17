@@ -5,15 +5,15 @@ import TextEditor from '../textEditor/TextEditor';
 import ModalTemplate from '@/templates/ModalTemplate';
 import Button from '@/templates/Button';
 import { useAppContext } from '@/contexts/Context';
+import { updateNotaTexto } from '@/services/exercises/exercises.service';
 
 export const FormEditNoteText = () => {
-  const { select, setSelect, setIsOpenModal } = useAppContext();
+  const { select, setSelect, setIsOpenModal, loader, setLoader } = useAppContext();
   const [feature, setFeature] = useState({
     titulo: '',
     texto: '',
   });
 
-  const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState(null);
 
   useEffect(() => {
@@ -34,24 +34,11 @@ export const FormEditNoteText = () => {
 
   const handleSubmit = async () => {
     if (!select?._id) return;
-    setLoading(true);
+    setLoader(true);
     setMensaje(null);
 
     try {
-      const response = await fetch(`http://localhost:5001/api/nota-texto/${select._id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          titulo: feature.titulo,
-          texto: feature.texto,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al editar la nota');
-      }
-
-      const result = await response.json();
+      await updateNotaTexto(select._id, {titulo: feature.titulo, texto: feature.texto})
       alert('Nota actualizada correctamente');
       setIsOpenModal('');
       setSelect(null);
@@ -59,7 +46,7 @@ export const FormEditNoteText = () => {
       console.error(error);
       alert('Error al editar la nota');
     } finally {
-      setLoading(false);
+      setLoader(false);
     }
   };
 
@@ -94,9 +81,9 @@ export const FormEditNoteText = () => {
         <div className="flex justify-end gap-3 pt-4">
           <Button
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={loader}
           >
-            {loading ? 'Guardando...' : 'Guardar cambios'}
+            {loader ? 'Guardando...' : 'Guardar cambios'}
           </Button>
         </div>
       </div>

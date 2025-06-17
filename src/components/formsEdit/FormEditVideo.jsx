@@ -7,9 +7,10 @@ import TextAreaTemplate from '@/templates/TextAreaTemplate';
 import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
+import { updateVideo } from '@/services/exercises/exercises.service';
 
 export default function FormEditVideo() {
-  const { select, setIsOpenModal } = useAppContext();   
+  const { select, setIsOpenModal, loader, setLoader } = useAppContext();   
   const [videoFile, setVideoFile] = useState(null);     
   const [videoPreview, setVideoPreview] = useState(null); 
   const [title, setTitle] = useState('');
@@ -42,27 +43,19 @@ export default function FormEditVideo() {
     }
 
     try {
-      setIsLoading(true);
+      setLoader(true);
       const formData = new FormData();
       formData.append('titulo', title.trim());
       formData.append('descripcion', description.trim());
       if (videoFile) formData.append('file', videoFile);
 
-      const res = await fetch(`http://localhost:5001/api/video/${select._id}`, {
-        method: 'PATCH',
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Error al actualizar el video');
-      }
+      await updateVideo(select._id, formData);
 
       setIsOpenModal(null);         
     } catch (err) {
       alert(err.message);
     } finally {
-      setIsLoading(false);
+      setLoader(false);
     }
   };
 
@@ -118,10 +111,10 @@ export default function FormEditVideo() {
       )}
 
       <div className="flex justify-between mt-6">
-        <Button variant="primary" onClick={handleSave} disabled={isLoading}>
-          {isLoading ? 'Guardando…' : 'Guardar cambios'}
+        <Button variant="primary" onClick={handleSave} disabled={loader}>
+          {loader ? 'Guardando…' : 'Guardar cambios'}
         </Button>
-        <Button variant="secondary" onClick={handleCancel} disabled={isLoading}>
+        <Button variant="secondary" onClick={handleCancel} disabled={loader}>
           Cancelar
         </Button>
       </div>

@@ -7,15 +7,17 @@ import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useParams } from 'next/navigation';
+import { useAppContext } from '@/contexts/Context';
+import { uploadGif } from '@/services/exercises/exercises.service';
 
 export default function GifUploadModal({ closeModal, onGifUpload }) {
+  const { loader, setLoader } = useAppContext();
   const [gifFile, setGifFile] = useState(null);
   const [gifPreview, setGifPreview] = useState(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const params = useParams();
-    const id = params.id;
+  const id = params.id;
 
   const handleGifUpload = (event) => {
     const file = event.target.files[0];
@@ -34,31 +36,22 @@ export default function GifUploadModal({ closeModal, onGifUpload }) {
     }
 
     try {
-      setIsLoading(true);
+      setLoader(true);
       const formData = new FormData();
       formData.append('file', gifFile);
       formData.append('titulo', title);
       formData.append('descripcion', description || 'Sin descripción');
-      formData.append('claseId', id); // Reemplaza con tu claseId real
+      formData.append('claseId', id);
       formData.append('template', 'gif');
 
-      const response = await fetch('http://localhost:5001/api/gif', {
-        method: 'POST',
-        body: formData,
-      });
+      const result = await uploadGif(formData);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al subir el GIF');
-      }
-
-      const result = await response.json();
       if (onGifUpload) onGifUpload(result);
       closeModal();
     } catch (error) {
       alert(error.message);
     } finally {
-      setIsLoading(false);
+      setLoader(false);
     }
   };
 
@@ -121,10 +114,10 @@ export default function GifUploadModal({ closeModal, onGifUpload }) {
       </div>
 
       <div className="flex justify-between mt-4">
-        <Button onClick={handleSaveGif} variant="primary" disabled={isLoading}>
-          {isLoading ? 'Guardando...' : 'Guardar'}
+        <Button onClick={handleSaveGif} variant="primary" disabled={loader}>
+          {loader ? 'Guardando...' : 'Guardar'}
         </Button>
-        <Button onClick={handleCancel} variant="secondary" disabled={isLoading}>
+        <Button onClick={handleCancel} variant="secondary" disabled={loader}>
           Cancelar
         </Button>
       </div>

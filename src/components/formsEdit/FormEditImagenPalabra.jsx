@@ -7,9 +7,10 @@ import ModalTemplate from '@/templates/ModalTemplate';
 import { ImageUp } from 'lucide-react';
 import Label from '@/templates/Labels';
 import { useAppContext } from '@/contexts/Context';
+import { updatePalabraImagen } from '@/services/exercises/exercises.service';
 
 const FormEditImagenPalabra = () => {
-    const { select, setIsOpenModal } = useAppContext();
+    const { select, setIsOpenModal, loader, setLoader } = useAppContext();
     const [title, setTitle] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const [images, setImages] = useState([]);
@@ -72,6 +73,7 @@ const FormEditImagenPalabra = () => {
 
     const handleSave = async () => {
         try {
+            setLoader(true);
             if (!select?._id) return;
 
             const formData = new FormData();
@@ -86,16 +88,12 @@ const FormEditImagenPalabra = () => {
             });
 
 
-            const res = await fetch(`http://localhost:5001/api/imagen-palabra/${select._id}`, {
-                method: 'PATCH',
-                body: formData,
-            });
-
-            if (!res.ok) throw new Error('Error al actualizar el ejercicio');
-
+            await updatePalabraImagen(select._id, formData);
             setIsOpenModal(false);
         } catch (err) {
             console.error(err);
+        } finally {
+            setLoader(false)
         }
     };
 

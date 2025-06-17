@@ -6,8 +6,11 @@ import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useParams } from 'next/navigation';
+import { useAppContext } from '@/contexts/Context';
+import { ordenarPalabra } from '@/services/exercises/exercises.service';
 
-const DraggableText = () => {
+const DraggableText = ({onSave, closeModal}) => {
+  const { setLoader, loader } = useAppContext();
   const [titulo, setTitulo] = useState('');
   const [textoOriginal, setTextoOriginal] = useState('');
   const [palabrasEnOrden, setPalabrasEnOrden] = useState([]);
@@ -63,10 +66,10 @@ const DraggableText = () => {
     <div className="rounded-lg flex flex-col items-center justify-center space-y-4 my-4">
       <div
         className={`border-dashed border-2 border-gray-300 px-4 py-2 w-full flex items-center justify-center rounded-[5px] ${feedback[index] === 'Correcto'
-            ? 'bg-green-300'
-            : feedback[index] === 'Incorrecto'
-              ? 'bg-red-200'
-              : ''
+          ? 'bg-green-300'
+          : feedback[index] === 'Incorrecto'
+            ? 'bg-red-200'
+            : ''
           }`}
         onDrop={(e) => handleDrop(e, index)}
         onDragOver={handleDragOver}
@@ -91,18 +94,14 @@ const DraggableText = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:5001/api/ordenar-palabra', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) throw new Error('Error al guardar el ejercicio');
-
-      console.log('Ejercicio guardado correctamente');
-      // puedes cerrar el modal aquí si quieres
+      setLoader(true);
+      const result = await ordenarPalabra(payload);
+      if (onSave) onSave(result);
+      closeModal();
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoader(false);
     }
   };
 

@@ -8,16 +8,16 @@ import DraggableLetter from '@/components/templates/DraggableLetter';
 import { shuffleArray } from '@/utils/ArrayUtils';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useAppContext } from '@/contexts/Context';
+import { updateFormarPalabra } from '@/services/exercises/exercises.service';
 
 export const FormEditOrdenarPalabra = () => {
-  const { select, setIsOpenModal } = useAppContext();
+  const { select, setIsOpenModal, loader, setLoader } = useAppContext();
   const [title, setTitle] = useState(select?.titulo || '');
   const [word, setWord] = useState(select?.palabraCorrecta || '');
   const [descripcion, setDescripcion] = useState(select?.descripcion || '');
   const [droppedLetters, setDroppedLetters] = useState([]);
   const [feedback, setFeedback] = useState([]);
   const [shuffledLetters, setShuffledLetters] = useState([]);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (word) {
@@ -68,7 +68,7 @@ export const FormEditOrdenarPalabra = () => {
       return;
     }
 
-    setLoading(true);
+    setLoader(true);
 
     const data = {
       titulo: title,
@@ -78,22 +78,13 @@ export const FormEditOrdenarPalabra = () => {
     };
 
     try {
-      const res = await fetch(`http://localhost:5001/api/formar-palabra/${select._id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) throw new Error('Error al actualizar el ejercicio');
-
-      const result = await res.json();
-      console.log('Actualizado:', result);
+      await updateFormarPalabra(select._id, data);
       setIsOpenModal(null);
     } catch (err) {
       console.error(err);
       alert('Ocurrió un error al actualizar el ejercicio.');
     } finally {
-      setLoading(false);
+      setLoader(false);
     }
   };
 
@@ -162,9 +153,9 @@ export const FormEditOrdenarPalabra = () => {
           onClick={handleUpdate}
           className="w-full"
           variant="primary"
-          disabled={loading}
+          disabled={loader}
         >
-          {loading ? 'Guardando...' : 'Guardar Cambios'}
+          {loader ? 'Guardando...' : 'Guardar Cambios'}
         </Button>
       </div>
     </ModalTemplate>

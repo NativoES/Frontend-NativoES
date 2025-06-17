@@ -17,15 +17,27 @@ export default function Login() {
 
     try {
       const data = await login({ body: { email, password } });
+
       localStorage.setItem("token", data.token);
       setUser(data.user);
 
-      router.push("/Admin");
+      const rol = data.user?.rol;
+
+      if (rol === "ADMINISTRADOR") {
+        router.push("/Admin");
+      } else if (rol === "PROFESOR") {
+        router.push("/Classes");
+      } else if (rol === "ESTUDIANTE") {
+        router.push("/MisClases");
+      } else {
+        setError("Rol no reconocido");
+      }
     } catch (err) {
       setError("Error de red o servidor");
       console.error(err);
     }
   };
+
 
 
   return (

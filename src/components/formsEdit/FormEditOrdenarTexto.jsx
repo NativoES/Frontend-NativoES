@@ -5,9 +5,10 @@ import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useAppContext } from '@/contexts/Context';
+import { updateOrdenarTexto } from '@/services/exercises/exercises.service';
 
 export const FormEditOrdenarTexto = () => {
-  const { select, setIsOpenModal } = useAppContext();
+  const { select, setIsOpenModal, loader, setLoader } = useAppContext();
   const [title, setTitle] = useState('');
   const [parts, setParts] = useState(['']);
   const [shuffledParts, setShuffledParts] = useState([]);
@@ -51,21 +52,18 @@ export const FormEditOrdenarTexto = () => {
     }
 
     try {
-      const res = await fetch(`http://localhost:5001/api/ordenar-texto/${select._id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          titulo: title.trim(),
-          palabrasOriginales: filtered,
-        }),
+      setLoader(true);
+      await updateOrdenarTexto(select._id, {
+        titulo: title.trim(),
+        palabrasOriginales: filtered
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
       alert('Ejercicio actualizado correctamente');
       setIsOpenModal(null);
     } catch (err) {
       alert('Error al actualizar: ' + err.message);
+    } finally {
+      setLoader(false);
     }
   };
 

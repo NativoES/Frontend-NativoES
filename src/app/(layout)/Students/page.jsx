@@ -11,6 +11,7 @@ import {
   useAppContext
 } from '@/contexts/Context';
 import { Paginator } from '@/components/Paginator';
+import { getAllUsers } from '@/services/user/user.service';
 
 export default function VistaEstudiante() {
   const { loader, setLoader, isOpenModal, setIsOpenModal } = useAppContext()
@@ -62,30 +63,21 @@ export default function VistaEstudiante() {
   }
 
 
-  async function handlerFetch(limit, page) {
+  const handlerFetch = async (limit, page) => {
+    try {
+      const result = await getAllUsers({ page: page, limit: limit, rol: 'ESTUDIANTE' });
 
-    const defaultLimit = 5;
-    const defaultPage = 1;
+      setStudents(result.data);
+      setCurrentPage(result.page);
+      setTotalPages(result.totalPages);
+      setTotalDocuments(result.total);
+    } catch (error) {
+      console.error("Error al cargar usuarios:", error.message);
+    } finally {
+      setLoader('');
+    }
+  };
 
-    const finalLimit = limit || defaultLimit;
-    const finalPage = page || defaultPage;
-
-    const res = await fetch(
-      window?.location?.href?.includes("localhost")
-        ? `http://localhost:5002/api/user?limit=${finalLimit}&page=${finalPage}&rol=ESTUDIANTE`
-        : ``
-    );
-
-    const result = await res.json();
-    console.log("resultadoo: ", result);
-
-    setStudents(result.data);
-
-    setCurrentPage(result.page);
-    setTotalPages(result.totalPages);
-    setTotalDocuments(result.total);
-    setLoader('');
-  }
   const handleItemsPerPageChange = (itemsPerPage) => {
     setItemsPerPage(itemsPerPage);
     setCurrentPage(1);
@@ -111,7 +103,7 @@ export default function VistaEstudiante() {
       localStorage.removeItem('activeStudentId');
     }
   }, [activeStudentId]);
-  
+
   return (
     <div className="h-[80vh] flex items-center justify-center">
       <div className="max-w-4xl w-full bg-white rounded-lg shadow-md p-8 border border-gray-200">

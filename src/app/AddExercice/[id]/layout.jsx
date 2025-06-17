@@ -15,7 +15,7 @@ export default function Layout({ children }) {
 
   return (
     <div className="h-screen flex items-center justify-center bg-gray-100">
-      <div className="w-full max-w-4xl p-6 bg-white rounded-lg shadow-md h-[90vh] flex flex-col">
+      <div className="w-full max-w-4xl p-6 mt-16 bg-white rounded-lg shadow-md h-[86vh] flex flex-col">
 
         {/* Navegador */}
         <div className="w-full border-b pb-2 mb-4 flex justify-start space-x-8">

@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Button from '@/templates/Button';
+import { enrollStudent, getAllStudents, getEnrolledStudents } from '@/services/user/user.service';
 
 export default function ModalInscribirEstudiante({ onClose, onInscribir, claseId }) {
     const [query, setQuery] = useState('');
@@ -11,15 +12,11 @@ export default function ModalInscribirEstudiante({ onClose, onInscribir, claseId
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [resAll, resEnrolled] = await Promise.all([
-                    fetch(`http://localhost:5002/api/user/userSpecific?rol=ESTUDIANTE`),
-                    fetch(`http://localhost:5002/api/enrollment/students?claseId=${claseId}`)
+                const [allData, enrolledData] = await Promise.all([
+                    getAllStudents(),
+                    getEnrolledStudents(claseId)
                 ]);
 
-                const allData = await resAll.json();
-                const enrolledData = await resEnrolled.json();
-
-                // Carga todos los estudiantes
                 if (Array.isArray(allData)) {
                     setAllStudents(allData);
                 } else if (Array.isArray(allData.data)) {
@@ -28,13 +25,10 @@ export default function ModalInscribirEstudiante({ onClose, onInscribir, claseId
                     console.warn("Formato de respuesta inesperado:", allData);
                 }
 
-                // Extrae IDs desde enrolledData.students
                 const inscritosIds = enrolledData.students.map((e) => e._id);
-                console.log("inscritosId: ", inscritosIds);
-                
                 setStudentsInscritos(inscritosIds);
             } catch (error) {
-                console.error('Error al cargar estudiantes:', error);
+                console.error("Error al cargar estudiantes:", error);
             } finally {
                 setLoading(false);
             }
@@ -49,18 +43,15 @@ export default function ModalInscribirEstudiante({ onClose, onInscribir, claseId
         student.email.toLowerCase().includes(query.toLowerCase())
     );
 
-    const handleInscribir = async (userId) => {
-        const res = await fetch('http://localhost:5002/api/enrollment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ estudianteId: userId, claseId }),
-        });
 
-        if (res.ok) {
-            onInscribir(); // Refresca vista principal
+    const handleInscribir = async (userId) => {
+        try {
+            await enrollStudent({ estudianteId: userId, claseId });
+            onInscribir();
             onClose();
-        } else {
-            alert('No se pudo inscribir al estudiante');
+        } catch (error) {
+            console.error("Error inscribiendo estudiante:", error);
+            alert("No se pudo inscribir al estudiante");
         }
     };
 

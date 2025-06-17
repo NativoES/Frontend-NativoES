@@ -5,8 +5,10 @@ import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useParams } from 'next/navigation';
+import { ordenarTexto } from '@/services/exercises/exercises.service';
 
-const SingleSelectQuestion = () => {
+const SingleSelectQuestion = ({closeModal, onSave}) => {
+  const { setLoader, loader } = useAppContext();
   const [title, setTitle] = useState('');
   const [parts, setParts] = useState(['']);
   const [shuffledParts, setShuffledParts] = useState([]);
@@ -50,21 +52,18 @@ const SingleSelectQuestion = () => {
     };
     
     try {
-      const res = await fetch('http://localhost:5001/api/ordenar-texto', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message || 'Error al guardar el ejercicio');
+      setLoader(true);
+      const result = ordenarTexto(payload);
 
       alert('Ejercicio guardado correctamente');
       setTitle('');
       setParts(['']);
+      if (onSave) onSave(result);
+      closeModal();
     } catch (err) {
       alert('Error al guardar: ' + err.message);
+    } finally {
+      setLoader(false);
     }
   };
 

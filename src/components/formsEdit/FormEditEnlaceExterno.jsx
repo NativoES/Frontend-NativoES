@@ -7,13 +7,13 @@ import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useAppContext } from '@/contexts/Context';
+import { updateEnlaceExterno } from '@/services/exercises/exercises.service';
 
 export const FormEditEnlaceExterno = () => {
-  const { select, setIsOpenModal } = useAppContext();
+  const { select, setIsOpenModal, loader, setLoader } = useAppContext();
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [enlace, setEnlace] = useState('');
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (select) {
@@ -36,26 +36,15 @@ export const FormEditEnlaceExterno = () => {
     };
 
     try {
-      setLoading(true);
-      const response = await fetch(`http://localhost:5001/api/enlace-externo/${select._id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Error al actualizar el enlace');
-      }
+      setLoader(true);
+      await updateEnlaceExterno(select._id, payload);
 
       alert('Enlace actualizado correctamente');
       setIsOpenModal(false);
     } catch (error) {
       alert(error.message);
     } finally {
-      setLoading(false);
+      setLoader(false);
     }
   };
 
@@ -98,9 +87,9 @@ export const FormEditEnlaceExterno = () => {
         className="w-full"
         variant="primary"
         icon={<Save size={20} />}
-        disabled={loading}
+        disabled={loader}
       >
-        {loading ? 'Actualizando...' : 'Actualizar'}
+        {loader ? 'Actualizando...' : 'Actualizar'}
       </Button>
     </ModalTemplate>
   );

@@ -7,13 +7,13 @@ import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useAppContext } from '@/contexts/Context';
+import { updateRelacionarPalabra } from '@/services/exercises/exercises.service';
 
 export const FormEditRelacionarPalabra = () => {
-  const { select, setIsOpenModal } = useAppContext();
+  const { select, setIsOpenModal, loader, setLoader } = useAppContext();
   const [title, setTitle] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [pairs, setPairs] = useState([{ spanish: '', english: '' }]);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (select) {
@@ -70,21 +70,16 @@ export const FormEditRelacionarPalabra = () => {
     };
 
     try {
-      setLoading(true);
-      const res = await fetch(`http://localhost:5001/api/relacionar-palabra/${select._id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (!res.ok) throw new Error('Error al actualizar');
+      setLoader(true);
+      
+      await updateRelacionarPalabra(select._id, payload);
 
       alert('Actualizado correctamente');
       setIsOpenModal(false);
     } catch (err) {
       alert(err.message);
     } finally {
-      setLoading(false);
+      setLoader(false);
     }
   };
 
@@ -153,9 +148,9 @@ export const FormEditRelacionarPalabra = () => {
         className="w-full"
         variant="primary"
         icon={<Save size={20} />}
-        disabled={loading}
+        disabled={loader}
       >
-        {loading ? 'Actualizando...' : 'Actualizar'}
+        {loader ? 'Actualizando...' : 'Actualizar'}
       </Button>
     </ModalTemplate>
   );

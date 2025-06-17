@@ -8,8 +8,11 @@ import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useParams } from 'next/navigation';
+import { notaColores } from '@/services/exercises/exercises.service';
+// import { notaColores } from '@/services/clases/exercises.service';
 
-const Notes = () => {
+const Notes = ({ onSave, closeModal }) => {
+  const { loader, setLoader } = useAppContext();
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [selectedColor, setSelectedColor] = useState('blue');
@@ -38,23 +41,14 @@ const Notes = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:5001/api/nota', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(nota),
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al crear la nota');
-      }
-
-      const result = await response.json();
-      console.log('Nota creada:', result);
-      handleCancel(); // limpia el formulario
+      setLoader(true)
+      const result = await notaColores(nota);
+      if (onSave) onSave(result);
+      closeModal();
     } catch (error) {
       console.error('Error al guardar la nota:', error);
+    } finally {
+      setLoader(false)
     }
   };
 

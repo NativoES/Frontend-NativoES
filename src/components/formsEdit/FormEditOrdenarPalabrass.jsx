@@ -7,9 +7,10 @@ import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useAppContext } from '@/contexts/Context';
 import { useParams } from 'next/navigation';
+import { updateOrdenarPalabra } from '@/services/exercises/exercises.service';
 
 export const FormEditOrdenarPalabrass = () => {
-  const { select, setIsOpenModal } = useAppContext();
+  const { select, setIsOpenModal, loader, setLoader } = useAppContext();
   const params = useParams();
   const id = params.id;
 
@@ -109,18 +110,14 @@ export const FormEditOrdenarPalabrass = () => {
     };
 
     try {
-      const response = await fetch(`http://localhost:5001/api/ordenar-palabra/${select._id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) throw new Error('Error al editar el ejercicio');
-
+      setLoader(true);
+      await updateOrdenarPalabra(select._id, payload);
       console.log('Ejercicio editado correctamente');
       setIsOpenModal(null);
     } catch (error) {
       console.error(error);
+    }finally{
+      setLoader(false);
     }
   };
 

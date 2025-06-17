@@ -5,17 +5,19 @@ import TextEditor from '../textEditor/TextEditor';
 import ModalTemplate from '@/templates/ModalTemplate';
 import Button from '@/templates/Button';
 import { useParams } from 'next/navigation';
+import { notaTexto } from '@/services/exercises/exercises.service';
+// import { notaTexto } from '@/services/clases/exercises.service';
 
-export const NotesText = () => {
+export const NotesText = ({ closeModal, onSave }) => {
+    const { loader, setLoader } = useAppContext();
     const params = useParams();
     const id = params.id;
+    const [mensaje, setMensaje] = useState(null);
     const [feature, setFeature] = useState({
         titulo: '',
         texto: '',
     });
 
-    const [loading, setLoading] = useState(false);
-    const [mensaje, setMensaje] = useState(null);
 
     const handleFeatureChange = (field, value) => {
         setFeature((prev) => ({
@@ -24,38 +26,28 @@ export const NotesText = () => {
         }));
     };
 
-    const createNotes = async (data) => {
-
-        const newData = {
-            ...data,
-            claseId: id,
-            template: "notaTexto"
-        }
-        const response = await fetch('http://localhost:5001/api/nota-texto', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newData),
-        });
-
-        if (!response.ok) {
-            throw new Error('Error al crear la nota');
-        }
-
-        return response.json();
-    };
 
     const handleSubmit = async () => {
-        setLoading(true);
+        setLoader(true);
         setMensaje(null);
         try {
-            await createNotes(feature);
+
+            const newData = {
+                ...feature,
+                claseId: id,
+                template: "notaTexto"
+            }
+
+            const result = await notaTexto(newData);
             setMensaje('Nota guardada con éxito');
             setFeature({ titulo: '', texto: '' });
+            if (onSave) onSave(result);
+            closeModal();
         } catch (error) {
             console.error(error);
             setMensaje('Ocurrió un error al guardar');
         } finally {
-            setLoading(false);
+            setLoader(false);
         }
     };
 
@@ -90,9 +82,9 @@ export const NotesText = () => {
                 <div className="flex justify-end gap-3 pt-4">
                     <Button
                         onClick={handleSubmit}
-                        disabled={loading}
+                        disabled={loader}
                     >
-                        {loading ? 'Guardando...' : 'Guardar'}
+                        {loader ? 'Guardando...' : 'Guardar'}
                     </Button>
                 </div>
             </div>

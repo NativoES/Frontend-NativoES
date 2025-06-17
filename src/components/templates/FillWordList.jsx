@@ -6,8 +6,11 @@ import DraggableCard from '@/templates/DraggableCard';
 import DroppableContainer from '@/templates/DroppableContainer';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useParams } from 'next/navigation';
+import { useAppContext } from '@/contexts/Context';
+import { completarTexto } from '@/services/exercises/exercises.service';
 
-const DraggableWords = () => {
+const DraggableWords = ({ closeModal, onSave }) => {
+  const { setLoader } = useAppContext();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [textToComplete, setTextToComplete] = useState("");
@@ -92,6 +95,12 @@ const DraggableWords = () => {
   console.log("pathname", id)
 
   const handleSave = async () => {
+    if (!title.trim() || !textToComplete.trim() || correctWords.length === 0) {
+      alert("Por favor, complete todos los campos requeridos.");
+      return;
+    }
+
+    setLoader(true);
 
     const content = {
       titulo: title,
@@ -100,52 +109,30 @@ const DraggableWords = () => {
       palabrasCorrectas: correctWords,
       claseId: id,
       template: "arrastrarAlTexto"
-    }
+    };
 
-    console.log("content: ", content);
-
-    const res = await fetch(
-      window?.location?.href?.includes("localhost")
-        ? `http://localhost:5001/api/completar-texto`
-        : ``,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json", // ← necesario
-        },
-        body: JSON.stringify(content),
-      }
-    );
-
-    const result = await res.json();
-    console.log("resultadoo: ", result);
-
-    if (res.ok) {
-
-      const response = await fetch(window?.location?.href?.includes('localhost')
-        ? `http://localhost:5001/api/completar-texto/${id}`
-        : '', {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ exerciseId: result.classe.id }),
-      });
-
-      console.log('RESPONSE', response)
+    try {
+      const result = await completarTexto(content);
 
       alert("Ejercicio guardado correctamente");
+
+      // Limpiar campos
+      setTitle("");
+      setDescription("");
+      setTextToComplete("");
+      setDroppedTexts([]);
+      setCorrectWords([]);
+      setFeedback([]);
+      setDisplayText([]);
+
+      if (onSave) onSave(result);
+      closeModal();
+    } catch (error) {
+      console.error(error);
+      alert("Ocurrió un error al guardar");
+    } finally {
+      setLoader(false);
     }
-    else {
-      alert("Error al guardar el ejercicio");
-    }
-    setTitle("");
-    setDescription("");
-    setTextToComplete("");
-    setDroppedTexts([]);
-    setCorrectWords([]);
-    setFeedback([]);
-    setDisplayText([]);
   };
 
   return (

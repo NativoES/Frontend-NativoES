@@ -7,15 +7,15 @@ import TextAreaTemplate from '@/templates/TextAreaTemplate';
 import Button from '@/templates/Button';
 import ModalTemplate from '@/templates/ModalTemplate';
 import AudioRecorder from '../AudioRecorder';
+import { updateAudio } from '@/services/exercises/exercises.service';
 
 export default function FormEditAudio() {
-  const { select, setIsOpenModal } = useAppContext();
+  const { select, setIsOpenModal, loader, setLoader } = useAppContext();
 
   const [audioFile, setAudioFile] = useState(null);         
   const [audioName, setAudioName] = useState('');
   const [description, setDescription] = useState('');
-  const [previewUrl, setPreviewUrl] = useState(null);       
-  const [isLoading, setIsLoading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);     
 
   useEffect(() => {
     if (!select) return;
@@ -42,25 +42,19 @@ export default function FormEditAudio() {
     }
 
     try {
-      setIsLoading(true);
+      setLoader(true);
       const formData = new FormData();
       formData.append('titulo', audioName.trim());
       formData.append('descripcion', description.trim());
       if (audioFile) formData.append('file', audioFile);
 
-      const res = await fetch(`http://localhost:5001/api/audio/${select._id}`, {
-        method: 'PATCH',
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Error al guardar el audio');
+      await updateAudio(select._id, formData);
 
       setIsOpenModal(null);
     } catch (err) {
       alert('Error al guardar: ' + err.message);
     } finally {
-      setIsLoading(false);
+      setLoader(false);
     }
   };
 
@@ -124,10 +118,10 @@ export default function FormEditAudio() {
       }} />
 
       <div className="flex justify-between mt-6">
-        <Button onClick={handleSave} variant="primary" disabled={isLoading}>
-          {isLoading ? 'Guardando...' : 'Guardar cambios'}
+        <Button onClick={handleSave} variant="primary" disabled={loader}>
+          {loader ? 'Guardando...' : 'Guardar cambios'}
         </Button>
-        <Button onClick={handleCancel} variant="secondary" disabled={isLoading}>
+        <Button onClick={handleCancel} variant="secondary" disabled={loader}>
           Cancelar
         </Button>
       </div>

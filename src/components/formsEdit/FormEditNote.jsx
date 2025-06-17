@@ -8,9 +8,10 @@ import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useAppContext } from '@/contexts/Context';
+import { updateNotaColores } from '@/services/exercises/exercises.service';
 
 export const FormEditNote = () => {
-    const { select, setSelect, setIsOpenModal } = useAppContext();
+    const { select, setSelect, setIsOpenModal, loader, setLoader } = useAppContext();
     const [title, setTitle] = useState('');
     const [message, setMessage] = useState('');
     const [selectedColor, setSelectedColor] = useState('blue');
@@ -52,15 +53,9 @@ export const FormEditNote = () => {
         };
 
         try {
-            const response = await fetch(`http://localhost:5001/api/nota/${select._id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            });
+            setLoader(true);
 
-            if (!response.ok) throw new Error('Error al editar la nota');
+            await updateNotaColores(select._id, payload);
 
             alert('Nota editada correctamente');
             setIsOpenModal(false);
@@ -68,6 +63,8 @@ export const FormEditNote = () => {
         } catch (error) {
             console.error('Error al editar la nota:', error);
             alert('Error al editar la nota');
+        } finally {
+            setLoader(false);
         }
     };
 

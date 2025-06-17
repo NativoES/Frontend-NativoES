@@ -1,27 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-import ModalTemplate from '@/templates/ModalTemplate';
-import Button from '@/templates/Button';
 import { useAppContext } from '@/contexts/Context';
+import { deleteExercises } from '@/services/exercises/exercises.service';
 
 export const DeleteExercise = () => {
-  const { select, setIsOpenModal, setSelect } = useAppContext();
-  const [loading, setLoading] = useState(false);
+  const { select, setIsOpenModal, setSelect, loader, setLoader } = useAppContext();
 
   const handleDelete = async () => {
     if (!select?._id) return;
 
-    setLoading(true);
+    setLoader(true);
     try {
-      const response = await fetch(`http://localhost:5001/api/ejercicios/${select._id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al eliminar el ejercicio');
-      }
-
+      deleteExercises(select._id)
       alert('Ejercicio eliminado correctamente');
       setIsOpenModal('');
       setSelect(null);
@@ -29,7 +20,7 @@ export const DeleteExercise = () => {
       console.error(error);
       alert('Error al eliminar');
     } finally {
-      setLoading(false);
+      setLoader(false);
     }
   };
 
@@ -51,10 +42,10 @@ export const DeleteExercise = () => {
           </button>
           <button
             onClick={handleDelete}
-            disabled={loading}
+            disabled={loader}
             className="px-4 py-2 rounded-lg bg-yellow-400 text-black font-semibold hover:bg-yellow-500 transition disabled:opacity-60"
           >
-            {loading ? 'Eliminando...' : 'Eliminar'}
+            {loader ? 'Eliminando...' : 'Eliminar'}
           </button>
         </div>
       </div>

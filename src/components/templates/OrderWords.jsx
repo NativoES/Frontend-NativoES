@@ -9,16 +9,16 @@ import { shuffleArray } from '@/utils/ArrayUtils';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useParams } from 'next/navigation';
 import { useAppContext } from '@/contexts/Context';
+import { formarPalabra } from '@/services/exercises/exercises.service';
 
-const DraggableLetters = () => {
-  const { setIsOpenModal } = useAppContext();
+const DraggableLetters = ({ onSave, closeModal }) => {
+  const { loader, setLoader } = useAppContext();
   const [title, setTitle] = useState('');
   const [word, setWord] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [droppedLetters, setDroppedLetters] = useState([]);
   const [feedback, setFeedback] = useState([]);
   const [shuffledLetters, setShuffledLetters] = useState([]);
-  const [loading, setLoading] = useState(false);
   const params = useParams();
   const id = params.id;
 
@@ -60,7 +60,7 @@ const DraggableLetters = () => {
       return;
     }
 
-    setLoading(true);
+    setLoader(true);
 
     const data = {
       titulo: title,
@@ -72,22 +72,14 @@ const DraggableLetters = () => {
     };
 
     try {
-      const res = await fetch('http://localhost:5001/api/formar-palabra', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) throw new Error('Error al guardar el ejercicio');
-
-      const result = await res.json();
-      console.log('Guardado:', result);
-      setIsOpenModal(null);
+      const result = formarPalabra(data);
+      if (onSave) onSave(result);
+      closeModal();
     } catch (err) {
       console.error(err);
       alert('Ocurrió un error al guardar el ejercicio.');
     } finally {
-      setLoading(false);
+      setLoader(false);
     }
   };
 
@@ -157,9 +149,9 @@ const DraggableLetters = () => {
           onClick={handleSave}
           className="w-full"
           variant="primary"
-          disabled={loading}
+          disabled={loader}
         >
-          {loading ? 'Guardando...' : 'Guardar'}
+          {loader ? 'Guardando...' : 'Guardar'}
         </Button>
       </div>
     </ModalTemplate>

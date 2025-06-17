@@ -9,9 +9,10 @@ import TextAreaTemplate from '@/templates/TextAreaTemplate';
 import Button from '@/templates/Button';
 import DraggableCard from '@/templates/DraggableCard';
 import DroppableContainer from '@/templates/DroppableContainer';
+import { updateCompletarTexto } from '@/services/exercises/exercises.service';
 
 export const FormEditArrastrarTexto = () => {
-  const { select, setSelect, setIsOpenModal } = useAppContext();
+  const { select, setSelect, setIsOpenModal, loader, setLoader } = useAppContext();
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [textoOriginal, setTextoOriginal] = useState('');
@@ -28,7 +29,6 @@ export const FormEditArrastrarTexto = () => {
     }
   }, [select]);
 
-  // Extrae palabras entre corchetes y construye la estructura visual
   const extractWords = (text) => {
     const regex = /\[(.*?)\]/g;
     const words = [];
@@ -102,17 +102,8 @@ export const FormEditArrastrarTexto = () => {
   };
 
   try {
-    const response = await fetch(`http://localhost:5001/api/completar-texto/${select._id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updatedFields),
-    });
-
-    if (!response.ok) {
-      throw new Error('Error al editar');
-    }
+    setLoader(true);
+    await updateCompletarTexto(select._id, updatedFields);
 
     alert('Editado correctamente');
     setIsOpenModal(false);
@@ -120,6 +111,8 @@ export const FormEditArrastrarTexto = () => {
   } catch (error) {
     console.error('Error al guardar los cambios:', error);
     alert('Error al editar');
+  } finally {
+    setLoader(true);
   }
 };
 

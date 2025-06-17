@@ -40,6 +40,7 @@ import { EnlaceExternoExercise } from '@/components/ejercicios/EnlaceExternoExer
 import { RelacionarPalabrasExercise } from '@/components/ejercicios/RelacionarPalabrasExercise';
 import { FalsoVerdaderoExercise } from '@/components/ejercicios/FalsoVerdaderoExercise';
 import { templates } from '@/data/templates';
+import { getClassById } from '@/services/exercises/clases.service';
 
 
 export default function ExercisePage() {
@@ -112,8 +113,8 @@ export default function ExercisePage() {
 
     const fetchData = async (claseId) => {
         try {
-            const res = await fetch(`http://localhost:5001/api/ejercicios/${claseId}`);
-            const data = await res.json();
+            // const res = await fetch(`http://localhost:5001/api/ejercicios/${claseId}`);
+            const data = await getClassById(claseId);
 
             setExercises(data);
 
@@ -281,28 +282,28 @@ export default function ExercisePage() {
                 <UploadAudio isOpen={true} onClose={closeModal} onAudioUpload={handleExerciseAdd} />
             )}
             {isOpenModal === 'fillInTheBlanks' && (
-                <FillInTheBlanks isOpen={true} onClose={closeModal} onSave={handleExerciseAdd} />
+                <FillInTheBlanks closeModal={closeModal} onSave={handleExerciseAdd} />
             )}
             {isOpenModal === 'completeText' && (
-                <CompleteText onClose={closeModal} onSave={handleExerciseAdd} />
+                <CompleteText closeModal={closeModal} onSave={handleExerciseAdd} />
             )}
             {isOpenModal === 'textAndArticle' && (
                 <NotesText onClose={closeModal} onSave={handleExerciseAdd} />
             )}
             {isOpenModal === 'orderText' && (
-                <OrderText onClose={closeModal} onSave={handleExerciseAdd} />
+                <OrderText closeModal={closeModal} onSave={handleExerciseAdd} />
             )}
             {isOpenModal === 'selectQuestion' && (
                 <SingleSelectQuestion onClose={closeModal} onSave={handleExerciseAdd} />
             )}
             {isOpenModal === 'wordsAndImage' && (
-                <WordsAndImage onClose={closeModal} onSave={handleExerciseAdd} />
+                <WordsAndImage closeModal={closeModal} onSave={handleExerciseAdd} />
             )}
             {isOpenModal === 'fillWordsList' && (
                 <DraggableWords onClose={closeModal} onSave={handleExerciseAdd} />
             )}
             {isOpenModal === 'orderWords' && (
-                <DraggableLetters onClose={closeModal} onSave={handleExerciseAdd} />
+                <DraggableLetters closeModal={closeModal} onSave={handleExerciseAdd} />
             )}
             {isOpenModal === 'externalLink' && (
                 <ExternalLinkCard onClose={closeModal} onSave={handleExerciseAdd} />
@@ -320,14 +321,14 @@ export default function ExercisePage() {
             )}
 
             {isOpenModal === 'relacionarPalabra' && (
-                <WordMatchGame closeModal={closeModal} onVideoUpload={handleExerciseAdd} />
+                <WordMatchGame closeModal={closeModal} onSave={handleExerciseAdd} />
             )}
 
             {isOpenModal === 'enlaceExterno' && (
-                <EnlaceExterno closeModal={closeModal} onVideoUpload={handleExerciseAdd} />
+                <EnlaceExterno closeModal={closeModal} onSave={handleExerciseAdd} />
             )}
             {isOpenModal === 'trueFalse' && (
-                <TrueFalseModal closeModal={closeModal} onVideoUpload={handleExerciseAdd} />
+                <TrueFalseModal closeModal={closeModal} onSave={handleExerciseAdd} />
             )}
 
         </>

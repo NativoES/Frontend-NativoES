@@ -6,11 +6,12 @@ import ModalTemplate from '@/templates/ModalTemplate';
 import { InputTemplate } from '@/templates/InputTemplate';
 import TextAreaTemplate from '@/templates/TextAreaTemplate';
 import Label from '@/templates/Labels';
-import { useAppContext } from '@/contexts/Context';
 import { useParams } from 'next/navigation';
+import { useAppContext } from '@/contexts/Context';
+import { seleccionPalabra } from '@/services/exercises/exercises.service';
 
-const FormCreateSeleccionPalabras = ({ onSave }) => {
-  const { setIsOpenModal } = useAppContext();
+const FormCreateSeleccionPalabras = ({ closeModal, onSave }) => {
+  const {loader, setLoader} = useAppContext();
   const [title, setTitle] = useState('');
   const [exerciseText, setExerciseText] = useState('');
   const [preview, setPreview] = useState([]);
@@ -56,29 +57,21 @@ const FormCreateSeleccionPalabras = ({ onSave }) => {
     };
 
     try {
-      const res = await fetch('http://localhost:5001/api/seleccion-palabra', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      setLoader(true);
+      const result = await seleccionPalabra(payload);
+      if (onSave) onSave(result);
+      closeModal();
 
-      if (!res.ok) {
-        const error = await res.json();
-        alert(error.message || 'Error al guardar el ejercicio');
-        return;
-      }
-
-      const data = await res.json();
-      onSave?.(data);
-      setIsOpenModal(false);
     } catch (err) {
       console.error(err);
-      alert('Error al conectar con el servidor');
+      setMensaje('Ocurrió un error al guardar');
+    } finally {
+      setLoader(false);
     }
   };
 
   const handleCancel = () => {
-    setIsOpenModal(false);
+    closeModal();
   };
 
   return (

@@ -9,6 +9,7 @@ import TextAreaTemplate from '@/templates/TextAreaTemplate';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useAppContext } from '@/contexts/Context';
 import { useParams } from 'next/navigation';
+import { llenarEspacio } from '@/services/exercises/exercises.service';
 
 export const parseExerciseText = (exerciseText, fillInWords, handleInputChange, errors) => {
   const parts = exerciseText.split(/(\[.*?\])/);
@@ -37,8 +38,8 @@ export const parseExerciseText = (exerciseText, fillInWords, handleInputChange, 
   });
 };
 
-export default function FillInTheBlanksModal({ onSave }) {
-  const { isOpenModal, setIsOpenModal, select } = useAppContext();
+export default function FillInTheBlanksModal({ closeModal, onSave }) {
+  const { isOpenModal, setLoader, select } = useAppContext();
   const [descripcion, setDescripcion] = useState('');
   const [task, setTask] = useState('');
   const [exerciseText, setExerciseText] = useState('');
@@ -107,25 +108,16 @@ export default function FillInTheBlanksModal({ onSave }) {
       };
 
       try {
-        const response = await fetch('http://localhost:5001/api/llenar-espacio', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        });
+        setLoader(true);
+        const result = llenarEspacio(payload);
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          alert(`Error: ${errorData.message || 'No se pudo guardar el ejercicio'}`);
-          return;
-        }
-
-        onSave(payload);
-        setIsOpenModal(false);
+        if (onSave) onSave(result);
+        closeModal();
       } catch (error) {
         alert('Error al conectar con el servidor');
         console.error(error);
+      } finally {
+        setLoader(false);
       }
     } else {
       alert('Por favor, completa todos los campos correctamente.');
@@ -134,7 +126,8 @@ export default function FillInTheBlanksModal({ onSave }) {
 
 
   const handleClose = () => {
-    setIsOpenModal(false);
+    // setIsOpenModal(false);
+    closeModal();
   };
 
   if (!isOpenModal) return null;
@@ -142,7 +135,7 @@ export default function FillInTheBlanksModal({ onSave }) {
   return (
     <ModalTemplate className="w-full">
       <h2 className="text-2xl font-bold text-gray-900 mb-4">
-        {select ? 'Editar ejercicio' : 'Crear ejercicio'} de Rellenar Espacios
+        Crear ejercicio de Rellenar Espacios
       </h2>
 
       <div className="mb-4">

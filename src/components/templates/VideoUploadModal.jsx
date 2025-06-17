@@ -7,13 +7,15 @@ import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useParams } from 'next/navigation';
+import { useAppContext } from '@/contexts/Context';
+import { uploadVideo } from '@/services/exercises/exercises.service';
 
 export default function VideoUploadModal({ closeModal, onVideoUpload }) {
+  const { setLoader, loader } = useAppContext();
   const [videoFile, setVideoFile] = useState(null);
   const [videoPreview, setVideoPreview] = useState(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const params = useParams();
   const id = params.id;
 
@@ -34,7 +36,7 @@ export default function VideoUploadModal({ closeModal, onVideoUpload }) {
     }
 
     try {
-      setIsLoading(true);
+      setLoader(true);
       const formData = new FormData();
       formData.append('file', videoFile);
       formData.append('titulo', title);
@@ -42,23 +44,14 @@ export default function VideoUploadModal({ closeModal, onVideoUpload }) {
       formData.append('claseId', id);
       formData.append('template', 'video');
 
-      const response = await fetch('http://localhost:5001/api/video', {
-        method: 'POST',
-        body: formData,
-      });
+      const result = await uploadVideo(formData);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al subir el video');
-      }
-
-      const result = await response.json();
       if (onVideoUpload) onVideoUpload(result);
       closeModal();
     } catch (error) {
       alert(error.message);
     } finally {
-      setIsLoading(false);
+      setLoader(false);
     }
   };
 
@@ -120,10 +113,10 @@ export default function VideoUploadModal({ closeModal, onVideoUpload }) {
       </div>
 
       <div className="flex justify-between mt-4">
-        <Button onClick={handleSaveVideo} variant="primary" disabled={isLoading}>
-          {isLoading ? 'Guardando...' : 'Guardar'}
+        <Button onClick={handleSaveVideo} variant="primary" disabled={loader}>
+          {loader ? 'Guardando...' : 'Guardar'}
         </Button>
-        <Button onClick={handleCancel} variant="secondary" disabled={isLoading}>
+        <Button onClick={handleCancel} variant="secondary" disabled={loader}>
           Cancelar
         </Button>
       </div>

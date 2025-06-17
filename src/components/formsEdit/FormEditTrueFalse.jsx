@@ -7,9 +7,10 @@ import Button from '@/templates/Button';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { Plus, Save, Trash2 } from 'lucide-react';
 import { useAppContext } from '@/contexts/Context';
+import { updateFalsoVerdadero } from '@/services/exercises/exercises.service';
 
 export const FormEditTrueFalse = () => {
-  const { select, setIsOpenModal } = useAppContext();
+  const { select, setIsOpenModal, loader, setLoader } = useAppContext();
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [preguntas, setPreguntas] = useState([]);
@@ -51,18 +52,14 @@ export const FormEditTrueFalse = () => {
     };
 
     try {
-      const res = await fetch(`http://localhost:5001/api/falso-verdadero/${select._id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) throw new Error('Error al actualizar el ejercicio');
-      alert('Ejercicio actualizado correctamente');
+      setLoader(true);
+      await updateFalsoVerdadero(select._id, payload);
       setIsOpenModal(false);
     } catch (error) {
       console.error(error);
       alert('Ocurrió un error al actualizar');
+    } finally{
+      setLoader(false);
     }
   };
 

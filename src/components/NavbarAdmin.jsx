@@ -9,7 +9,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     // Limpia los datos del localStorage o cualquier otra información de sesión
-    localStorage.removeItem('userEmail');
+    localStorage.removeItem('token');
     console.log('Sesión cerrada');
 
     // Redirige al login

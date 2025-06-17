@@ -7,14 +7,14 @@ import Button from '@/templates/Button';
 import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useAppContext } from '@/contexts/Context';
+import { updateGif } from '@/services/exercises/exercises.service';
 
 export default function FormEditGif() {
-  const { select, setIsOpenModal } = useAppContext();
+  const { select, setIsOpenModal, loader, setLoader } = useAppContext();
   const [gifFile, setGifFile] = useState(null);
   const [gifPreview, setGifPreview] = useState(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (select) {
@@ -38,7 +38,7 @@ export default function FormEditGif() {
    
 
     try {
-      setIsLoading(true);
+      setLoader(true);
       const formData = new FormData();
 
       if (gifFile) {
@@ -48,21 +48,13 @@ export default function FormEditGif() {
       formData.append('titulo', title);
       formData.append('descripcion', description || 'Sin descripción');
 
-      const response = await fetch(`http://localhost:5001/api/gif/${select._id}`, {
-        method: 'PATCH',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al editar el GIF');
-      }
+      await updateGif(select._id, formData);
 
       setIsOpenModal(false);
     } catch (error) {
       alert(error.message);
     } finally {
-      setIsLoading(false);
+      setLoader(false);
     }
   };
 
@@ -125,10 +117,10 @@ export default function FormEditGif() {
       </div>
 
       <div className="flex justify-between mt-4">
-        <Button onClick={handleSaveEdit} variant="primary" disabled={isLoading}>
-          {isLoading ? 'Guardando...' : 'Guardar cambios'}
+        <Button onClick={handleSaveEdit} variant="primary" disabled={loader}>
+          {loader ? 'Guardando...' : 'Guardar cambios'}
         </Button>
-        <Button onClick={handleCancel} variant="secondary" disabled={isLoading}>
+        <Button onClick={handleCancel} variant="secondary" disabled={loader}>
           Cancelar
         </Button>
       </div>

@@ -8,6 +8,7 @@ import InputTemplate from '@/templates/InputTemplate';
 import TextAreaTemplate from '@/templates/TextAreaTemplate';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useAppContext } from '@/contexts/Context';
+import { updateLlenarEspacio } from '@/services/exercises/exercises.service';
 
 const parseExerciseText = (exerciseText, fillInWords, handleInputChange, errors) => {
   const parts = exerciseText.split(/(\[.*?\])/);
@@ -37,7 +38,7 @@ const parseExerciseText = (exerciseText, fillInWords, handleInputChange, errors)
 };
 
 export const FormEditLlenarTexto = () => {
-  const { isOpenModal, setIsOpenModal, select } = useAppContext();
+  const { isOpenModal, setIsOpenModal, select, loader, setLoader } = useAppContext();
 
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -76,24 +77,16 @@ export const FormEditLlenarTexto = () => {
     };
 
     try {
-      const response = await fetch(`http://localhost:5001/api/llenar-espacio/${select._id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+      setLoader(true);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert(`Error: ${errorData.message || 'No se pudo guardar los cambios'}`);
-        return;
-      }
+      await updateLlenarEspacio(select._id, payload);
 
       setIsOpenModal(false);
     } catch (error) {
       alert('Error al conectar con el servidor');
       console.error(error);
+    }finally {
+      setLoader(false)
     }
   };
 

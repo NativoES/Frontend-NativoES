@@ -8,9 +8,10 @@ import TextAreaTemplate from '@/templates/TextAreaTemplate';
 import Button from '@/templates/Button';
 import { useAppContext } from '@/contexts/Context';
 import { useParams } from 'next/navigation';
+import { updateSeleccionPalabra } from '@/services/exercises/exercises.service';
 
 const FormEditSeleccionPalabras = () => {
-    const { select, setIsOpenModal } = useAppContext();
+    const { select, setIsOpenModal, loader, setLoader } = useAppContext();
 
     const [title, setTitle] = useState('');
     const [descripcion, setDescripcion] = useState('');
@@ -59,22 +60,15 @@ const FormEditSeleccionPalabras = () => {
         };
 
         try {
-            const res = await fetch(`http://localhost:5001/api/seleccion-palabra/${select._id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            });
-
-            if (!res.ok) {
-                const err = await res.json();
-                alert(err.message || 'Error al guardar');
-                return;
-            }
-
+            setLoader(true);
+            await updateSeleccionPalabra(select._id, payload);
+                        
             setIsOpenModal(false);
         } catch (error) {
             console.error(error);
             alert('Error de conexión al servidor');
+        } finally{
+            setLoader(true);
         }
     };
 
