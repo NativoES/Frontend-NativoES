@@ -134,16 +134,16 @@ export default function VistaEstudiante() {
                 className="hover:shadow-sm transition-shadow duration-300 cursor-pointer hover:border-[#FEAB5F] mb-2 flex justify-between items-center"
               >
                 <div className="flex items-center">
-                  {student.fotografia && (
+                  {student?.fotografia && (
                     <img
-                      src={student.fotografia}
+                      src={student?.fotografia}
                       alt="Perfil"
                       className="w-16 h-16 object-cover rounded-full mr-4"
                     />
                   )}
                   <div>
-                    <h3 className="text-lg text-gray-900">{student.nombreCompleto}</h3>
-                    <p className="text-gray-600">{student.email}</p>
+                    <h3 className="text-lg text-gray-900">{student?.nombreCompleto}</h3>
+                    <p className="text-gray-600">{student?.email}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">

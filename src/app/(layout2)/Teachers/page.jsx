@@ -8,6 +8,7 @@ import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import Button from '@/components/ui/Button';
 import { Plus, Trash, Move } from 'lucide-react';
+import { createTeacher, deleteTeacher, getTeacher, updateTeacher } from '@/services/landing/landing.service';
 
 const TeachersEditor = () => {
   const { siteData, updateSection, language } = useAppContext();
@@ -18,19 +19,17 @@ const TeachersEditor = () => {
   const [selectedFiles, setSelectedFiles] = useState({});
 
 
-  const fetchTeachers = async () => {
+  const fetchTeachers = async (locale) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/teacher?locale=${idioma}`);
-      const data = await res.json();
+      const data = await getTeacher(locale);
       setTeachers(data);
     } catch (error) {
       console.error('Error al cargar profesores:', error);
     }
   };
   useEffect(() => {
-
-    fetchTeachers();
-  }, [idioma]);
+    fetchTeachers(idioma);
+  }, [language]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -119,10 +118,27 @@ const TeachersEditor = () => {
     setTeachers(prev => [...prev, newTeacher]);
   };
 
-  const removeTeacher = (index) => {
-    const updated = [...teachers];
-    updated.splice(index, 1);
-    setTeachers(updated);
+  const removeTeacher = async (index, id) => {
+    console.log("id usuario: ", id);
+    
+    if (!id) {
+      const updated = [...teachers];
+      updated.splice(index, 1);
+      setTeachers(updated);
+      return;
+    }
+
+    try {
+      const res = await deleteTeacher(id);
+      console.log("eliminar teacher: ", res);
+      
+      const updated = [...teachers];
+      updated.splice(index, 1);
+      setTeachers(updated);
+    } catch (error) {
+      console.error('Error al eliminar característica:', err);
+        alert('No se pudo eliminar la característica');
+    }
   };
 
   const moveTeacher = (index, direction) => {
@@ -155,18 +171,12 @@ const TeachersEditor = () => {
       }
 
       if (teacher._id) {
-        await fetch(`http://localhost:5000/api/teacher/${teacher._id}`, {
-          method: 'PATCH',
-          body: formData,
-        });
+        await updateTeacher(teacher._id, formData);
       } else {
-        await fetch(`http://localhost:5000/api/teacher`, {
-          method: 'POST',
-          body: formData,
-        });
+        await createTeacher(formData);
       }
     }
-    fetchTeachers();
+    fetchTeachers(idioma);
   };
 
 
@@ -199,7 +209,7 @@ const TeachersEditor = () => {
                     <button onClick={() => moveTeacher(index, 'down')} disabled={index === teachers.length - 1} className="p-1">
                       <Move size={16} className="-rotate-90" />
                     </button>
-                    <button onClick={() => removeTeacher(index)} className="p-1 text-red-500">
+                    <button onClick={() => removeTeacher(index, teacher._id)} className="p-1 text-red-500">
                       <Trash size={16} />
                     </button>
                   </div>

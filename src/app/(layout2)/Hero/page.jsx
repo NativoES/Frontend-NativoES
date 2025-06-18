@@ -7,6 +7,7 @@ import Card, { CardContent, CardHeader } from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import Button from '@/components/ui/Button';
+import { createHero, getHero, updateHero } from '@/services/landing/landing.service';
 
 const emptyHeroData = {
     title: '',
@@ -27,10 +28,12 @@ const HeroEditor = () => {
 
     const idioma = language.toLowerCase();
 
+    console.log("lenguaje: ", language);
+    
+
     const loadHeroData = async (idioma) => {
         try {
-            const res = await fetch(`http://localhost:5000/api/hero?locale=${idioma}`);
-            const data = await res.json();
+            const data = await getHero(idioma);
 
             console.log('Datos del hero:', data);
 
@@ -101,16 +104,12 @@ const HeroEditor = () => {
 
             if (formData._id) {
                 // PATCH
-                await fetch(`http://localhost:5000/api/hero/${formData._id}`, {
-                    method: 'PATCH',
-                    body: formDataToSend
-                });
+                await updateHero(formData._id, formDataToSend);
+                
             } else {
                 // POST
-                await fetch('http://localhost:5000/api/hero', {
-                    method: 'POST',
-                    body: formDataToSend
-                });
+                await createHero(formDataToSend)
+                
             }
 
 
@@ -218,32 +217,6 @@ const HeroEditor = () => {
                         </form>
                     </CardContent>
                 </Card>
-
-                {/* <Card>
-                    <CardHeader>
-                        <h3 className="text-lg font-semibold">Vista previa</h3>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="rounded-lg overflow-hidden shadow-md bg-gray-800 text-white relative aspect-video">
-                            <div className="absolute inset-0 bg-cover bg-center opacity-40" style={{ backgroundImage: `url(${formData.backgroundImage})` }} />
-                            <div className="relative z-10 p-6 flex flex-col h-full justify-center">
-                                <h1 className="text-3xl font-bold mb-2">{formData.title}</h1>
-                                <p className="text-sm mb-4">{formData.subtitle}</p>
-                                <div className="flex flex-wrap gap-3 mb-4">
-                                    <span className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium">
-                                        {formData.ctaPrimary}
-                                    </span>
-                                    <span className="bg-transparent border border-white text-white px-4 py-2 rounded-md text-sm font-medium">
-                                        {formData.ctaSecondary}
-                                    </span>
-                                </div>
-                                <div className="text-sm">
-                                    <span className="font-bold">{formData.studentsCount}</span> {formData.studentsText}
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card> */}
             </div>
         </div>
     );

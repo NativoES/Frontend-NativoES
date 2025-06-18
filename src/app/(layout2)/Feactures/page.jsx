@@ -10,17 +10,20 @@ import TextEditor from '@/components/TextEditor/TextEditor';
 import 'react-quill-new/dist/quill.snow.css'
 import 'react-quill-new/dist/quill.bubble.css'
 import 'react-quill-new/dist/quill.core.css'
+import { createFormStudy, deleteFormStudy, getFormStudy, updateFormStudy } from '@/services/landing/landing.service';
 
 const FeaturesEditor = () => {
   const { language } = useAppContext();
   const locale = language.toLowerCase();
   const [features, setFeatures] = useState([]);
 
-  useEffect(() => {
-    fetch(`http://localhost:5000/api/form-study?locale=${locale}`)
-      .then(res => res.json())
-      .then(data => {
-        const items = data.map((item) => ({
+  const idioma = language.toLowerCase();
+
+  const getFormStudies = async (locale) => {
+    try {
+      const data = await getFormStudy(locale);
+
+      const items = data.map((item) => ({
           _id: item._id,
           titulo: item[locale]?.titulo || '',
           descripcion: item[locale]?.descripcion || '',
@@ -29,8 +32,12 @@ const FeaturesEditor = () => {
         }));
 
         setFeatures(items);
-      })
-      .catch(err => console.error('Error cargando features:', err));
+    } catch (error) {
+      alert("Error al registrar.")
+    }
+  }
+  useEffect(() => {
+    getFormStudies(idioma)
   }, [language]);
 
   const handleFeatureChange = (index, field, value) => {
@@ -54,12 +61,10 @@ const FeaturesEditor = () => {
 
 
     try {
-      const res = await fetch(`http://localhost:5000/api/${id}`, {
-        method: 'DELETE',
-      });
 
-      if (!res.ok) throw new Error('Error al eliminar en el servidor');
-
+      const res = await deleteFormStudy(id);
+      console.log("respsuesta eliminar. ", res);
+      
       const updated = [...features];
       updated.splice(index, 1);
       setFeatures(updated);
@@ -102,15 +107,11 @@ const FeaturesEditor = () => {
 
       try {
         if (feature._id) {
-          await fetch(`http://localhost:5000/api/form-study/${feature._id}`, {
-            method: 'PATCH',
-            body: formData,
-          });
+          await updateFormStudy(feature._id, formData);
+         
         } else {
-          await fetch('http://localhost:5000/api/form-study', {
-            method: 'POST',
-            body: formData,
-          });
+          await createFormStudy(formData);
+          
         }
       } catch (error) {
         console.error('Error al guardar característica:', error);

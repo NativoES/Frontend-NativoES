@@ -23,7 +23,7 @@ export default function Login() {
 
       const rol = data.user?.rol;
 
-      if (rol === "ADMINISTRADOR") {
+      if (rol === "ADMIN") {
         router.push("/Admin");
       } else if (rol === "PROFESOR") {
         router.push("/Classes");
