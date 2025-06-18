@@ -6,69 +6,74 @@ import Textarea from '@/components/ui/Textarea';
 import Button from '@/components/ui/Button';
 import { Plus, Trash, Move } from 'lucide-react';
 import { useAppContext } from '@/contexts/Context';
+import {
+  createMethodCourse,
+  deleteMethodCourse,
+  getMethodCourse,
+  updateMethodCourse
+} from '@/services/landing/landing.service';
 
 const MethodsEditor = () => {
   const { language } = useAppContext();
-  const locale = language.toLowerCase();
+  const idioma = language.toLowerCase();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
 
   // GET
-  const fetchMethods = async () => {
+  const fetchMethods = async (locale) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/method-course?locale=${locale}`);
-      const data = await res.json();
+      const data = await getMethodCourse(locale);
       const methods = data.map(item => ({
         _id: item._id,
-        title: item[locale].titulo,
-        description: item[locale].descripcion,
-        icon: item[locale].typeIcon,
+        title: item[idioma].titulo,
+        description: item[idioma].descripcion,
+        icon: item[idioma].typeIcon,
       }));
       setItems(methods);
     } catch (err) {
-      console.error('Error fetching methods', err);
+      console.error('Error fetching methods:', err);
     }
   };
 
   // POST
   const createMethod = async (method) => {
-    await fetch(`http://localhost:5000/api/method-course`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        locale,
-        titulo: method.title,
-        descripcion: method.description,
-        typeIcon: method.icon,
-      }),
-    });
+    const data = {
+      locale: idioma,
+      titulo: method.title,
+      descripcion: method.description,
+      typeIcon: method.icon,
+    };
+    await createMethodCourse(data);
   };
 
   // PATCH
   const updateMethod = async (id, method) => {
-    await fetch(`http://localhost:5000/api/method-course/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        locale,
-        titulo: method.title,
-        descripcion: method.description,
-        typeIcon: method.icon,
-      }),
-    });
+    const data = {
+      locale: idioma,
+      titulo: method.title,
+      descripcion: method.description,
+      typeIcon: method.icon,
+    };
+    await updateMethodCourse(id, data);
   };
 
   const handleSave = async () => {
-    setLoading(true);
+    // setLoading(true);
     for (const method of items) {
+      if (!method.title || !method.description || !method.icon) {
+        alert('Por favor completa todos los campos antes de guardar.');
+        setLoading(false);
+        return;
+      }
+
       if (method._id) {
         await updateMethod(method._id, method);
       } else {
         await createMethod(method);
       }
     }
-    await fetchMethods(); // recargar después de guardar
-    setLoading(false);
+    await fetchMethods(idioma);
+    // setLoading(false);
   };
 
   const handleChange = (index, field, value) => {
@@ -89,10 +94,23 @@ const MethodsEditor = () => {
     ]);
   };
 
-  const removeMethod = (index) => {
-    const updated = [...items];
-    updated.splice(index, 1);
-    setItems(updated);
+  const removeMethod = async (index, id) => {
+    if (!id) {
+      const updated = [...items];
+      updated.splice(index, 1);
+      setItems(updated);
+      return;
+    }
+
+    try {
+      await deleteMethodCourse(id);
+      const updated = [...items];
+      updated.splice(index, 1);
+      setItems(updated);
+    } catch (err) {
+      console.error('Error al eliminar método:', err);
+      alert('No se pudo eliminar el método.');
+    }
   };
 
   const moveMethod = (index, direction) => {
@@ -104,7 +122,7 @@ const MethodsEditor = () => {
   };
 
   useEffect(() => {
-    fetchMethods();
+    fetchMethods(idioma);
   }, [language]);
 
   return (
@@ -141,7 +159,7 @@ const MethodsEditor = () => {
                 <button onClick={() => moveMethod(index, 'down')} disabled={index === items.length - 1}>
                   <Move size={16} className="-rotate-90" />
                 </button>
-                <button onClick={() => removeMethod(index)} className="text-red-500 hover:text-red-700">
+                <button onClick={() => removeMethod(index, method._id)} className="text-red-500 hover:text-red-700">
                   <Trash size={16} />
                 </button>
               </div>

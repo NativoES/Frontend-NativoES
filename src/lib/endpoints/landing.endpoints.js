@@ -70,4 +70,104 @@ export const LANDING_ENDPOINTS = {
         path: "/teacher/:id",
         method: "DELETE",
     },
+    
+    //   teachers
+    REGISTER_METHOD_COURSE: {
+        service: "LANDING",
+        path: "/method-course",
+        method: "POST",
+    },
+
+    UPDATE_METHOD_COURSE: {
+        service: "LANDING",
+        path: "/method-course/:id",
+        method: "PATCH",
+    },
+    
+    GET_METHOD_COURSE: {
+        service: "LANDING",
+        path: "/method-course",
+        method: "GET",
+    },
+    
+    DELETE_METHOD_COURSE: {
+        service: "LANDING",
+        path: "/method-course/:id",
+        method: "DELETE",
+    },
+
+    //   planes
+    REGISTER_PRICE: {
+        service: "LANDING",
+        path: "/plan",
+        method: "POST",
+    },
+
+    UPDATE_PRICE: {
+        service: "LANDING",
+        path: "/plan/:id",
+        method: "PATCH",
+    },
+    
+    GET_PRICE: {
+        service: "LANDING",
+        path: "/plan",
+        method: "GET",
+    },
+    
+    DELETE_PRICE: {
+        service: "LANDING",
+        path: "/plan/:id",
+        method: "DELETE",
+    },
+
+    //   review
+    REGISTER_CONTACT: {
+        service: "LANDING",
+        path: "/information",
+        method: "POST",
+    },
+
+    UPDATE_CONTACT: {
+        service: "LANDING",
+        path: "/information/:id",
+        method: "PATCH",
+    },
+    
+    GET_CONTACT: {
+        service: "LANDING",
+        path: "/information",
+        method: "GET",
+    },
+    
+    DELETE_CONTACT: {
+        service: "LANDING",
+        path: "/information/:id",
+        method: "DELETE",
+    },
+
+    //   review
+    REGISTER_REVIEW: {
+        service: "LANDING",
+        path: "/review",
+        method: "POST",
+    },
+
+    UPDATE_REVIEW: {
+        service: "LANDING",
+        path: "/review/:id",
+        method: "PATCH",
+    },
+    
+    GET_REVIEW: {
+        service: "LANDING",
+        path: "/review",
+        method: "GET",
+    },
+    
+    DELETE_REVIEW: {
+        service: "LANDING",
+        path: "/review/:id",
+        method: "DELETE",
+    },
 };

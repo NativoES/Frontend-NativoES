@@ -23,7 +23,7 @@ const ReviewCard = ({ review, index, onChange, onChangeRespuesta, onAvatarChange
 
         const updated = [...formData];
         updated[index].avatarFile = file;
-        updated[index].avatarUrl = URL.createObjectURL(file); // vista previa
+        updated[index].avatarUrl = URL.createObjectURL(file); 
         setFormData(updated);
     };
 

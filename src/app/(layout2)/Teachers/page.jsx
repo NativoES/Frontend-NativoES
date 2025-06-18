@@ -203,13 +203,13 @@ const TeachersEditor = () => {
                 <CardHeader className="flex justify-between items-center">
                   <h4 className="text-md font-medium">{t.nombre || 'Nuevo Profesor'}</h4>
                   <div className="flex space-x-2">
-                    <button onClick={() => moveTeacher(index, 'up')} disabled={index === 0} className="p-1">
+                    <button  type='button' onClick={() => moveTeacher(index, 'up')} disabled={index === 0} className="p-1">
                       <Move size={16} className="rotate-90" />
                     </button>
-                    <button onClick={() => moveTeacher(index, 'down')} disabled={index === teachers.length - 1} className="p-1">
+                    <button type='button' onClick={() => moveTeacher(index, 'down')} disabled={index === teachers.length - 1} className="p-1">
                       <Move size={16} className="-rotate-90" />
                     </button>
-                    <button onClick={() => removeTeacher(index, teacher._id)} className="p-1 text-red-500">
+                    <button type='button' onClick={() => removeTeacher(index, teacher._id)} className="p-1 text-red-500">
                       <Trash size={16} />
                     </button>
                   </div>

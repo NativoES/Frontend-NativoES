@@ -113,7 +113,6 @@ export default function ExercisePage() {
 
     const fetchData = async (claseId) => {
         try {
-            // const res = await fetch(`http://localhost:5001/api/ejercicios/${claseId}`);
             const data = await getClassById(claseId);
 
             setExercises(data);
@@ -250,6 +249,8 @@ export default function ExercisePage() {
                         </div>
                     </div>
                 )}
+
+
 
                 <div className="mt-4">
                     <button

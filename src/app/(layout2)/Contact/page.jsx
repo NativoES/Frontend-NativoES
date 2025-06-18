@@ -5,6 +5,7 @@ import Card, { CardContent, CardHeader } from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { useAppContext } from '@/contexts/Context';
+import { createContact, getContact, updateContact } from '@/services/landing/landing.service';
 
 const DIAS_SEMANA = [
   "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"
@@ -47,27 +48,29 @@ const ContactEditor = () => {
     });
   };
 
-  const fetchHorarios = (len) => {
-    fetch(`http://localhost:5000/api/information?locale=${len}`)
-      .then(res => res.json())
-      .then(data => {
-        const info = data[0];
-        if (info && info[locale]) {
-          setInfoId(info._id);
-          setTelefono(info[locale].telefono || '');
-          setEmail(info[locale].email || '');
-          setHorarios(normalizarHorarios(info[locale].horarios || []));
-          setRedesSociales(normalizarRedes(info[locale].redesSociales || []));
-        } else {
-          setInfoId(null);
-          setTelefono('');
-          setEmail('');
-          setHorarios(normalizarHorarios([]));
-          setRedesSociales(normalizarRedes([]));
-        }
-      })
-      .catch(err => console.error('Error al cargar información:', err));
+  const fetchHorarios = async (len) => {
+    try {
+      const data = await getContact(len);
+      const info = data[0];
+
+      if (info && info[len]) {
+        setInfoId(info._id);
+        setTelefono(info[len].telefono || '');
+        setEmail(info[len].email || '');
+        setHorarios(normalizarHorarios(info[len].horarios || []));
+        setRedesSociales(normalizarRedes(info[len].redesSociales || []));
+      } else {
+        setInfoId(null);
+        setTelefono('');
+        setEmail('');
+        setHorarios(normalizarHorarios([]));
+        setRedesSociales(normalizarRedes([]));
+      }
+    } catch (err) {
+      console.error('Error al cargar información:', err);
+    }
   };
+
 
   useEffect(() => {
     fetchHorarios(locale);
@@ -83,7 +86,7 @@ const ContactEditor = () => {
     );
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const payload = {
@@ -96,30 +99,24 @@ const ContactEditor = () => {
       }
     };
 
-    console.log("payload: ", payload);
-    
+    try {
+      let data;
 
-    const url = infoId
-      ? `http://localhost:5000/api/information/${infoId}`
-      : `http://localhost:5000/api/information`;
+      if (infoId) {
+        data = await updateContact(infoId, payload);
+      } else {
+        data = await createContact(payload);
+      }
 
-    const method = infoId ? 'PATCH' : 'POST';
+      alert('Información guardada correctamente');
+      if (data?._id) setInfoId(data._id);
 
-    fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-      .then(res => res.json())
-      .then(data => {
-        alert('Información guardada correctamente');
-        if (data._id) setInfoId(data._id);
-      })
-      .catch(err => {
-        console.error('Error al guardar:', err);
-        alert('Hubo un error al guardar la información');
-      });
+    } catch (err) {
+      console.error('Error al guardar:', err);
+      alert('Hubo un error al guardar la información');
+    }
   };
+
 
   return (
     <div className="space-y-6">

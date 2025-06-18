@@ -41,3 +41,65 @@ export const updateTeacher = (id, formData) =>
 
 export const deleteTeacher = (id) =>
   apiRequest("DELETE_TEACHER", { pathParams: { id } }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+// method course
+export const getMethodCourse = (locale) =>
+    apiRequest('GET_METHOD_COURSE', {
+        params: { locale }
+    }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+export const createMethodCourse = (body) =>
+    apiRequest('REGISTER_METHOD_COURSE', { body }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+export const updateMethodCourse = (id, body) =>
+    apiRequest('UPDATE_METHOD_COURSE', { pathParams: { id }, body }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+export const deleteMethodCourse = (id) =>
+  apiRequest("REGISTER_PRICE", { pathParams: { id } }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+// method course
+export const createPrice = (body) =>
+    apiRequest('REGISTER_PRICE', { body }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+export const updatePrice = (id, body) =>
+    apiRequest('UPDATE_PRICE', { pathParams: { id }, body }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+export const getPrice = (locale) =>
+    apiRequest('GET_PRICE', {
+        params: { locale }
+    }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+export const deletePrice = (id) =>
+  apiRequest("DELETE_PRICE", { pathParams: { id } }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+// CONTACT
+export const getContact = (locale) =>
+    apiRequest('GET_CONTACT', {
+        params: { locale }
+    }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+export const createContact = (body) =>
+    apiRequest('REGISTER_CONTACT', { body }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+export const updateContact = (id, body) =>
+    apiRequest('UPDATE_CONTACT', { pathParams: { id }, body }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+export const deleteContact = (id) =>
+  apiRequest("DELETE_CONTACT", { pathParams: { id } }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+
+// Review
+export const getReview = (locale) =>
+    apiRequest('GET_REVIEW', {
+        params: { locale }
+    }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+export const createReview = (formData) =>
+    apiRequest('REGISTER_REVIEW', { body: formData }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+export const updateReview = (id, formData) =>
+    apiRequest('UPDATE_REVIEW', { pathParams: { id }, body: formData }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+export const deleteReview = (id) =>
+  apiRequest("DELETE_REVIEW", { pathParams: { id } }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
