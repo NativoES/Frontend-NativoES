@@ -82,9 +82,11 @@ export default function ProfesoresPage() {
     setItemsPerPage(itemsPerPage);
     setCurrentPage(1);
   };
+  
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
+
   useEffect(() => {
     handlerFetch(itemsPerPage, currentPage);
   }, [loader, itemsPerPage, currentPage]);
@@ -92,6 +94,7 @@ export default function ProfesoresPage() {
   const handleReload = () => {
     handlerFetch(itemsPerPage, currentPage);
   };
+  
   useEffect(() => {
     localStorage.setItem('students', JSON.stringify(students));
   }, [students]);
@@ -104,6 +107,7 @@ export default function ProfesoresPage() {
     }
   }, [activeStudentId]);
   console.log('students', isOpenModal)
+
   return (
     <div className="h-[80vh] flex items-center justify-center">
       <div className="max-w-4xl w-full bg-white rounded-lg shadow-md p-8 border border-gray-200">

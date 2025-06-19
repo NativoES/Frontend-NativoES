@@ -41,6 +41,7 @@ import { RelacionarPalabrasExercise } from '@/components/ejercicios/RelacionarPa
 import { FalsoVerdaderoExercise } from '@/components/ejercicios/FalsoVerdaderoExercise';
 import { templates } from '@/data/templates';
 import { getClassById } from '@/services/exercises/clases.service';
+import { ModalDescubrir } from '@/components/ModalDescubrir';
 
 
 export default function ExercisePage() {
@@ -232,7 +233,6 @@ export default function ExercisePage() {
                                         <MediaExercise exercise={exercise} />
                                     )}
 
-
                                     {exercise.template === "arrastrarAlTexto" && (
                                         <ArrastrarAlTextoExercise
                                             exercise={exercise}
@@ -247,10 +247,23 @@ export default function ExercisePage() {
                                 </div>
                             ))}
                         </div>
+
+                        <div className="mt-6 flex justify-center">
+                            <button
+                                onClick={() => setIsOpenModal('descubrir')}
+                                className="relative px-8 py-4 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 text-white text-xl font-bold rounded-xl shadow-lg overflow-hidden hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 transition-colors duration-500 flex items-center gap-3"
+                            >
+                                <span className="absolute -top-4 -left-4 w-20 h-20 bg-pink-300 rounded-full opacity-70 animate-pulse blur-xl mix-blend-screen"></span>
+                                <span className="absolute -bottom-6 -right-6 w-32 h-32 bg-purple-400 rounded-full opacity-80 animate-ping blur-2xl mix-blend-screen"></span>
+
+                                <span className="text-3xl">✨</span>
+
+                                Descubrir idea
+                            </button>
+                        </div>
+
                     </div>
                 )}
-
-
 
                 <div className="mt-4">
                     <button
@@ -261,6 +274,7 @@ export default function ExercisePage() {
                     </button>
                 </div>
             </div>
+
 
             {isOpenModal === 'templates' && (
                 <ModalTemplate className="w-full ">
@@ -275,6 +289,9 @@ export default function ExercisePage() {
                         }
                     </div>
                 </ModalTemplate>
+            )}
+            {isOpenModal === 'descubrir' && (
+                <ModalDescubrir closeModal={closeModal} onSave={handleExerciseAdd} />
             )}
             {isOpenModal === 'imageProvider' && (
                 <ImageProvider closeModal={closeModal} onImageUpload={handleExerciseAdd} />

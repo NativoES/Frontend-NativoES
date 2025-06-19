@@ -4,14 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ClassList } from '@/templates/ClassList';
-import { languages } from '@/data/languages';
-import Button from '@/templates/Button';
 import LinkButton from '@/components/LinkButton';
 import { useAppContext } from '@/contexts/Context';
 import { Paginator } from '@/components/Paginator';
 
 
-export default function ClassesPage() {
+export default function ClassTemplatesPage() {
   const { loader } = useAppContext();
   const router = useRouter();
   const [classes, setClasses] = useState([]);
@@ -31,7 +29,7 @@ export default function ClassesPage() {
 
     const res = await fetch(
       window?.location?.href?.includes("localhost")
-        ? `http://localhost:5001/api/classes?limit=${finalLimit}&page=${finalPage}`
+        ? `http://localhost:5001/api/classes?limit=${finalLimit}&page=${finalPage}&publico=true`
         : ``
     );
 
@@ -69,22 +67,7 @@ export default function ClassesPage() {
   return (
     <div className="h-[80vh] flex items-center justify-center">
       <div className="max-w-4xl w-full bg-white rounded-lg shadow-md p-8 border border-gray-200">
-        <h1 className="text-3xl text-center mb-8 text-gray-900">Clases</h1>
-
-        <div className="flex flex-col items-center mb-4">
-          {/* <Button
-              onClick={() => setIsOpenModal(true)}
-              variant="primary"
-              className="w-full"
-            >
-              + Create New Teacher
-            </Button> */}
-
-          <LinkButton href="/CreateClass" className="mb-4 w-full flex justify-center">
-            <Plus className="mr-2" />
-            Crear nueva clase
-          </LinkButton>
-        </div>
+        <h1 className="text-3xl text-center mb-8 text-gray-900">Clases publicas</h1>
 
         {/* {isOpenModal && (
           <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center z-20">
@@ -93,7 +76,6 @@ export default function ClassesPage() {
         )} */}
 
         <div className="flex flex-col items-center mb-4 w-full">
-          <h2 className="text-lg text-gray-900 mb-2">Clases registrados</h2>
           <ul className="list-none p-0 m-0 w-full">
             <ClassList
               classes={classes}

@@ -1,12 +1,13 @@
 'use client'
 
 import '@/styles/globals.css';
-import DashboardLayout2 from '@/components/layout/DashboardLayout2';
+// import DashboardLayout2 from '@/components/layout/DashboardLayout2';
 import NavbarAdmin from "@/components/NavbarAdmin"
 import { usePathname } from 'next/navigation';
 import Loader from '@/components/Loader';
 import { useAppContext
  } from '@/contexts/Context';
+import DashboardLayout from '@/components/layout/DashboardLayout';
  
 export default function RootLayout({ children }) {
   const pathname = usePathname();
@@ -14,9 +15,9 @@ export default function RootLayout({ children }) {
   return (
 
     <div className="flex flex-col min-h-screen bg-gray-100">
-      <DashboardLayout2>
+      <DashboardLayout>
            <main >{children}</main>
-      </DashboardLayout2>
+      </DashboardLayout>
       {/* {loader !== "" && <Loader></Loader>}
       {pathname.startsWith('/Admin') && <NavbarAdmin />}
       {pathname.startsWith('/Student') && <NavbarAdmin />}

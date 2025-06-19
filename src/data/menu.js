@@ -1,8 +1,9 @@
-import { BookOpen, Edit, Globe, GraduationCap, Home, MessageCircle, Phone, Star, Tag, Users } from "lucide-react";
+import { BookAIcon, BookOpen, Edit, Globe, GraduationCap, Home, MessageCircle, Phone, Star, Tag, Users } from "lucide-react";
 
 
 export const navItemsProfesor = [
   { name: 'Inicio', pathname: '/Classes', icon: <Home className="h-5 w-5" /> },
+  { name: 'Descubrir Mas', pathname: '/ClassesTemplates', icon: <BookAIcon className="h-5 w-5" /> },
   { name: 'Profesores', pathname: '/Profesores', icon: <Users className="h-5 w-5" /> },
   { name: 'Estudiantes', pathname: '/Students', icon: <GraduationCap className="h-5 w-5" /> },
   { name: 'Clases', pathname: '/Classes', icon: <BookOpen className="h-5 w-5" /> },
