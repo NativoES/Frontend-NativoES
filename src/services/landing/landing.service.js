@@ -12,6 +12,21 @@ export const createHero = (formData) =>
 export const updateHero = (id, formData) =>
     apiRequest('UPDATE_HERO', { pathParams: { id }, body: formData }, LANDING_ENDPOINTS, LANDING_SERVICES);
 
+// characteristic
+export const getCharacteristics = (locale) =>
+    apiRequest('GET_CHARACTERISTIC', {
+        params: { locale }
+    }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+export const createCharacteristic = (formData) =>
+    apiRequest('REGISTER_CHARACTERISTIC', { body: formData }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+export const updateCharacteristic = (id, formData) =>
+    apiRequest('UPDATE_CHARACTERISTIC', { pathParams: { id }, body: formData }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
+export const deleteCharacteristic = (id) =>
+  apiRequest("DELETE_CHARACTERISTIC", { pathParams: { id } }, LANDING_ENDPOINTS, LANDING_SERVICES);
+
 // form study
 export const getFormStudy = (locale) =>
     apiRequest('GET_FORM_STUDY', {

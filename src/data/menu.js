@@ -1,4 +1,4 @@
-import { BookAIcon, BookOpen, Edit, Globe, GraduationCap, Home, MessageCircle, Phone, Star, Tag, Users } from "lucide-react";
+import { BookAIcon, BookOpen, Edit, GlassWater, Globe, GraduationCap, Home, MessageCircle, Phone, Star, Tag, Users } from "lucide-react";
 
 
 export const navItemsProfesor = [
@@ -29,6 +29,7 @@ export const navItemsAdmin = [
       { name: 'Sección Hero', pathname: '/Hero', icon: <Edit className="h-5 w-5" /> },
       { name: 'Características', pathname: '/Feactures', icon: <Tag className="h-5 w-5" /> },
       { name: 'Profesores', pathname: '/Teachers', icon: <Users className="h-5 w-5" /> },
+      { name: 'Fomas de estudio', pathname: '/FormStudy', icon: <GlassWater className="h-5 w-5" /> },
       { name: 'Métodos de estudio', pathname: '/Methods', icon: <MessageCircle className="h-5 w-5" /> },
       { name: 'Precios', pathname: '/Pricing', icon: <Tag className="h-5 w-5" /> },
       { name: 'Reseñas', pathname: '/Reviews', icon: <Star className="h-5 w-5" /> },

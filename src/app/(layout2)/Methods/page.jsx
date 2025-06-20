@@ -1,10 +1,10 @@
-'use client'
+'use client';
 import React, { useEffect, useState } from 'react';
 import Card, { CardContent, CardHeader } from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import Button from '@/components/ui/Button';
-import { Plus, Trash, Move } from 'lucide-react';
+import { Plus, Trash, Move, Book, Pen, Star, Code2, Globe, Heart, User, Shield, Camera, CheckCircle, Compass, Eye, Flame, Cloud, Folder, Gift, Home, KeyRound, Leaf, Lock, Phone } from 'lucide-react';
 import { useAppContext } from '@/contexts/Context';
 import {
   createMethodCourse,
@@ -13,13 +13,36 @@ import {
   updateMethodCourse
 } from '@/services/landing/landing.service';
 
+const iconOptions = [
+  { name: 'book', icon: <Book size={18} /> },
+  { name: 'pen', icon: <Pen size={18} /> },
+  { name: 'star', icon: <Star size={18} /> },
+  { name: 'code', icon: <Code2 size={18} /> },
+  { name: 'globe', icon: <Globe size={18} /> },
+  { name: 'heart', icon: <Heart size={18} /> },
+  { name: 'user', icon: <User size={18} /> },
+  { name: 'shield', icon: <Shield size={18} /> },
+  { name: 'camera', icon: <Camera size={18} /> },
+  { name: 'check-circle', icon: <CheckCircle size={18} /> },
+  { name: 'compass', icon: <Compass size={18} /> },
+  { name: 'eye', icon: <Eye size={18} /> },
+  { name: 'flame', icon: <Flame size={18} /> },
+  { name: 'cloud', icon: <Cloud size={18} /> },
+  { name: 'folder', icon: <Folder size={18} /> },
+  { name: 'gift', icon: <Gift size={18} /> },
+  { name: 'home', icon: <Home size={18} /> },
+  { name: 'key-round', icon: <KeyRound size={18} /> },
+  { name: 'leaf', icon: <Leaf size={18} /> },
+  { name: 'lock', icon: <Lock size={18} /> },
+  { name: 'phone', icon: <Phone size={18} /> }
+];
+
 const MethodsEditor = () => {
-  const { language } = useAppContext();
+  const { language, showAlert } = useAppContext();
   const idioma = language.toLowerCase();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // GET
   const fetchMethods = async (locale) => {
     try {
       const data = await getMethodCourse(locale);
@@ -35,7 +58,6 @@ const MethodsEditor = () => {
     }
   };
 
-  // POST
   const createMethod = async (method) => {
     const data = {
       locale: idioma,
@@ -46,7 +68,6 @@ const MethodsEditor = () => {
     await createMethodCourse(data);
   };
 
-  // PATCH
   const updateMethod = async (id, method) => {
     const data = {
       locale: idioma,
@@ -58,22 +79,25 @@ const MethodsEditor = () => {
   };
 
   const handleSave = async () => {
-    // setLoading(true);
-    for (const method of items) {
-      if (!method.title || !method.description || !method.icon) {
-        alert('Por favor completa todos los campos antes de guardar.');
-        setLoading(false);
-        return;
-      }
+    try {
 
-      if (method._id) {
-        await updateMethod(method._id, method);
-      } else {
-        await createMethod(method);
+      for (const method of items) {
+        if (!method.title || !method.description || !method.icon) {
+          alert('Por favor completa todos los campos antes de guardar.');
+          return;
+        }
+        if (method._id) {
+          await updateMethod(method._id, method);
+        } else {
+          await createMethod(method);
+        }
       }
+      showAlert('Guardado correctamente', 'success');
+    } catch (error) {
+      showAlert('Error al guardar', 'error');
+    } finally {
+      await fetchMethods(idioma);
     }
-    await fetchMethods(idioma);
-    // setLoading(false);
   };
 
   const handleChange = (index, field, value) => {
@@ -101,15 +125,15 @@ const MethodsEditor = () => {
       setItems(updated);
       return;
     }
-
     try {
       await deleteMethodCourse(id);
       const updated = [...items];
       updated.splice(index, 1);
       setItems(updated);
+      showAlert('Eliminado correctamente', 'success');
     } catch (err) {
       console.error('Error al eliminar método:', err);
-      alert('No se pudo eliminar el método.');
+      showAlert('Error al eliminar', 'error');
     }
   };
 
@@ -136,20 +160,14 @@ const MethodsEditor = () => {
 
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold">Métodos</h3>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          leftIcon={<Plus size={16} />}
-          onClick={addMethod}
-        >
+        <Button variant="outline" size="sm" leftIcon={<Plus size={16} />} onClick={addMethod}>
           Añadir método
         </Button>
       </div>
 
       <div className="space-y-4">
         {items.map((method, index) => (
-          <Card key={method} className="border border-gray-200 dark:border-gray-700">
+          <Card key={index} className="border border-gray-200 dark:border-gray-700">
             <CardHeader className="flex items-center justify-between py-3">
               <h4 className="text-md font-medium">{method.title}</h4>
               <div className="flex items-center space-x-2">
@@ -178,12 +196,25 @@ const MethodsEditor = () => {
                 rows={3}
                 fullWidth
               />
-              <Input
-                label="Icono"
-                value={method.icon}
-                onChange={(e) => handleChange(index, 'icon', e.target.value)}
-                fullWidth
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">Ícono</label>
+                <select
+                  className="w-full border rounded px-3 py-2 bg-white text-gray-900 dark:bg-white dark:text-gray-900"
+                  value={method.icon}
+                  onChange={(e) => handleChange(index, 'icon', e.target.value)}
+                >
+                  {iconOptions.map((opt) => (
+                    <option key={opt.name} value={opt.name}>
+                      {opt.name}
+                    </option>
+                  ))}
+                </select>
+                <div className="mt-2 text-sm flex items-center gap-2 bg-white dark:bg-white px-3 py-2 border rounded">
+                  <span className="text-gray-600">Vista previa:</span>
+                  {iconOptions.find((i) => i.name === method.icon)?.icon}
+                  <span className="text-gray-800 font-medium">{method.icon}</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
         ))}

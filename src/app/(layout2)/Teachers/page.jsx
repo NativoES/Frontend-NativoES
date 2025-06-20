@@ -5,19 +5,25 @@ import { useAppContext } from '@/contexts/Context';
 
 import Card, { CardContent, CardHeader } from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
-import Textarea from '@/components/ui/Textarea';
 import Button from '@/components/ui/Button';
+import 'react-quill-new/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.bubble.css';
+import 'react-quill-new/dist/quill.core.css';
 import { Plus, Trash, Move } from 'lucide-react';
+
 import { createTeacher, deleteTeacher, getTeacher, updateTeacher } from '@/services/landing/landing.service';
+import TextEditor from '@/components/TextEditor/TextEditor';
 
 const TeachersEditor = () => {
-  const { siteData, updateSection, language } = useAppContext();
-  const [formData, setFormData] = useState({});
+  const { updateSection, language, showAlert } = useAppContext();
   const [teachers, setTeachers] = useState([]);
-  const idioma = language.toLowerCase();
   const [selectedImages, setSelectedImages] = useState({});
   const [selectedFiles, setSelectedFiles] = useState({});
+  const idioma = language.toLowerCase();
 
+  useEffect(() => {
+    fetchTeachers(idioma);
+  }, [language]);
 
   const fetchTeachers = async (locale) => {
     try {
@@ -27,16 +33,11 @@ const TeachersEditor = () => {
       console.error('Error al cargar profesores:', error);
     }
   };
-  useEffect(() => {
-    fetchTeachers(idioma);
-  }, [language]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
 
   const handleTeacherChange = (index, field, value) => {
+    const prevValue = teachers[index]?.[idioma]?.[field];
+    if (prevValue === value) return;
+
     const updated = [...teachers];
     updated[index] = {
       ...updated[index],
@@ -48,47 +49,6 @@ const TeachersEditor = () => {
     setTeachers(updated);
   };
 
-  const handleArrayChange = (index, field, subIndex, value) => {
-    const updated = [...teachers];
-    const arr = [...(updated[index][idioma]?.[field] || [])];
-    arr[subIndex] = value;
-    updated[index] = {
-      ...updated[index],
-      [idioma]: {
-        ...updated[index][idioma],
-        [field]: arr
-      }
-    };
-    setTeachers(updated);
-  };
-
-  const addArrayItem = (index, field) => {
-    const updated = [...teachers];
-    const arr = [...(updated[index][idioma]?.[field] || [])];
-    arr.push('');
-    updated[index] = {
-      ...updated[index],
-      [idioma]: {
-        ...updated[index][idioma],
-        [field]: arr
-      }
-    };
-    setTeachers(updated);
-  };
-
-  const removeArrayItem = (index, field, subIndex) => {
-    const updated = [...teachers];
-    const arr = [...(updated[index][idioma]?.[field] || [])];
-    arr.splice(subIndex, 1);
-    updated[index] = {
-      ...updated[index],
-      [idioma]: {
-        ...updated[index][idioma],
-        [field]: arr
-      }
-    };
-    setTeachers(updated);
-  };
 
   const handleImageUpload = (event, index) => {
     const file = event.target?.files[0];
@@ -103,24 +63,21 @@ const TeachersEditor = () => {
     reader.readAsDataURL(file);
   };
 
-
   const addTeacher = () => {
     const newTeacher = {
       [idioma]: {
         nombre: '',
         cargo: '',
         fotografia: '',
-        resumenPrincipal: [],
-        resumenSecundario: [],
-        presentacion: []
+        resumenPrincipal: '',
+        resumenSecundario: '',
+        presentacion: ''
       }
     };
     setTeachers(prev => [...prev, newTeacher]);
   };
 
   const removeTeacher = async (index, id) => {
-    console.log("id usuario: ", id);
-    
     if (!id) {
       const updated = [...teachers];
       updated.splice(index, 1);
@@ -129,15 +86,15 @@ const TeachersEditor = () => {
     }
 
     try {
-      const res = await deleteTeacher(id);
-      console.log("eliminar teacher: ", res);
-      
+      await deleteTeacher(id);
       const updated = [...teachers];
       updated.splice(index, 1);
       setTeachers(updated);
+
+      showAlert('Eliminado correctamente', 'success');
     } catch (error) {
-      console.error('Error al eliminar característica:', err);
-        alert('No se pudo eliminar la característica');
+      console.error('Error al eliminar profesor:', error);
+      showAlert('Error al eliminar', 'error');
     }
   };
 
@@ -151,34 +108,38 @@ const TeachersEditor = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    updateSection('teachers', {});
+    try {
+      for (let index = 0; index < teachers.length; index++) {
+        const teacher = teachers[index];
+        const formData = new FormData();
 
-    // Esto sigue igual si no incluye archivos
-    updateSection('teachers', formData);
+        formData.append('locale', idioma);
+        formData.append('nombre', teacher[idioma]?.nombre || '');
+        formData.append('cargo', teacher[idioma]?.cargo || '');
+        formData.append('resumenPrincipal', teacher[idioma]?.resumenPrincipal || '');
+        formData.append('resumenSecundario', teacher[idioma]?.resumenSecundario || '');
+        formData.append('presentacion', teacher[idioma]?.presentacion || '');
 
-    for (let index = 0; index < teachers.length; index++) {
-      const teacher = teachers[index];
-      const formData = new FormData();
+        if (selectedFiles[index]) {
+          formData.append('file', selectedFiles[index]);
+        }
 
-      formData.append('locale', idioma);
-      formData.append('nombre', teacher[idioma]?.nombre || '');
-      formData.append('cargo', teacher[idioma]?.cargo || '');
-      formData.append('resumenPrincipal', JSON.stringify(teacher[idioma]?.resumenPrincipal || []));
-      formData.append('resumenSecundario', JSON.stringify(teacher[idioma]?.resumenSecundario || []));
-      formData.append('presentacion', JSON.stringify(teacher[idioma]?.presentacion || []));
-
-      if (selectedFiles[index]) {
-        formData.append('file', selectedFiles[index]);
+        if (teacher._id) {
+          await updateTeacher(teacher._id, formData);
+        } else {
+          await createTeacher(formData);
+        }
       }
 
-      if (teacher._id) {
-        await updateTeacher(teacher._id, formData);
-      } else {
-        await createTeacher(formData);
-      }
+      showAlert('Guardado correctamente', 'success');
+      fetchTeachers(idioma);
+    } catch (error) {
+      showAlert('Error al guardar', 'error');
     }
-    fetchTeachers(idioma);
-  };
 
+
+  };
 
   return (
     <div className="space-y-6">
@@ -203,7 +164,7 @@ const TeachersEditor = () => {
                 <CardHeader className="flex justify-between items-center">
                   <h4 className="text-md font-medium">{t.nombre || 'Nuevo Profesor'}</h4>
                   <div className="flex space-x-2">
-                    <button  type='button' onClick={() => moveTeacher(index, 'up')} disabled={index === 0} className="p-1">
+                    <button type='button' onClick={() => moveTeacher(index, 'up')} disabled={index === 0} className="p-1">
                       <Move size={16} className="rotate-90" />
                     </button>
                     <button type='button' onClick={() => moveTeacher(index, 'down')} disabled={index === teachers.length - 1} className="p-1">
@@ -220,13 +181,11 @@ const TeachersEditor = () => {
                     <label className="block font-medium mb-1">Fotografía</label>
                     <div className="flex items-center space-x-4">
                       <div className="w-24 h-24 bg-gray-100 rounded overflow-hidden">
-
                         <img
-                          src={selectedImages[index] || t.fotografia || '/no-image.png'}
+                          src={typeof selectedImages[index] === 'string' ? selectedImages[index] : (t.fotografia || '/no-image.png')}
                           alt="preview"
                           className="w-full h-full object-cover"
                         />
-
                       </div>
                       <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, index)} />
                     </div>
@@ -245,46 +204,30 @@ const TeachersEditor = () => {
                     fullWidth
                   />
 
-                  {['resumenPrincipal', 'resumenSecundario', 'presentacion'].map((field) => (
-                    <div key={field} className="mt-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h5 className="font-medium">{field}</h5>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          leftIcon={<Plus size={14} />}
-                          onClick={() => addArrayItem(index, field)}
-                        >
-                          Añadir
-                        </Button>
-                      </div>
-
-                      <div className="space-y-2">
-                        {(t[field] || []).map((item, i) => (
-                          <div key={i} className="flex items-center">
-                            <Input
-                              value={item}
-                              onChange={(e) => handleArrayChange(index, field, i, e.target.value)}
-                              className="flex-grow"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => removeArrayItem(index, field, i)}
-                              className="ml-2 p-1 text-red-500 hover:text-red-700"
-                            >
-                              <Trash size={14} />
-                            </button>
-                          </div>
-                        ))}
-                        {(t[field] || []).length === 0 && (
-                          <div className="text-center py-4 bg-gray-50 rounded border border-dashed">
-                            <p className="text-sm text-gray-500">No hay elementos. Haga clic en "Añadir" para comenzar.</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Resumen Principal</label>
+                    <TextEditor
+                      value={t.resumenPrincipal}
+                      setValue={(value) => handleTeacherChange(index, 'resumenPrincipal', value)}
+                      edit
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Resumen Secundario</label>
+                    <TextEditor
+                      value={t.resumenSecundario}
+                      setValue={(value) => handleTeacherChange(index, 'resumenSecundario', value)}
+                      edit
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Presentación</label>
+                    <TextEditor
+                      value={t.presentacion}
+                      setValue={(value) => handleTeacherChange(index, 'presentacion', value)}
+                      edit
+                    />
+                  </div>
                 </CardContent>
               </Card>
             );

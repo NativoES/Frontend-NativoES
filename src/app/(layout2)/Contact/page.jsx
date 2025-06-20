@@ -12,7 +12,7 @@ const DIAS_SEMANA = [
 ];
 
 const ContactEditor = () => {
-  const { language } = useAppContext();
+  const { language, showAlert } = useAppContext();
   const [infoId, setInfoId] = useState(null);
   const [telefono, setTelefono] = useState('');
   const [email, setEmail] = useState('');
@@ -108,15 +108,14 @@ const ContactEditor = () => {
         data = await createContact(payload);
       }
 
-      alert('Información guardada correctamente');
+      showAlert('Guardado correctamente', 'success');
       if (data?._id) setInfoId(data._id);
 
     } catch (err) {
       console.error('Error al guardar:', err);
-      alert('Hubo un error al guardar la información');
+      showAlert('Error al guardar', 'error');
     }
   };
-
 
   return (
     <div className="space-y-6">

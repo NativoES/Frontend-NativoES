@@ -67,7 +67,7 @@ const DashboardHome = () => {
               </div>
               <div>
                 <p className="text-sm text-amber-600 dark:text-amber-300">Reseñas</p>
-                <p className="font-semibold">{siteData.reviews.items.length}</p>
+                <p className="font-semibold">{siteData.reviews.items?.length}</p>
               </div>
             </div>
           </div>

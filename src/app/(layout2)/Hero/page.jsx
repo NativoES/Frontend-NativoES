@@ -21,7 +21,7 @@ const emptyHeroData = {
 };
 
 const HeroEditor = () => {
-    const { siteData, updateSection, language } = useAppContext();
+    const { siteData, updateSection, language, showAlert } = useAppContext();
     const [formData, setFormData] = useState(emptyHeroData);
     const [backgroundFile, setBackgroundFile] = useState(null);
     const [backgroundPreview, setBackgroundPreview] = useState('');
@@ -109,20 +109,16 @@ const HeroEditor = () => {
             } else {
                 // POST
                 await createHero(formDataToSend)
-                
             }
 
-
             updateSection('hero', { ...siteData.hero, [idioma]: formDataToSend });
-            console.log('hero actualizado/creado', formDataToSend);
-
+            showAlert('Guardado correctamente', 'success');
+            
         } catch (error) {
             console.error('Error al enviar formulario:', error);
+            showAlert('Error al guardar', 'error');
         }
     };
-
-    console.log('formData: ', formData);
-
 
     return (
         <div className="space-y-6">

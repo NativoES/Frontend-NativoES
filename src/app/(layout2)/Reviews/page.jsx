@@ -6,33 +6,37 @@ import { useAppContext } from '@/contexts/Context';
 import Button from '@/components/ui/Button';
 import { Plus } from 'lucide-react';
 import ReviewCard from '@/components/ReviewCard';
+import { createReview, deleteReview, getReview, updateReview } from '@/services/landing/landing.service';
 
 const ReviewsEditor = () => {
-  const { language, updateSection } = useAppContext();
+  const { language, showAlert, updateSection } = useAppContext();
   const [formData, setFormData] = useState([]);
   const idioma = language.toLowerCase();
 
   const loadData = async () => {
-    fetch(`http://localhost:5000/api/review?locale=${idioma}`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          const normalized = data.map(item => ({
-            _id: item._id,
-            ...item[idioma]?.resennia,
-            avatarUrl: item[idioma]?.resennia?.avatarUrl || '',
-            avatarFile: null,
-            respuestas: item[idioma]?.respuestas ?? {
-              texto: '',
-              autor: '',
-              contenido: '',
-              fecha: new Date().toISOString()
-            }
-          }));
-          setFormData(normalized);
-        }
-      });
-  }
+    try {
+      const data = await getReview(idioma);
+
+      if (Array.isArray(data)) {
+        const normalized = data.map(item => ({
+          _id: item._id,
+          ...item[idioma]?.resennia,
+          avatarUrl: item[idioma]?.resennia?.avatarUrl || '',
+          avatarFile: null,
+          respuestas: item[idioma]?.respuestas ?? {
+            texto: '',
+            autor: '',
+            contenido: '',
+            fecha: new Date().toISOString()
+          }
+        }));
+        setFormData(normalized);
+      }
+    } catch (error) {
+      console.error('Error al cargar los reviews:', error);
+      alert("Error al cargar los datos.")
+    }
+  };
 
   useEffect(() => {
     loadData();
@@ -60,45 +64,42 @@ const ReviewsEditor = () => {
     setFormData(updated);
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    for (const review of formData) {
-      const method = review._id ? 'PATCH' : 'POST';
-      const url = review._id
-        ? `http://localhost:5000/api/review/${review._id}`
-        : `http://localhost:5000/api/review`;
+    try {
+      for (const review of formData) {
+        const form = new FormData();
+        form.append('locale', idioma);
 
-      const form = new FormData();
-      form.append('locale', idioma);
+        const resennia = {
+          nombre: review.nombre,
+          contenido: review.contenido,
+          calificacion: review.calificacion,
+          avatarUrl: review.avatarUrl,
+        };
+        form.append('resennia', JSON.stringify(resennia));
+        form.append('respuestas', JSON.stringify(review.respuestas));
 
-      // 🔁 Serializamos 'resennia' como un objeto
-      const resennia = {
-        nombre: review.nombre,
-        contenido: review.contenido,
-        calificacion: review.calificacion,
-        avatarUrl: review.avatarUrl, // solo si ya existe
-      };
-      form.append('resennia', JSON.stringify(resennia));
+        if (review.avatarFile instanceof File) {
+          form.append('file', review.avatarFile);
+        }
 
-      // 🔁 También serializamos 'respuestas'
-      form.append('respuestas', JSON.stringify(review.respuestas));
-
-      // Si hay archivo seleccionado (nuevo)
-      if (review.avatarFile instanceof File) {
-        form.append('file', review.avatarFile);
+        if (review._id) {
+          await updateReview(review._id, form);
+        } else {
+          await createReview(form);
+        }
       }
 
-      await fetch(url, {
-        method,
-        body: form,
-      });
+      updateSection('reviews', formData);
+      await loadData();
+      showAlert('Guardado correctamente', 'success');
+    } catch (error) {
+      showAlert('Error al guardar', 'error');
     }
-
-    updateSection('reviews', formData);
-    loadData();
   };
-
 
 
   const addReview = () => {
@@ -123,24 +124,17 @@ const ReviewsEditor = () => {
   const removeReview = async (index) => {
     const review = formData[index];
 
-    // Si tiene ID, eliminar en backend primero
     if (review._id) {
       try {
-        const response = await fetch(`http://localhost:5000/api/review/${review._id}`, {
-          method: 'DELETE',
-        });
-
-        if (!response.ok) {
-          console.error('Error al eliminar en la base de datos');
-          return;
-        }
+        await deleteReview(review._id);
+        showAlert('Eliminado correctamente', 'success');
       } catch (error) {
-        console.error('Error en la petición DELETE:', error);
+        console.error('Error al eliminar en la base de datos:', error);
+        showAlert('Error al eliminar', 'error');
         return;
       }
     }
 
-    // Luego eliminar del estado local
     const updated = [...formData];
     updated.splice(index, 1);
     setFormData(updated);

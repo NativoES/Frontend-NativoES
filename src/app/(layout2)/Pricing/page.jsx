@@ -14,7 +14,7 @@ import {
 } from '@/services/landing/landing.service';
 
 export default function PricingEditor() {
-  const { language } = useAppContext();
+  const { language, showAlert } = useAppContext();
   const locale = language.toLowerCase();
   const [plans, setPlans] = useState([]);
 
@@ -82,9 +82,10 @@ export default function PricingEditor() {
     if (plan._id) {
       try {
         await deletePrice(plan._id);
+        showAlert('Eliminado correctamente', 'success');
       } catch (error) {
         console.error('Error al eliminar plan:', error);
-        alert('Error al eliminar el plan');
+        showAlert('Error al eliminar', 'error');
         return;
       }
     }
@@ -147,14 +148,14 @@ export default function PricingEditor() {
         } else {
           await createPrice(payload);
         }
+        showAlert('Guardado correctamente', 'success');
       } catch (error) {
         console.error('Error al guardar plan:', error);
-        alert('Error al guardar algunos planes');
+        showAlert('Error al guardar', 'error');
         return;
-      } 
+      }
     }
 
-    alert('Planes guardados correctamente');
     const refreshed = await getPrice(locale);
     const updated = refreshed.map(p => ({
       _id: p._id,

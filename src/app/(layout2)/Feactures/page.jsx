@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useEffect, useState } from 'react';
 import Card, { CardContent, CardHeader } from '@/components/ui/Card';
@@ -7,37 +7,36 @@ import Button from '@/components/ui/Button';
 import { Plus, Trash, Move } from 'lucide-react';
 import { useAppContext } from '@/contexts/Context';
 import TextEditor from '@/components/TextEditor/TextEditor';
-import 'react-quill-new/dist/quill.snow.css'
-import 'react-quill-new/dist/quill.bubble.css'
-import 'react-quill-new/dist/quill.core.css'
-import { createFormStudy, deleteFormStudy, getFormStudy, updateFormStudy } from '@/services/landing/landing.service';
+import 'react-quill-new/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.bubble.css';
+import 'react-quill-new/dist/quill.core.css';
+import { createCharacteristic, deleteCharacteristic, getCharacteristics, updateCharacteristic } from '@/services/landing/landing.service';
 
 const FeaturesEditor = () => {
-  const { language } = useAppContext();
+  const { language, showAlert } = useAppContext();
   const locale = language.toLowerCase();
   const [features, setFeatures] = useState([]);
 
-  const idioma = language.toLowerCase();
-
   const getFormStudies = async (locale) => {
     try {
-      const data = await getFormStudy(locale);
+      const data = await getCharacteristics(locale);
 
       const items = data.map((item) => ({
-          _id: item._id,
-          titulo: item[locale]?.titulo || '',
-          descripcion: item[locale]?.descripcion || '',
-          visible: item[locale]?.visible || false,
-          media: item[locale]?.media || { url: '', type: 'image' },
-        }));
+        _id: item._id,
+        titulo: item[locale]?.titulo || '',
+        descripcion: item[locale]?.descripcion || '',
+        visible: item[locale]?.visible || false,
+        media: item[locale]?.media || { url: '', type: 'image' },
+      }));
 
-        setFeatures(items);
+      setFeatures(items);
     } catch (error) {
-      alert("Error al registrar.")
+      alert("Error al cargar características.");
     }
-  }
+  };
+
   useEffect(() => {
-    getFormStudies(idioma)
+    getFormStudies(locale);
   }, [language]);
 
   const handleFeatureChange = (index, field, value) => {
@@ -47,11 +46,15 @@ const FeaturesEditor = () => {
   };
 
   const addFeature = () => {
-    setFeatures(prev => [...prev, { titulo: '', descripcion: '', typeIcon: '' }]);
+    setFeatures(prev => [...prev, {
+      titulo: '',
+      descripcion: '',
+      visible: false,
+      media: { url: '', type: 'image' }
+    }]);
   };
 
   const removeFeature = async (index, id) => {
-    console.log("id: ", id);
     if (!id) {
       const updated = [...features];
       updated.splice(index, 1);
@@ -59,25 +62,22 @@ const FeaturesEditor = () => {
       return;
     }
 
-
     try {
-
-      const res = await deleteFormStudy(id);
-      console.log("respsuesta eliminar. ", res);
-      
+      await deleteCharacteristic(id);
       const updated = [...features];
       updated.splice(index, 1);
       setFeatures(updated);
+      showAlert('Eliminado correctamente', 'success');
+
     } catch (err) {
       console.error('Error al eliminar característica:', err);
-      alert('No se pudo eliminar la característica');
+      showAlert('Error al eliminar', 'error');
     }
   };
 
-
   const moveFeature = (index, direction) => {
-    if ((direction === 'up' && index === 0) || (direction === 'down' && index === features.length - 1)) return;
     const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= features.length) return;
     const updated = [...features];
     [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
     setFeatures(updated);
@@ -95,30 +95,45 @@ const FeaturesEditor = () => {
         visible: feature.visible ?? false,
       };
 
-      // Si hay media y es tipo File (imagen nueva seleccionada)
-      if (feature.media instanceof File) {
-        formData.append('file', feature.media); // clave debe coincidir con Multer
-      } else if (feature.media?.url && feature.media?.type) {
-        // Si ya hay media previa, la incluimos como parte del content
-        content.media = feature.media;
+      if (feature.media?.file instanceof File) {
+        formData.append('file', feature.media.file);
+      }
+
+      if (!(feature.media?.file instanceof File) && feature.media?.url && feature.media?.type) {
+        content.media = {
+          url: feature.media.url,
+          type: feature.media.type,
+        };
       }
 
       formData.append('content', JSON.stringify(content));
 
       try {
         if (feature._id) {
-          await updateFormStudy(feature._id, formData);
-         
+          await updateCharacteristic(feature._id, formData);
         } else {
-          await createFormStudy(formData);
-          
+          await createCharacteristic(formData);
         }
+        showAlert('Guardado correctamente', 'success');
       } catch (error) {
         console.error('Error al guardar característica:', error);
+        showAlert('Error al guardar', 'error');
       }
     }
+
+    await getFormStudies(locale);
   };
 
+  const handleFileSelect = (e, index) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFeatureChange(index, 'media', {
+        type: 'image',
+        url: URL.createObjectURL(file),
+        file,
+      });
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -197,19 +212,29 @@ const FeaturesEditor = () => {
               </div>
 
               {feature.media?.type === 'image' ? (
-                <Input
-                  label="Subir imagen"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const url = URL.createObjectURL(file); // solo preview, luego debes subirla
-                      handleFeatureChange(index, 'media', { type: 'image', url });
-                      // Aquí luego debes implementar subida real a S3 y reemplazar `url`
-                    }
-                  }}
-                />
+                <>
+                  <Input
+                    label="Subir imagen"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileSelect(e, index)}
+                  />
+
+                  {feature.media?.file ? (
+                    <img
+                      src={URL.createObjectURL(feature.media.file)}
+                      alt="Vista previa (local)"
+                      className="h-32 object-contain mt-2"
+                    />
+                  ) : feature.media?.url ? (
+                    <img
+                      src={feature.media.url}
+                      alt="Vista previa (remota)"
+                      className="h-32 object-contain mt-2"
+                    />
+                  ) : null}
+
+                </>
               ) : (
                 <Input
                   label="URL del video"
@@ -222,18 +247,18 @@ const FeaturesEditor = () => {
                   }
                 />
               )}
-
             </CardContent>
           </Card>
         ))}
 
         {features.length === 0 && (
           <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
-            <p className="text-gray-500 dark:text-gray-400">No hay características. Haga clic en "Añadir característica" para comenzar.</p>
+            <p className="text-gray-500 dark:text-gray-400">
+              No hay características. Haga clic en "Añadir característica" para comenzar.
+            </p>
           </div>
         )}
       </div>
-
     </div>
   );
 };

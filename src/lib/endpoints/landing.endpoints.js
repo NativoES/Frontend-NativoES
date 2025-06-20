@@ -21,6 +21,31 @@ export const LANDING_ENDPOINTS = {
         method: "GET",
     },
 
+    //   characteristic
+    REGISTER_CHARACTERISTIC: {
+        service: "LANDING",
+        path: "/characteristic",
+        method: "POST",
+    },
+
+    UPDATE_CHARACTERISTIC: {
+        service: "LANDING",
+        path: "/characteristic/:id",
+        method: "PATCH",
+    },
+    
+    GET_CHARACTERISTIC: {
+        service: "LANDING",
+        path: "/characteristic",
+        method: "GET",
+    },
+    
+    DELETE_CHARACTERISTIC: {
+        service: "LANDING",
+        path: "/characteristic/:id",
+        method: "DELETE",
+    },
+    
     //   Form Study
     REGISTER_FORM_STUDY: {
         service: "LANDING",
@@ -121,7 +146,7 @@ export const LANDING_ENDPOINTS = {
         method: "DELETE",
     },
 
-    //   review
+    //   contact
     REGISTER_CONTACT: {
         service: "LANDING",
         path: "/information",
