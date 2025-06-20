@@ -65,7 +65,7 @@ export const updatePrice = (id, body) =>
     apiRequest('UPDATE_PRICE', { pathParams: { id }, body }, LANDING_ENDPOINTS, LANDING_SERVICES);
 
 export const getPrice = (locale) =>
-    apiRequest('GET_PRICE', {
+    apiRequest('GET_PRICE', {   
         params: { locale }
     }, LANDING_ENDPOINTS, LANDING_SERVICES);
 
