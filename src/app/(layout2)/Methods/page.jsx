@@ -149,7 +149,7 @@ const MethodsEditor = () => {
 
       <div className="space-y-4">
         {items.map((method, index) => (
-          <Card key={index} className="border border-gray-200 dark:border-gray-700">
+          <Card key={method} className="border border-gray-200 dark:border-gray-700">
             <CardHeader className="flex items-center justify-between py-3">
               <h4 className="text-md font-medium">{method.title}</h4>
               <div className="flex items-center space-x-2">

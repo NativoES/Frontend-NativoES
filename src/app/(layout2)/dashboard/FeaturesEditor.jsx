@@ -167,13 +167,7 @@ const FeaturesEditor= () => {
                   fullWidth
                 />
                 
-                <Textarea
-                  label="Descripción"
-                  value={feature.description}
-                  onChange={(e) => handleFeatureChange(index, 'description', e.target.value)}
-                  rows={3}
-                  fullWidth
-                />
+         
                 
                 <Input
                   label="Icono"

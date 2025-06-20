@@ -139,7 +139,7 @@ const FeaturesEditor = () => {
 
       <div className="space-y-4">
         {features.map((feature, index) => (
-          <Card key={index} className="border border-gray-200 dark:border-gray-700">
+          <Card key={feature._id} className="border border-gray-200 dark:border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between py-3">
               <h4 className="text-md font-medium">Característica {index + 1}</h4>
               <div className="flex items-center space-x-2">

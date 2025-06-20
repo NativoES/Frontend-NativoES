@@ -122,13 +122,13 @@ const ContactEditor = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Editar Información de Contacto</h2>
-        <Button type="submit" form="contact-form">Guardar cambios</Button>
+        <Button type="submit" form="contact-form" variant="primary">Guardar cambios</Button>
       </div>
 
       <form id="contact-form" onSubmit={handleSubmit}>
         <Card className="mb-6">
           <CardHeader>
-            <h3 className="text-lg font-semibold">Información de contacto</h3>
+            <h3 className="text-xl font-semibold">Información de contacto</h3>
           </CardHeader>
 
           <CardContent className="space-y-6">
@@ -150,7 +150,7 @@ const ContactEditor = () => {
             </div>
 
             <div>
-              <h4 className="text-md font-medium mb-3">Horario de atención</h4>
+              <h4 className="text-xl font-semibold">Horario de atención</h4>
               <div className="space-y-4">
                 {horarios.map((h, index) => (
                   <div
@@ -196,23 +196,25 @@ const ContactEditor = () => {
             </div>
 
             <div>
-              <h4 className="text-md font-medium mb-3">Redes Sociales</h4>
+              <h4 className="text-xl font-semibold">Redes Sociales</h4>
               <div className="space-y-3">
                 {redesSociales.map((r, index) => (
                   <div
                     key={r.nombre}
-                    className="flex items-center gap-4 border p-3 rounded-lg"
+                    className="flex items-center justify-between gap-4 border p-3 rounded-lg max-w-[500px]"
                   >
                     <div className="text-2xl w-20 text-center">{r.icon}</div>
-                    <Input
+                    {/* <Input
                       label="Nombre"
                       value={r.nombre}
                       disabled
                       className="w-1/2"
-                    />
+                    /> */}
+                    <span>{r.nombre}</span>
                     <Input
-                      label="URL"
+                      // label="URL"
                       value={r.url}
+                      placeholder="URL"
                       onChange={(e) =>
                         setRedesSociales(prev =>
                           prev.map((x, i) =>
