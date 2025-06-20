@@ -6,6 +6,7 @@ import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useParams } from 'next/navigation';
 import { ordenarTexto } from '@/services/exercises/exercises.service';
+import { useAppContext } from '@/contexts/Context';
 
 const SingleSelectQuestion = ({closeModal, onSave}) => {
   const { setLoader, loader } = useAppContext();

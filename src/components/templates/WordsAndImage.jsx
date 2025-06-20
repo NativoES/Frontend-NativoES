@@ -8,6 +8,7 @@ import { ImageUp } from 'lucide-react';
 import Label from '@/templates/Labels';
 import { useParams } from 'next/navigation';
 import { palabraImagen } from '@/services/exercises/exercises.service';
+import { useAppContext } from '@/contexts/Context';
 
 const DraggableText = ({ closeModal, onSave }) => {
   const { setLoader, loader } = useAppContext();
