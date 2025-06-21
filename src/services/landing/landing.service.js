@@ -73,11 +73,11 @@ export const deleteMethodCourse = (id) =>
   apiRequest("REGISTER_PRICE", { pathParams: { id } }, LANDING_ENDPOINTS, LANDING_SERVICES);
 
 // method course
-export const createPrice = (body) =>
-    apiRequest('REGISTER_PRICE', { body }, LANDING_ENDPOINTS, LANDING_SERVICES);
+export const createPrice = (formData) =>
+    apiRequest('REGISTER_PRICE', { body: formData }, LANDING_ENDPOINTS, LANDING_SERVICES);
 
-export const updatePrice = (id, body) =>
-    apiRequest('UPDATE_PRICE', { pathParams: { id }, body }, LANDING_ENDPOINTS, LANDING_SERVICES);
+export const updatePrice = (id, formData) =>
+    apiRequest('UPDATE_PRICE', { pathParams: { id }, body: formData }, LANDING_ENDPOINTS, LANDING_SERVICES);
 
 export const getPrice = (locale) =>
     apiRequest('GET_PRICE', {   

@@ -27,6 +27,7 @@ export default function PricingEditor() {
         tituloDelPlan: p[locale]?.tituloDelPlan || '',
         descripcion: p[locale]?.descripcion || '',
         imageUrl: p[locale]?.imageUrl || '',
+        imageFile: null,
         typePlan: (p[locale]?.typePlan || []).map(tp => ({
           type: tp.type,
           caracteristicas: tp.caracteristicas.map(c => ({
@@ -46,10 +47,16 @@ export default function PricingEditor() {
     fetchPrices();
   }, [locale]);
 
-
   const handleChange = (i, field, value) => {
     const updated = [...plans];
     updated[i][field] = value;
+    setPlans(updated);
+  };
+
+  const handleImageChange = (i, file) => {
+    const updated = [...plans];
+    updated[i].imageFile = file;
+    updated[i].imageUrl = URL.createObjectURL(file);
     setPlans(updated);
   };
 
@@ -72,6 +79,7 @@ export default function PricingEditor() {
         tituloDelPlan: '',
         descripcion: '',
         imageUrl: '',
+        imageFile: null,
         typePlan: [],
       }
     ]);
@@ -127,12 +135,21 @@ export default function PricingEditor() {
 
   const save = async () => {
     for (const plan of plans) {
-      const payload = {
-        locale,
-        tituloDelPlan: plan.tituloDelPlan,
-        descripcion: plan.descripcion,
-        imageUrl: plan.imageUrl,
-        typePlan: plan.typePlan.map(tp => ({
+      const form = new FormData();
+      form.append('locale', locale);
+      form.append('tituloDelPlan', plan.tituloDelPlan);
+      form.append('descripcion', plan.descripcion);
+
+      if (plan.imageFile instanceof File) {
+        form.append('file', plan.imageFile);
+      } else {
+        form.append('imageUrl', plan.imageUrl);
+      }
+
+
+      // form.append('imageUrl', plan.imageUrl);
+      form.append('typePlan', JSON.stringify(
+        plan.typePlan.map(tp => ({
           type: tp.type,
           caracteristicas: tp.caracteristicas.map(c => ({
             caracteristica: c.caracteristica,
@@ -140,13 +157,13 @@ export default function PricingEditor() {
             precioConDescuento: Number(c.precioConDescuento)
           }))
         }))
-      };
+      ));
 
       try {
         if (plan._id) {
-          await updatePrice(plan._id, payload);
+          await updatePrice(plan._id, form);
         } else {
-          await createPrice(payload);
+          await createPrice(form);
         }
         showAlert('Guardado correctamente', 'success');
       } catch (error) {
@@ -156,22 +173,7 @@ export default function PricingEditor() {
       }
     }
 
-    const refreshed = await getPrice(locale);
-    const updated = refreshed.map(p => ({
-      _id: p._id,
-      tituloDelPlan: p[locale]?.tituloDelPlan || '',
-      descripcion: p[locale]?.descripcion || '',
-      imageUrl: p[locale]?.imageUrl || '',
-      typePlan: (p[locale]?.typePlan || []).map(tp => ({
-        type: tp.type,
-        caracteristicas: tp.caracteristicas.map(c => ({
-          caracteristica: c.caracteristica,
-          precioRegular: c.precioRegular || '',
-          precioConDescuento: c.precioConDescuento || ''
-        }))
-      }))
-    }));
-    setPlans(updated);
+    await fetchPrices();
   };
 
   return (
@@ -184,9 +186,11 @@ export default function PricingEditor() {
       <Button onClick={addPlan} variant="outline" size="sm">Agregar plan</Button>
 
       {plans.map((plan, i) => (
-        <div key={i} className="border p-4 rounded space-y-3 bg-white dark:bg-gray-white text-gray-900 dark:text-gray-100">
+        <div key={i} className="border p-4 rounded space-y-3 bg-white dark:bg-gray-white text-gray-900 dark:text-gray-900">
           <Input label="Título" value={plan.tituloDelPlan} onChange={e => handleChange(i, 'tituloDelPlan', e.target.value)} />
-          <Input label="Imagen" value={plan.imageUrl} onChange={e => handleChange(i, 'imageUrl', e.target.value)} />
+          {/* <Input label="Imagen URL" value={plan.imageUrl} onChange={e => handleChange(i, 'imageUrl', e.target.value)} /> */}
+          <input type="file" accept="image/*" onChange={e => handleImageChange(i, e.target.files[0])} />
+          {plan.imageUrl && <img src={plan.imageUrl} alt="preview" className="w-40 h-40 object-cover rounded" />}
           <TextEditor value={plan.descripcion} setValue={val => handleChange(i, 'descripcion', val)} edit />
 
           <Button onClick={() => addTypePlan(i)} variant="outline" size="xs">Agregar tipo de plan</Button>
