@@ -200,4 +200,10 @@ export const EXERCISE_ENDPOINTS = {
     path: '/ejercicios/:id',
     method: 'POST',
   },
+
+  GET_EXERCISE: {
+    service: 'CLASSES',
+    path: '/ejercicios/:id',
+    method: 'GET',
+  },
 };

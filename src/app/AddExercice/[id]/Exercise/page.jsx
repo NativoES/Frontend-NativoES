@@ -42,6 +42,7 @@ import { FalsoVerdaderoExercise } from '@/components/ejercicios/FalsoVerdaderoEx
 import { templates } from '@/data/templates';
 import { getClassById } from '@/services/exercises/clases.service';
 import { ModalDescubrir } from '@/components/ModalDescubrir';
+import { getExercises } from '@/services/exercises/exercises.service';
 
 
 export default function ExercisePage() {
@@ -114,7 +115,7 @@ export default function ExercisePage() {
 
     const fetchData = async (claseId) => {
         try {
-            const data = await getClassById(claseId);
+            const data = await getExercises(claseId);
 
             setExercises(data);
 

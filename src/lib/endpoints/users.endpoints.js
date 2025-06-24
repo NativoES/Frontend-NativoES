@@ -40,4 +40,10 @@ export const USER_ENDPOINTS = {
     path: "/enrollment",
     method: "POST",
   },
+
+  GET_CLASES_BY_ESTUDENT: {
+    service: "AUTH",
+    path: "/enrollment/estudiante/:estudianteId/clases",
+    method: "GET",
+  },
 };

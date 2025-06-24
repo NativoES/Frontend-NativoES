@@ -87,3 +87,6 @@ export const updateNotaColores = (id, body) =>
 
 export const deleteExercises = (id) =>
   apiRequest('DELETE_EXERCISE', { pathParams: { id }  }, EXERCISE_ENDPOINTS, EXERCISE_SERVICES);
+
+export const getExercises = (id) =>
+  apiRequest('GET_EXERCISE', { pathParams: { id }  }, EXERCISE_ENDPOINTS, EXERCISE_SERVICES);

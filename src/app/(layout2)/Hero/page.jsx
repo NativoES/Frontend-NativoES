@@ -25,12 +25,9 @@ const HeroEditor = () => {
     const [formData, setFormData] = useState(emptyHeroData);
     const [backgroundFile, setBackgroundFile] = useState(null);
     const [backgroundPreview, setBackgroundPreview] = useState('');
-
-    const idioma = language.toLowerCase();
-
-    console.log("lenguaje: ", language);
     
-
+    const idioma = language.toLowerCase();
+    
     const loadHeroData = async (idioma) => {
         try {
             const data = await getHero(idioma);
@@ -98,7 +95,6 @@ const HeroEditor = () => {
         } else {
             formDataToSend.append('file', backgroundFile);
         }
-
 
         try {
 

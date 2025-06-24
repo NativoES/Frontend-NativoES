@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 import { ClassCreateCard } from '@/components/ClassCreateCard';
 
-export const ClassList = ({  onNavigate, onDelete, classes }) => {
-
+export const ClassList = ({ onNavigate, onDelete, onClone, classes }) => {
   return (
     <ul className="space-y-4">
       {classes?.map((classItem) => (
@@ -12,10 +11,10 @@ export const ClassList = ({  onNavigate, onDelete, classes }) => {
             classItem={classItem}
             onClick={() => onNavigate(`/AddExercice/${classItem._id}`)}
             onDelete={onDelete}
+            onClone={onClone}
           />
         </li>
       ))}
     </ul>
   );
-
-} 
+};

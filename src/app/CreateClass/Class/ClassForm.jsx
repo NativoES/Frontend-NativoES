@@ -7,8 +7,8 @@ import TextAreaTemplate from '@/templates/TextAreaTemplate';
 import Label from '@/templates/Labels';
 import Button from '@/templates/Button';
 import { ImageUp } from 'lucide-react';
-import { useAppContext
- } from '@/contexts/Context';
+import { useAppContext } from '@/contexts/Context';
+
 const formFields = [
   { name: 'nombreDeLaClase', label: 'Nombre de la clase', type: 'text' },
   { name: 'nivel', label: 'Nivel', type: 'text' },
@@ -31,7 +31,7 @@ export default function ClassForm({ formData, onChange, onSubmit }) {
       data.append("file", file);
       data.append("nombreClase", selectValue.nombreDeLaClase);
       // data.append("nivel", Number(selectValue.nivel));
-      data.append("nivel", String(Number(selectValue.nivel))); 
+      data.append("nivel", String(Number(selectValue.nivel)));
       data.append("idioma", selectValue.idioma);
       data.append("horario", selectValue.horario);
       data.append("descripcion", selectValue.descripcion);
@@ -79,7 +79,7 @@ export default function ClassForm({ formData, onChange, onSubmit }) {
         <label
           htmlFor='file-input' className="relative flex justify-center items-center flex-wrap  w-[120px] h-[120px] mb-6 border border-dashed border-gray-300 p-4 rounded-md">
           {!imagen && <ImageUp></ImageUp>}
-          {!imagen && <span className='text-[12px]'>Cargar Perfil</span>}
+          {!imagen && <span className='text-[12px]'>Cargar imagen</span>}
           {imagen && <img src={imagen} alt="Perfil" className="w-full h-full object-cover  mt-2  rounded-full" />}
         </label>
         <input

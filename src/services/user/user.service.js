@@ -12,13 +12,20 @@ export const getAllStudents = (rol = "ESTUDIANTE") =>
         params: { rol },
     }, USER_ENDPOINTS, USER_SERVICES);
 
-export const getEnrolledStudents = (claseId) =>
+export const getEnrolledStudents = (claseId, limit, page) =>
     apiRequest("GET_ENROLLED_STUDENTS", {
-        params: { claseId },
+        params: { claseId, limit, page },
     }, USER_ENDPOINTS, USER_SERVICES);
 
 export const enrollStudent = ({ estudianteId, claseId }) =>
     apiRequest("CREATE_ENROLLMENT", {
         body: { estudianteId, claseId },
     }, USER_ENDPOINTS, USER_SERVICES);
+
+export const getClasesByStudent = (estudianteId) => {
+    return apiRequest("GET_CLASES_BY_ESTUDENT", {
+        pathParams: { estudianteId },
+    }, USER_ENDPOINTS, USER_SERVICES);
+};
+
 

@@ -8,6 +8,7 @@ import { CardTemplate } from '@/templates/CardTemplate';
 import { useAppContext } from '@/contexts/Context';
 import { Paginator } from '@/components/Paginator';
 import ModalInscribirEstudiante from '@/components/ModalInscribirEstudiante';
+import { getEnrolledStudents } from '@/services/user/user.service';
 
 export default function VistaEstudiante() {
   const { loader, setLoader, isOpenModal, setIsOpenModal } = useAppContext();
@@ -17,17 +18,14 @@ export default function VistaEstudiante() {
   const [students, setStudents] = useState([]);
   const [activeStudentId, setActiveStudentId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
   const [totalDocuments, setTotalDocuments] = useState(0);
 
   const [showModal, setShowModal] = useState(false);
 
   const handlerFetch = async (limit, page) => {
-    const res = await fetch(
-      `http://localhost:5002/api/enrollment/students?claseId=${claseId}&limit=${limit}&page=${page}`
-    );
-    const result = await res.json();
+    const result = await getEnrolledStudents(claseId, limit, page);
     setStudents(result.students);
     setTotalDocuments(result.total);
     setTotalPages(result.totalPages);

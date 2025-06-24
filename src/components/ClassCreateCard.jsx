@@ -1,12 +1,11 @@
 'use client';
 import React from 'react';
-import { Users, Globe2, Calendar, Trash2 } from 'lucide-react';
+import { Globe2, Calendar, Copy } from 'lucide-react';
 import { cn } from '@/utils/utils';
 import { CardTemplate } from '@/templates/CardTemplate';
 import Label from '@/templates/Labels';
-import ModalTemplate from '@/templates/ModalTemplate';
 
-export function ClassCreateCard({ classItem, className, onClick, onDelete }) {
+export function ClassCreateCard({ classItem, className, onClick, onDelete, onClone }) {
   return (
     <CardTemplate
       className={cn(
@@ -14,8 +13,20 @@ export function ClassCreateCard({ classItem, className, onClick, onDelete }) {
         className
       )}
     >
+      {/* Botón para clonar */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onClone?.(classItem);
+        }}
+        className="absolute top-2 right-2 text-gray-500 hover:text-blue-600"
+        title="Clonar clase"
+      >
+        <Copy className="w-5 h-5" />
+      </button>
+
       <div className="flex items-start justify-between" onClick={onClick}>
-        <div className='flex'>
+        <div className="flex">
           {classItem.claseIMG && (
             <img
               src={classItem.claseIMG}
@@ -28,19 +39,14 @@ export function ClassCreateCard({ classItem, className, onClick, onDelete }) {
             <p className="text-gray-600 text-sm mb-4">{classItem.descripcion}</p>
           </div>
         </div>
-
-
         <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-          Level {classItem.nivel}
+          Nivel {classItem.nivel}
         </span>
-
-        {/* <DeleteButton onDelete={onDelete} /> */}
       </div>
 
       <div className="flex items-center space-x-4 text-sm text-gray-500">
-        <InfoItem icon={Globe2} text={classItem.idioma || 'No language specified'} />
-        {/* <InfoItem icon={Users} text={`${classItem.students} students`} /> */}
-        <InfoItem icon={Calendar} text={`${classItem.horario || 0} /sesiones`} />
+        <InfoItem icon={Globe2} text={classItem.idioma || 'Idioma no especificado'} />
+        <InfoItem icon={Calendar} text={`${classItem.horario || 0} / sesiones`} />
       </div>
     </CardTemplate>
   );
@@ -51,16 +57,4 @@ const InfoItem = ({ icon: Icon, text }) => (
     <Icon className="h-4 w-4 mr-1" />
     <span>{text}</span>
   </div>
-);
-
-const DeleteButton = ({ onDelete }) => (
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      onDelete();
-    }}
-    className="absolute top-2 right-2 text-red-600 hover:text-red-800 transition duration-300"
-  >
-    <Trash2 className="h-5 w-5" />
-  </button>
 );

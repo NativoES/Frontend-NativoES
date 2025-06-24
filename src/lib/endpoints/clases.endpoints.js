@@ -5,31 +5,31 @@ export const CLASSES_SERVICES = {
 export const CLASSES_ENDPOINTS = {
   REGISTER_CLASS: {
     service: "CLASSES",
-    path: "/",
+    path: "/classes",
     method: "POST",
   },
 
   GET_CLASSES: {
     service: "CLASSES",
-    path: "/",
+    path: "/classes",
     method: "GET",
   },
 
   GET_CLASS_BY_ID: {
     service: "CLASSES",
-    path: "/ejercicios/:id",
+    path: "/classes/ejercicios/:id",
     method: "GET",
   },
 
   UPDATE_CLASS: {
     service: "CLASSES",
-    path: "/:id",
+    path: "/classes/:id",
     method: "PATCH",
   },
 
   DELETE_CLASS: {
     service: "CLASSES",
-    path: "/:id",
+    path: "/classes/:id",
     method: "DELETE",
   },
 };
