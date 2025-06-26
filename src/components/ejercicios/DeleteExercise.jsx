@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useAppContext } from '@/contexts/Context';
 import { deleteExercises } from '@/services/exercises/exercises.service';
 
@@ -10,17 +10,15 @@ export const DeleteExercise = () => {
   const handleDelete = async () => {
     if (!select?._id) return;
 
-    setLoader(true);
     try {
-      deleteExercises(select._id)
-      alert('Ejercicio eliminado correctamente');
+      setLoader(true);
+      await deleteExercises(select._id)
       setIsOpenModal('');
       setSelect(null);
+      setLoader(false);
     } catch (error) {
       console.error(error);
       alert('Error al eliminar');
-    } finally {
-      setLoader(false);
     }
   };
 

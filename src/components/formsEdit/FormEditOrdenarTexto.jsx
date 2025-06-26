@@ -60,10 +60,9 @@ export const FormEditOrdenarTexto = () => {
 
       alert('Ejercicio actualizado correctamente');
       setIsOpenModal(null);
+      setLoader(false);
     } catch (err) {
       alert('Error al actualizar: ' + err.message);
-    } finally {
-      setLoader(false);
     }
   };
 

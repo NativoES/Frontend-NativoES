@@ -4,7 +4,6 @@ import { useState } from "react";
 import InputTemplate  from '@/templates/InputTemplate'
 import TextAreaTemplate from '@/templates/TextAreaTemplate'
 import Button from '@/templates/Button'
-import { CardTemplate } from '@/templates/CardTemplate'
 import Label from '@/templates/Labels'
 
 const ExternalLinkCard = ({ onSave, onCancel }) => {

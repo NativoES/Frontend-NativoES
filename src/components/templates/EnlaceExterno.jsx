@@ -11,7 +11,7 @@ import { useAppContext } from '@/contexts/Context';
 import { enlaceExterno } from '@/services/exercises/exercises.service';
 
 export default function EnlaceExterno({ onSave, closeModal }) {
-  const {loader, setLoader} = useAppContext();
+  const { loader, setLoader } = useAppContext();
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [enlace, setEnlace] = useState('');
@@ -37,11 +37,10 @@ export default function EnlaceExterno({ onSave, closeModal }) {
       setLoader(true);
       const result = await enlaceExterno(payload);
       if (onSave) onSave(result);
+      setLoader(false);
       closeModal();
     } catch (error) {
       alert(error.message);
-    } finally {
-      setLoader(false);
     }
   };
 

@@ -5,6 +5,7 @@ import { ExerciseCardHeader } from '../headers/ExerciseCardHeader';
 import { useAppContext } from '@/contexts/Context';
 import { DeleteExercise } from './DeleteExercise';
 import FormEditSeleccionPalabras from '../formsEdit/FormEditSeleccionPalabras';
+import { CloneExcercise } from './CloneExcercise';
 
 export const SeleccionarPalabraExercise = ({ exercise }) => {
   const { setSelect, setIsOpenModal, isOpenModal } = useAppContext();
@@ -48,12 +49,19 @@ export const SeleccionarPalabraExercise = ({ exercise }) => {
     setIsOpenModal('deleteExercise');
   };
 
+  const handleClone = () => {
+    setSelect(exercise);
+    setIsOpenModal('cloneExercise');
+  };
+
   return (
     <>
       <ExerciseCardHeader
         title={exercise.titulo || 'Ejercicio sin título'}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        modal={isOpenModal}
+        onClone={handleClone}
       />
 
       <p className="my-4 text-sm text-gray-600">
@@ -69,6 +77,7 @@ export const SeleccionarPalabraExercise = ({ exercise }) => {
 
       {isOpenModal === 'editSeleccionPalabra' && <FormEditSeleccionPalabras />}
       {isOpenModal === 'deleteExercise' && <DeleteExercise />}
+      {isOpenModal === 'cloneExercise' && <CloneExcercise />}
     </>
   );
 };

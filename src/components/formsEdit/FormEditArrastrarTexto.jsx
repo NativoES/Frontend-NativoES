@@ -108,11 +108,10 @@ export const FormEditArrastrarTexto = () => {
     alert('Editado correctamente');
     setIsOpenModal(false);
     setSelect(null);
+    setLoader(true);
   } catch (error) {
     console.error('Error al guardar los cambios:', error);
     alert('Error al editar');
-  } finally {
-    setLoader(true);
   }
 };
 

@@ -9,7 +9,7 @@ import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useParams } from 'next/navigation';
 import { notaColores } from '@/services/exercises/exercises.service';
-// import { notaColores } from '@/services/clases/exercises.service';
+import { useAppContext } from '@/contexts/Context';
 
 const Notes = ({ onSave, closeModal }) => {
   const { loader, setLoader } = useAppContext();
@@ -44,11 +44,10 @@ const Notes = ({ onSave, closeModal }) => {
       setLoader(true)
       const result = await notaColores(nota);
       if (onSave) onSave(result);
+      setLoader(false)
       closeModal();
     } catch (error) {
       console.error('Error al guardar la nota:', error);
-    } finally {
-      setLoader(false)
     }
   };
 

@@ -62,11 +62,10 @@ const FormCreateSeleccionPalabras = ({ closeModal, onSave }) => {
       if (onSave) onSave(result);
       closeModal();
 
+      setLoader(false);
     } catch (err) {
       console.error(err);
       setMensaje('Ocurrió un error al guardar');
-    } finally {
-      setLoader(false);
     }
   };
 

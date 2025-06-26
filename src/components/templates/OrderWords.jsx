@@ -59,9 +59,7 @@ const DraggableLetters = ({ onSave, closeModal }) => {
       alert('Todos los campos son obligatorios.');
       return;
     }
-
-    setLoader(true);
-
+        
     const data = {
       titulo: title,
       letras: word.split(''),
@@ -70,16 +68,16 @@ const DraggableLetters = ({ onSave, closeModal }) => {
       template: 'formarPalabra',
       descripcion: descripcion || undefined,
     };
-
+    
     try {
+      setLoader(true);
       const result = formarPalabra(data);
       if (onSave) onSave(result);
+      setLoader(false);
       closeModal();
     } catch (err) {
       console.error(err);
       alert('Ocurrió un error al guardar el ejercicio.');
-    } finally {
-      setLoader(false);
     }
   };
 

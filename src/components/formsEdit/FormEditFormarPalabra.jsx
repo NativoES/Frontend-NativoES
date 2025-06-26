@@ -69,8 +69,6 @@ export const FormEditFormarPalabra = () => {
       return;
     }
 
-    setLoader(true);
-
     const payload = {
       titulo: title,
       letras: word.split(''),
@@ -79,14 +77,13 @@ export const FormEditFormarPalabra = () => {
     };
 
     try {
+      setLoader(true);
       await updateFormarPalabra(select._id, payload);
 
+      setLoader(false);
       setIsOpenModal(null);
     } catch (err) {
       console.error(err);
-      alert('Hubo un error al actualizar.');
-    } finally {
-      setLoader(false);
     }
   };
 

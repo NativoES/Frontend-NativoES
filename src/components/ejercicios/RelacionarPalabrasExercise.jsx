@@ -5,6 +5,7 @@ import { ExerciseCardHeader } from '../headers/ExerciseCardHeader';
 import { DeleteExercise } from './DeleteExercise';
 import { useAppContext } from '@/contexts/Context';
 import { FormEditRelacionarPalabra } from '../formsEdit/FormEditRelacionarPalabra';
+import { CloneExcercise } from './CloneExcercise';
 
 export const RelacionarPalabrasExercise = ({ exercise }) => {
   const { setSelect, setIsOpenModal, isOpenModal } = useAppContext();
@@ -73,12 +74,19 @@ export const RelacionarPalabrasExercise = ({ exercise }) => {
     setIsOpenModal('deleteExercise');
   };
 
+  const handleClone = () => {
+    setSelect(exercise);
+    setIsOpenModal('cloneExercise');
+  };
+
   return (
     <>
       <ExerciseCardHeader
         title={exercise.titulo || 'Ejercicio sin título'}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        modal={isOpenModal}
+        onClone={handleClone}
       />
 
       <p className="my-4 text-sm text-gray-600">{exercise.descripcion ?? ''}</p>
@@ -89,9 +97,8 @@ export const RelacionarPalabrasExercise = ({ exercise }) => {
           {leftWords.map((word, i) => (
             <button
               key={i}
-              className={`px-4 py-2 border rounded shadow hover:bg-gray-100 transition ${getColor('left', word)} ${
-                selectedLeft === word ? 'ring-2 ring-blue-400' : ''
-              }`}
+              className={`px-4 py-2 border rounded shadow hover:bg-gray-100 transition ${getColor('left', word)} ${selectedLeft === word ? 'ring-2 ring-blue-400' : ''
+                }`}
               onClick={() => handleLeftSelect(word)}
               disabled={isMatched('left', word)}
             >
@@ -105,9 +112,8 @@ export const RelacionarPalabrasExercise = ({ exercise }) => {
           {rightWords.map((word, i) => (
             <button
               key={i}
-              className={`px-4 py-2 border rounded shadow hover:bg-gray-100 transition ${getColor('right', word)} ${
-                selectedRight === word ? 'ring-2 ring-blue-400' : ''
-              }`}
+              className={`px-4 py-2 border rounded shadow hover:bg-gray-100 transition ${getColor('right', word)} ${selectedRight === word ? 'ring-2 ring-blue-400' : ''
+                }`}
               onClick={() => handleRightSelect(word)}
               disabled={isMatched('right', word)}
             >
@@ -119,6 +125,7 @@ export const RelacionarPalabrasExercise = ({ exercise }) => {
 
       {isOpenModal === 'editRelacionarPalabra' && <FormEditRelacionarPalabra />}
       {isOpenModal === 'deleteExercise' && <DeleteExercise />}
+      {isOpenModal === 'cloneExercise' && <CloneExcercise />}
     </>
   );
 };

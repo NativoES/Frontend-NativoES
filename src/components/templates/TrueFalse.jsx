@@ -8,6 +8,7 @@ import Button from '@/templates/Button';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { Plus, Save, Trash2 } from 'lucide-react';
 import { falsoVerdadero } from '@/services/exercises/exercises.service';
+import { useAppContext } from '@/contexts/Context';
 
 export default function TrueFalseModal({ closeModal, onSave }) {
   const { setLoader, loader } = useAppContext();
@@ -50,12 +51,11 @@ export default function TrueFalseModal({ closeModal, onSave }) {
       setLoader(true);
       const result = falsoVerdadero(payload);
       if (onSave) onSave(result);
+      setLoader(false);
       closeModal();
     } catch (error) {
       console.error(error);
       alert('Ocurrió un error al guardar');
-    } finally {
-      setLoader(false);
     }
   };
 

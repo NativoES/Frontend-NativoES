@@ -198,12 +198,18 @@ export const EXERCISE_ENDPOINTS = {
   DELETE_EXERCISE: {
     service: 'CLASSES',
     path: '/ejercicios/:id',
-    method: 'POST',
+    method: 'DELETE',
   },
 
   GET_EXERCISE: {
     service: 'CLASSES',
     path: '/ejercicios/:id',
+    method: 'GET',
+  },
+
+  GET_PUBLIC_EXERCISE: {
+    service: 'CLASSES',
+    path: '/ejercicios/public-exercise',
     method: 'GET',
   },
 };

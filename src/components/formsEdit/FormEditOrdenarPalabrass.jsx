@@ -35,7 +35,7 @@ export const FormEditOrdenarPalabrass = () => {
   }, [select]);
 
   console.log("ejercicio: ", select);
-  
+
 
   const handleTextChange = (e) => {
     const inputText = e.target.value;
@@ -82,13 +82,12 @@ export const FormEditOrdenarPalabrass = () => {
   const DroppableContainer = ({ index }) => (
     <div className="rounded-lg flex flex-col items-center justify-center space-y-4 my-4">
       <div
-        className={`border-dashed border-2 border-gray-300 px-4 py-2 w-full flex items-center justify-center rounded-[5px] ${
-          feedback[index] === 'Correcto'
+        className={`border-dashed border-2 border-gray-300 px-4 py-2 w-full flex items-center justify-center rounded-[5px] ${feedback[index] === 'Correcto'
             ? 'bg-green-300'
             : feedback[index] === 'Incorrecto'
-            ? 'bg-red-200'
-            : ''
-        }`}
+              ? 'bg-red-200'
+              : ''
+          }`}
         onDrop={(e) => handleDrop(e, index)}
         onDragOver={handleDragOver}
       >
@@ -112,12 +111,10 @@ export const FormEditOrdenarPalabrass = () => {
     try {
       setLoader(true);
       await updateOrdenarPalabra(select._id, payload);
-      console.log('Ejercicio editado correctamente');
+      setLoader(false);
       setIsOpenModal(null);
     } catch (error) {
       console.error(error);
-    }finally{
-      setLoader(false);
     }
   };
 

@@ -36,7 +36,7 @@ export default function ClassesPage() {
     const result = await getClasses({
       page: finalPage,
       limit: finalLimit,
-      profesorId,
+      profesorId: profesorId,
     });
 
     setClasses(result.data);

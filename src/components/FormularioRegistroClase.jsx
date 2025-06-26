@@ -12,7 +12,7 @@ import { createClass } from '@/services/exercises/clases.service';
 const idiomas = ['Español', 'Inglés', 'Francés', 'Ruso'];
 
 export const FormularioRegistroClase = () => {
-  const { setIsOpenModal, loader, setLoader, showAlert } = useAppContext();
+  const { setIsOpenModal, loader, setLoader, showAlert, userDB } = useAppContext();
   const [imagen, setImagen] = useState(null);
   const [file, setFile] = useState(null);
   const [selectValue, setSelectValue] = useState({
@@ -35,6 +35,7 @@ export const FormularioRegistroClase = () => {
       data.append('nivel', selectValue.nivel);
       data.append('idioma', selectValue.idioma);
       data.append('horario', selectValue.horario);
+      data.append('profesorId', userDB._id);
       data.append('descripcion', selectValue.descripcion);
       data.append('isPrivate', selectValue.isPrivate ? 'true' : 'false');
 

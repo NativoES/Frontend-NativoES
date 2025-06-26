@@ -5,7 +5,7 @@ import { cn } from '@/utils/utils';
 import { CardTemplate } from '@/templates/CardTemplate';
 import Label from '@/templates/Labels';
 
-export function ClassCreateCard({ classItem, className, onClick, onDelete, onClone }) {
+export function ClassCreateCard({ classItem, className, onClick, onDelete, onClone, showCloneButton = false }) {
   return (
     <CardTemplate
       className={cn(
@@ -13,17 +13,18 @@ export function ClassCreateCard({ classItem, className, onClick, onDelete, onClo
         className
       )}
     >
-      {/* Botón para clonar */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onClone?.(classItem);
-        }}
-        className="absolute top-2 right-2 text-gray-500 hover:text-blue-600"
-        title="Clonar clase"
-      >
-        <Copy className="w-5 h-5" />
-      </button>
+      {showCloneButton && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onClone?.(classItem);
+          }}
+          className="absolute top-2 right-2 text-gray-500 hover:text-blue-600"
+          title="Clonar clase"
+        >
+          <Copy className="w-5 h-5" />
+        </button>
+      )}
 
       <div className="flex items-start justify-between" onClick={onClick}>
         <div className="flex">
@@ -39,7 +40,7 @@ export function ClassCreateCard({ classItem, className, onClick, onDelete, onClo
             <p className="text-gray-600 text-sm mb-4">{classItem.descripcion}</p>
           </div>
         </div>
-        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+        <span className="px-2.5 py-0.5 mt-3 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
           Nivel {classItem.nivel}
         </span>
       </div>

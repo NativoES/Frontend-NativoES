@@ -57,14 +57,12 @@ export const FormEditNote = () => {
 
             await updateNotaColores(select._id, payload);
 
-            alert('Nota editada correctamente');
-            setIsOpenModal(false);
+            setLoader(false);
             setSelect(null);
+            setIsOpenModal(false);
         } catch (error) {
             console.error('Error al editar la nota:', error);
             alert('Error al editar la nota');
-        } finally {
-            setLoader(false);
         }
     };
 

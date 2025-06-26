@@ -2,10 +2,16 @@
 
 import React from 'react';
 import { Calendar, BookOpenText } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export const StudentClassCard = ({ clase }) => {
+   const router = useRouter();
+  const handleClick = () => {
+    router.push(`/MisClases/${clase._id}`);
+  };
+
   return (
-    <div className="flex bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden border border-gray-200">
+    <div onClick={handleClick} className="flex bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden border border-gray-200 cursor-pointer">
       {clase.imagen && (
         <img
           src={clase.imagen}

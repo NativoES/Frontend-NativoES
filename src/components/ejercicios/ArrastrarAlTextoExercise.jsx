@@ -5,6 +5,7 @@ import { ExerciseCardHeader } from '../headers/ExerciseCardHeader';
 import { useAppContext } from '@/contexts/Context';
 import { FormEditArrastrarTexto } from '../formsEdit/FormEditArrastrarTexto';
 import { DeleteExercise } from './DeleteExercise';
+import { CloneExcercise } from './CloneExcercise';
 
 export const ArrastrarAlTextoExercise = ({
   exercise,
@@ -26,6 +27,10 @@ export const ArrastrarAlTextoExercise = ({
     setSelect(exercise);
     setIsOpenModal('deleteExercise');
   };
+  const handleClone = () => {
+    setSelect(exercise);
+    setIsOpenModal('cloneExercise');
+  };
 
   return (
     <>
@@ -33,9 +38,11 @@ export const ArrastrarAlTextoExercise = ({
         title={exercise.titulo || 'Ejercicio sin título'}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        modal={isOpenModal}
+        onClone={handleClone}
       />
 
-      <p className="my-4 text-sm text-gray-600">{exercise.descripcion ?? ""}</p>
+      <p className="my-4 text-sm text-gray-600">{exercise.descripcion ?? ""}jajajja</p>
 
       <div className="mb-4">
         <div className="flex flex-wrap gap-2 mb-4">
@@ -69,6 +76,7 @@ export const ArrastrarAlTextoExercise = ({
 
       {isOpenModal === "EditarArrastrarTexto" && <FormEditArrastrarTexto />}
       {isOpenModal === 'deleteExercise' && <DeleteExercise />}
+      {isOpenModal === 'cloneExercise' && <CloneExcercise />}
 
     </>
   );

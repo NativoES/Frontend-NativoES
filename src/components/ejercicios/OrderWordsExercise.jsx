@@ -8,6 +8,7 @@ import Label from '@/templates/Labels';
 import DraggableLetter from '@/components/templates/DraggableLetter';
 import DroppableContainer from '@/components/templates/DroppableContainer';
 import { FormEditFormarPalabra } from '../formsEdit/FormEditFormarPalabra';
+import { CloneExcercise } from './CloneExcercise';
 
 export const OrderWordsExercise = ({ exercise, onDelete }) => {
   const { setSelect, setIsOpenModal, isOpenModal } = useAppContext();
@@ -55,12 +56,19 @@ export const OrderWordsExercise = ({ exercise, onDelete }) => {
     }
   };
 
+  const handleClone = () => {
+    setSelect(exercise);
+    setIsOpenModal('cloneExercise');
+  };
+
   return (
     <>
       <ExerciseCardHeader
         title={exercise.titulo || 'Ejercicio sin título'}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        modal={isOpenModal}
+        onClone={handleClone}
       />
 
       <p className="my-4 text-sm text-gray-600">
@@ -102,6 +110,7 @@ export const OrderWordsExercise = ({ exercise, onDelete }) => {
 
       {isOpenModal === 'editFormarPalabra' && <FormEditFormarPalabra />}
       {isOpenModal === 'deleteExercise' && <DeleteExercise />}
+      {isOpenModal === 'cloneExercise' && <CloneExcercise />}
     </>
   );
 };

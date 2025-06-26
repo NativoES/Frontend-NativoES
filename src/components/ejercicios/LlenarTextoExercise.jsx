@@ -5,6 +5,7 @@ import { useAppContext } from '@/contexts/Context';
 import { DeleteExercise } from './DeleteExercise';
 import { parseExerciseText } from '../templates/FillInTheBlanks';
 import { FormEditLlenarTexto } from '../formsEdit/FormEditLlenarTexto';
+import { CloneExcercise } from './CloneExcercise';
 
 export const LlenarTextoExercise = ({ exercise }) => {
   const { setSelect, setIsOpenModal, isOpenModal } = useAppContext();
@@ -44,8 +45,11 @@ export const LlenarTextoExercise = ({ exercise }) => {
     return matches.map((m) => m.slice(1, -1));
   };
 
-  console.log("modal abierto: ", isOpenModal);
-  
+  const handleClone = () => {
+    setSelect(exercise);
+    setIsOpenModal('cloneExercise');
+  };
+
 
   return (
     <>
@@ -53,6 +57,8 @@ export const LlenarTextoExercise = ({ exercise }) => {
         title={exercise.titulo || 'Ejercicio sin título'}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        modal={isOpenModal}
+        onClone={handleClone}
       />
 
       <p className="my-4 text-sm text-gray-600">
@@ -69,6 +75,7 @@ export const LlenarTextoExercise = ({ exercise }) => {
 
       {isOpenModal === 'editLlenarTexto' && <FormEditLlenarTexto />}
       {isOpenModal === 'deleteExercise' && <DeleteExercise />}
+      {isOpenModal === 'cloneExercise' && <CloneExcercise />}
     </>
   );
 };

@@ -54,12 +54,11 @@ export const FormEditTrueFalse = () => {
     try {
       setLoader(true);
       await updateFalsoVerdadero(select._id, payload);
+      setLoader(false);
       setIsOpenModal(false);
     } catch (error) {
       console.error(error);
       alert('Ocurrió un error al actualizar');
-    } finally{
-      setLoader(false);
     }
   };
 

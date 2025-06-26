@@ -113,11 +113,10 @@ export default function FillInTheBlanksModal({ closeModal, onSave }) {
 
         if (onSave) onSave(result);
         closeModal();
+        setLoader(false);
       } catch (error) {
         alert('Error al conectar con el servidor');
         console.error(error);
-      } finally {
-        setLoader(false);
       }
     } else {
       alert('Por favor, completa todos los campos correctamente.');

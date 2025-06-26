@@ -39,12 +39,10 @@ export const FormEditEnlaceExterno = () => {
       setLoader(true);
       await updateEnlaceExterno(select._id, payload);
 
-      alert('Enlace actualizado correctamente');
+      setLoader(false);
       setIsOpenModal(false);
     } catch (error) {
       alert(error.message);
-    } finally {
-      setLoader(false);
     }
   };
 

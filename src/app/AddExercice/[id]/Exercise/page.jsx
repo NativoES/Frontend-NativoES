@@ -46,7 +46,7 @@ import { getExercises } from '@/services/exercises/exercises.service';
 
 
 export default function ExercisePage() {
-    const { setIsOpenModal, isOpenModal } = useAppContext()
+    const { setIsOpenModal, isOpenModal, loader } = useAppContext()
 
     const [exercises, setExercises] = useState([]);
     const params = useParams();
@@ -133,12 +133,8 @@ export default function ExercisePage() {
     };
 
     useEffect(() => {
-
         fetchData(id);
-    }, [id]);
-
-    console.log("ejercicios: ", exercises);
-    console.log("modal: ", isOpenModal);
+    }, [loader, id]);
 
     return (
         <>
@@ -147,13 +143,20 @@ export default function ExercisePage() {
                 <p className="text-3xl font-bold py-2 mb-4">Lista de Ejercicios</p>
 
                 {exercises.length === 0 && (
-                    <div className="flex-1 flex flex-col items-center justify-center">
-                        <BookOpen className="h-16 w-16 text-gray-400" />
-                        <p className="mt-4 text-center text-gray-600">
-                            No tienes ejercicios en esta sección, ¿deseas agregar ejercicios?
+                    <div className="flex-1 flex flex-col items-center justify-center text-center px-4">
+                        <BookOpen className="h-16 w-16 text-gray-400 mb-4" />
+                        <p className="text-lg text-gray-700 mb-4">
+                            No tienes ejercicios en esta sección.
                         </p>
+                        <button
+                            onClick={() => setIsOpenModal('descubrir')}
+                            className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-md font-semibold shadow-md hover:from-purple-600 hover:to-indigo-600 transition-all duration-300"
+                        >
+                            ¿Deseas agregar ejercicios?
+                        </button>
                     </div>
                 )}
+
 
                 {exercises.length > 0 && (
                     <div className="flex-1 overflow-y-auto pr-2 mt-2">

@@ -24,7 +24,7 @@ export default function ClassTemplatesPage() {
   const handlerFetch = async (limit, page) => {
     const finalLimit = limit || 5;
     const finalPage = page || 1;
-    const result = await getClasses(finalPage, finalLimit, true);
+    const result = await getClasses({ page: finalPage, limit: finalLimit, publico: true });
     setClasses(result.data);
     setCurrentPage(result.page);
     setTotalPages(result.totalPages);
@@ -96,6 +96,7 @@ export default function ClassTemplatesPage() {
               onNavigate={(path) => router.push(path)}
               onDelete={handleDelete}
               onClone={handleCloneClick}
+              cloneButton={true}
             />
           </ul>
         </div>

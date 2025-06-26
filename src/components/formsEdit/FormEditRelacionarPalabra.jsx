@@ -74,12 +74,10 @@ export const FormEditRelacionarPalabra = () => {
       
       await updateRelacionarPalabra(select._id, payload);
 
-      alert('Actualizado correctamente');
+      setLoader(false);
       setIsOpenModal(false);
     } catch (err) {
       alert(err.message);
-    } finally {
-      setLoader(false);
     }
   };
 

@@ -5,6 +5,7 @@ import { ExerciseCardHeader } from '../headers/ExerciseCardHeader';
 import { DeleteExercise } from './DeleteExercise';
 import { useAppContext } from '@/contexts/Context';
 import { FormEditTrueFalse } from '../formsEdit/FormEditTrueFalse';
+import { CloneExcercise } from './CloneExcercise';
 
 export const FalsoVerdaderoExercise = ({ exercise }) => {
   const { setSelect, setIsOpenModal, isOpenModal } = useAppContext();
@@ -44,12 +45,19 @@ export const FalsoVerdaderoExercise = ({ exercise }) => {
     return estado ? 'bg-green-200 border-green-400' : 'bg-red-200 border-red-400';
   };
 
+  const handleClone = () => {
+    setSelect(exercise);
+    setIsOpenModal('cloneExercise');
+  };
+
   return (
     <>
       <ExerciseCardHeader
         title={exercise.titulo || 'Ejercicio sin título'}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        modal={isOpenModal}
+        onClone={handleClone}
       />
 
       <p className="my-4 text-sm text-gray-600">{exercise.descripcion ?? ''}</p>
@@ -65,11 +73,10 @@ export const FalsoVerdaderoExercise = ({ exercise }) => {
               {['Verdadero', 'Falso', 'No sé'].map((opcion) => (
                 <button
                   key={opcion}
-                  className={`px-4 py-1 rounded border shadow-sm ${
-                    respuestas[i]?.seleccion === opcion
+                  className={`px-4 py-1 rounded border shadow-sm ${respuestas[i]?.seleccion === opcion
                       ? 'bg-blue-100 border-blue-300'
                       : 'hover:bg-gray-100'
-                  }`}
+                    }`}
                   onClick={() => handleSeleccion(i, opcion)}
                 >
                   {opcion}
@@ -92,6 +99,7 @@ export const FalsoVerdaderoExercise = ({ exercise }) => {
 
       {isOpenModal === 'editFalsoVerdadero' && <FormEditTrueFalse />}
       {isOpenModal === 'deleteExercise' && <DeleteExercise />}
+      {isOpenModal === 'cloneExercise' && <CloneExcercise />}
     </>
   );
 };

@@ -90,3 +90,6 @@ export const deleteExercises = (id) =>
 
 export const getExercises = (id) =>
   apiRequest('GET_EXERCISE', { pathParams: { id }  }, EXERCISE_ENDPOINTS, EXERCISE_SERVICES);
+
+export const getPublicExercises = () =>
+  apiRequest('GET_PUBLIC_EXERCISE', {}, EXERCISE_ENDPOINTS, EXERCISE_SERVICES);

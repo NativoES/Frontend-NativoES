@@ -8,7 +8,7 @@ import Label from '@/templates/Labels';
 import ModalTemplate from '@/templates/ModalTemplate';
 import { useParams } from 'next/navigation';
 import { uploadImage } from '@/services/exercises/exercises.service';
-// import { uploadImage } from '@/services/clases/exercises.service';
+import { useAppContext } from '@/contexts/Context';
 
 export default function ImageUploadModal({ closeModal, onImageUpload }) {
   const { loader, setLoader } = useAppContext();

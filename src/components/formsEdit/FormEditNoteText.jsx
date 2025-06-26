@@ -42,11 +42,10 @@ export const FormEditNoteText = () => {
       alert('Nota actualizada correctamente');
       setIsOpenModal('');
       setSelect(null);
+      setLoader(false);
     } catch (error) {
       console.error(error);
       alert('Error al editar la nota');
-    } finally {
-      setLoader(false);
     }
   };
 

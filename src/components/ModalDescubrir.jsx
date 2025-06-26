@@ -15,14 +15,7 @@ import { EnlaceExternoExercise } from '@/components/ejercicios/EnlaceExternoExer
 import { RelacionarPalabrasExercise } from '@/components/ejercicios/RelacionarPalabrasExercise';
 import { FalsoVerdaderoExercise } from '@/components/ejercicios/FalsoVerdaderoExercise';
 import FullScreenModal from '@/templates/FullScreenModal';
-
-
-async function getAllTemplatesPublics() {
-    const res = await fetch('http://localhost:5001/api/ejercicios/public-exercise');
-    if (!res.ok) throw new Error('Error al cargar los templates');
-    const data = await res.json();
-    return data; // ajusta según la estructura que retorne tu backend
-}
+import { getPublicExercises } from '@/services/exercises/exercises.service';
 
 export const ModalDescubrir = ({ closeModal, onSave }) => {
     const [exercises, setExercises] = useState([]);
@@ -35,7 +28,7 @@ export const ModalDescubrir = ({ closeModal, onSave }) => {
     useEffect(() => {
         async function fetchExercises() {
             try {
-                const data = await getAllTemplatesPublics();
+                const data = await getPublicExercises();
                 setExercises(data);
             } catch (e) {
                 setError(e.message);

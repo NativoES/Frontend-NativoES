@@ -6,7 +6,7 @@ import ModalTemplate from '@/templates/ModalTemplate';
 import Button from '@/templates/Button';
 import { useParams } from 'next/navigation';
 import { notaTexto } from '@/services/exercises/exercises.service';
-// import { notaTexto } from '@/services/clases/exercises.service';
+import { useAppContext } from '@/contexts/Context';
 
 export const NotesText = ({ closeModal, onSave }) => {
     const { loader, setLoader } = useAppContext();

@@ -5,6 +5,7 @@ import { ExerciseCardHeader } from '../headers/ExerciseCardHeader';
 import { useAppContext } from '@/contexts/Context';
 import { DeleteExercise } from './DeleteExercise';
 import { FormEditOrdenarPalabrass } from '../formsEdit/FormEditOrdenarPalabrass';
+import { CloneExcercise } from './CloneExcercise';
 
 export const OrdenarPalabraExercise = ({ exercise }) => {
   const { setSelect, setIsOpenModal, isOpenModal } = useAppContext();
@@ -26,6 +27,11 @@ export const OrdenarPalabraExercise = ({ exercise }) => {
   const handleDelete = () => {
     setSelect(exercise);
     setIsOpenModal('deleteExercise');
+  };
+
+  const handleClone = () => {
+    setSelect(exercise);
+    setIsOpenModal('cloneExercise');
   };
 
   const handleDragStart = (e, word) => {
@@ -54,8 +60,8 @@ export const OrdenarPalabraExercise = ({ exercise }) => {
     <div
       className={`border-dashed border-2 px-4 py-2 rounded-md min-w-[100px] text-center transition
         ${feedback[index] === 'correct' ? 'bg-green-200 border-green-400' :
-        feedback[index] === 'incorrect' ? 'bg-red-200 border-red-400' :
-        'bg-gray-100 border-gray-300'}
+          feedback[index] === 'incorrect' ? 'bg-red-200 border-red-400' :
+            'bg-gray-100 border-gray-300'}
       `}
       onDrop={(e) => handleDrop(e, index)}
       onDragOver={handleDragOver}
@@ -70,6 +76,8 @@ export const OrdenarPalabraExercise = ({ exercise }) => {
         title={exercise.titulo || 'Ejercicio sin título'}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        modal={isOpenModal}
+        onClone={handleClone}
       />
 
       <p className="my-4 text-sm text-gray-600">{exercise.descripcion ?? ''}</p>
@@ -99,6 +107,7 @@ export const OrdenarPalabraExercise = ({ exercise }) => {
 
       {isOpenModal === 'editOrdenarPalabra' && <FormEditOrdenarPalabrass />}
       {isOpenModal === 'deleteExercise' && <DeleteExercise />}
+      {isOpenModal === 'cloneExercise' && <CloneExcercise />}
     </>
   );
 };

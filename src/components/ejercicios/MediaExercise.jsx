@@ -8,6 +8,7 @@ import FormEditGif from '../formsEdit/FormEditGif';
 import FormEditAudio from '../formsEdit/FormEditAudio';
 import FormEditVideo from '../formsEdit/FormEditVideo';
 import FormEditImage from '../formsEdit/FormEditImage';
+import { CloneExcercise } from './CloneExcercise';
 
 const renderMedia = (template, exercise) => {
   let url = '';
@@ -85,12 +86,19 @@ export const MediaExercise = ({ exercise, onDelete }) => {
 
   const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
+  const handleClone = () => {
+    setSelect(exercise);
+    setIsOpenModal('cloneExercise');
+  };
+
   return (
     <>
       <ExerciseCardHeader
         title={exercise.titulo || 'Ejercicio sin título'}
         onEdit={handleEdit}
         onDelete={handleDelete || onDelete}
+        modal={isOpenModal}
+        onClone={handleClone}
       />
 
       <p className="my-4 text-sm text-gray-600">{exercise.descripcion ?? ''}</p>
@@ -99,6 +107,7 @@ export const MediaExercise = ({ exercise, onDelete }) => {
 
       {isOpenModal === `edit${capitalize(exercise.template)}` && renderEditForm(exercise.template)}
       {isOpenModal === 'deleteExercise' && <DeleteExercise />}
+      {isOpenModal === 'cloneExercise' && <CloneExcercise />}
     </>
   );
 };
